@@ -1,8 +1,8 @@
 {
   "domain": "emu_m_bus_center",
   "name": "Emu M-Bus Center",
-  "documentation": "https://github.com/redlukas/emu-mbus-center",
-  "issue_tracker": "https://github.com/redlukas/emu-mbus-center/issues",
+  "documentation": "https://github.com/redlukas/emu_mbus_center",
+  "issue_tracker": "https://github.com/redlukas/emu_mbus_center/issues",
   "dependencies": [],
   "config_flow": true,
   "codeowners": [

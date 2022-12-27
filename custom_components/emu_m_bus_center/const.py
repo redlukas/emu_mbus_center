@@ -6,7 +6,7 @@ DOMAIN_DATA = f"{DOMAIN}_data"
 VERSION = "0.0.0"
 
 ATTRIBUTION = "Data provided by http://jsonplaceholder.typicode.com/"
-ISSUE_URL = "https://github.com/redlukas/emu-mbus-center/issues"
+ISSUE_URL = "https://github.com/redlukas/emu_mbus_center/issues"
 
 # Icons
 ICON = "mdi:format-quote-close"

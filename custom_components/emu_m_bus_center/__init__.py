@@ -2,7 +2,7 @@
 Custom integration to integrate Emu M-Bus Center with Home Assistant.
 
 For more details about this integration, please refer to
-https://github.com/redlukas/emu-mbus-center
+https://github.com/redlukas/emu_mbus_center
 """
 import asyncio
 import logging
