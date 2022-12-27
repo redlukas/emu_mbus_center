@@ -1,10 +1,14 @@
 {
   "domain": "emu_m_bus_center",
   "name": "Emu M-Bus Center",
-  "documentation": "https://github.com/redlukas/emu-m-bus-center",
-  "issue_tracker": "https://github.com/redlukas/emu-m-bus-center/issues",
+  "documentation": "https://github.com/redlukas/emu-mbus-center",
+  "issue_tracker": "https://github.com/redlukas/emu-mbus-center/issues",
   "dependencies": [],
   "config_flow": true,
-  "codeowners": ["@redlukas"],
-  "requirements": []
+  "codeowners": [
+    "@redlukas"
+  ],
+  "requirements": [],
+  "version": "0.0.0",
+  "integration_type": "hub"
 }

@@ -2,7 +2,7 @@
 Custom integration to integrate Emu M-Bus Center with Home Assistant.
 
 For more details about this integration, please refer to
-https://github.com/redlukas/emu-m-bus-center
+https://github.com/redlukas/emu-mbus-center
 """
 import asyncio
 import logging
@@ -17,8 +17,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from .api import EmuMBusCenterApiClient
-from .const import CONF_PASSWORD
-from .const import CONF_USERNAME
+from .const import CONF_IP
+from .const import CONF_MBUS_IDS
 from .const import DOMAIN
 from .const import PLATFORMS
 from .const import STARTUP_MESSAGE
@@ -39,11 +39,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass.data.setdefault(DOMAIN, {})
         _LOGGER.info(STARTUP_MESSAGE)
 
-    username = entry.data.get(CONF_USERNAME)
-    password = entry.data.get(CONF_PASSWORD)
+    ip = entry.data.get(CONF_IP)
 
     session = async_get_clientsession(hass)
-    client = EmuMBusCenterApiClient(username, password, session)
+    client = EmuMBusCenterApiClient(ip, session)
 
     coordinator = EmuMBusCenterDataUpdateCoordinator(hass, client=client)
     await coordinator.async_refresh()

@@ -27,10 +27,10 @@ class EmuMBusCenterFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         # Uncomment the next 2 lines if only a single instance of the integration is allowed:
         # if self._async_current_entries():
-        #     return self.async_abort(reason="single_instance_allowed")
+        #      return self.async_abort(reason="single_instance_allowed")
 
         if user_input is not None:
-            valid = await self._test_credentials(
+            valid = await self._test_ip(
                 user_input[CONF_USERNAME], user_input[CONF_PASSWORD]
             )
             if valid:
@@ -59,12 +59,12 @@ class EmuMBusCenterFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             errors=self._errors,
         )
 
-    async def _test_credentials(self, username, password):
-        """Return true if credentials is valid."""
+    async def _test_ip(self, ip):
+        """Return true if ip is valid."""
         try:
             session = async_create_clientsession(self.hass)
-            client = EmuMBusCenterApiClient(username, password, session)
-            await client.async_get_data()
+            client = EmuMBusCenterApiClient(ip, session)
+            await client.async_test_center_ip()
             return True
         except Exception:  # pylint: disable=broad-except
             pass

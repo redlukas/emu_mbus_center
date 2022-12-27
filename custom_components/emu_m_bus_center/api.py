@@ -15,18 +15,24 @@ HEADERS = {"Content-type": "application/json; charset=UTF-8"}
 
 
 class EmuMBusCenterApiClient:
-    def __init__(
-        self, username: str, password: str, session: aiohttp.ClientSession
-    ) -> None:
+    def __init__(self, ip: str, session: aiohttp.ClientSession) -> None:
         """Sample API Client."""
-        self._username = username
-        self._passeword = password
+        self._ip = ip
         self._session = session
 
     async def async_get_data(self) -> dict:
         """Get data from the API."""
-        url = "https://jsonplaceholder.typicode.com/posts/1"
-        return await self.api_wrapper("get", url)
+        return await self.api_wrapper("get", self._ip)
+
+    async def async_test_center_ip(self) -> dict:
+        """test if there is an M-Bus Center Listening on this IP"""
+        return await self.api_wrapper("get", self._ip)
+
+    async def async_get_device_data(self, number: int) -> dict:
+        """test if there is an M-Bus Center Listening on this IP"""
+        return await self.api_wrapper(
+            "get", f"http://${self._ip}/app/api/id/${number}.json"
+        )
 
     async def async_set_title(self, value: str) -> None:
         """Get data from the API."""
