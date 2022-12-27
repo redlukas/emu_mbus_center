@@ -1,7 +1,6 @@
 {
   "name": "Emu M-Bus Center",
   "hacs": "1.6.0",
-  "domains": ["binary_sensor", "sensor", "switch"],
   "iot_class": "Local Polling",
   "homeassistant": "0.7.4"
 }
