@@ -1,0 +1,10 @@
+{
+  "domain": "emu_m_bus_center",
+  "name": "Emu M-Bus Center",
+  "documentation": "https://github.com/redlukas/emu-m-bus-center",
+  "issue_tracker": "https://github.com/redlukas/emu-m-bus-center/issues",
+  "dependencies": [],
+  "config_flow": true,
+  "codeowners": ["@redlukas"],
+  "requirements": []
+}
