@@ -51,13 +51,3 @@ jobs:
         with:
           category: "integration"
           ignore: brands
-
-  hassfest:
-    runs-on: "ubuntu-latest"
-    name: Hassfest
-    steps:
-      - name: Check out the repository
-        uses: "actions/checkout@v3.2.0"
-
-      - name: Hassfest validation
-        uses: "home-assistant/actions/hassfest@master"

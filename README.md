@@ -6,10 +6,10 @@
 
 [![pre-commit][pre-commit-shield]][pre-commit]
 [![Black][black-shield]][black]
+[![Validate with Hassfest][hassfest-badge]][hassfest]
 
 [![hacs][hacsbadge]][hacs]
 [![Project Maintenance][maintenance-shield]][user_profile]
-[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
 [![Discord][discord-shield]][discord]
 [![Community Forum][forum-shield]][forum]
@@ -57,21 +57,21 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 
 [integration_blueprint]: https://github.com/custom-components/integration_blueprint
 [black]: https://github.com/psf/black
-[black-shield]: https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge
-[buymecoffee]: https://www.buymeacoffee.com/redlukas
-[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
-[commits-shield]: https://img.shields.io/github/commit-activity/y/redlukas/emu_mbus_center.svg?style=for-the-badge
+[black-shield]: https://img.shields.io/badge/code%20style-black-000000.svg
+[commits-shield]: https://img.shields.io/github/commit-activity/y/redlukas/emu_mbus_center.svg
 [commits]: https://github.com/redlukas/emu_mbus_center/commits/main
 [hacs]: https://hacs.xyz
-[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
+[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg
 [discord]: https://discord.gg/Qa5fW2R
-[discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style=for-the-badge
-[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge
+[discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style
+[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg
 [forum]: https://community.home-assistant.io/
-[license-shield]: https://img.shields.io/github/license/redlukas/emu_mbus_center.svg?style=for-the-badge
-[maintenance-shield]: https://img.shields.io/badge/maintainer-%40redlukas-blue.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/redlukas/emu_mbus_center.svg
+[maintenance-shield]: https://img.shields.io/badge/maintainer-%40redlukas-blue.svg
 [pre-commit]: https://github.com/pre-commit/pre-commit
-[pre-commit-shield]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=for-the-badge
-[releases-shield]: https://img.shields.io/github/release/redlukas/emu_mbus_center.svg?style=for-the-badge
+[pre-commit-shield]: https://img.shields.io/badge/pre--commit-enabled-brightgreen
+[releases-shield]: https://img.shields.io/github/release/redlukas/emu_mbus_center.svg
 [releases]: https://github.com/redlukas/emu_mbus_center/releases
 [user_profile]: https://github.com/redlukas
+[hassfest-badge]: https://github.com/redlukas/emu_mbus_center/workflows/Validate%20with%20Hassfest/badge.svg
+[hassfest]: https://developers.home-assistant.io/blog/2020/04/16/hassfest/
