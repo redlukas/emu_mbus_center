@@ -5,11 +5,9 @@
   "issue_tracker": "https://github.com/redlukas/emu_mbus_center/issues",
   "dependencies": [],
   "config_flow": true,
-  "codeowners": [
-    "@redlukas"
-  ],
-  "requirements": [],
-  "version": "0.0.0",
+  "codeowners": ["@redlukas"],
+  "requirements": ["requests==2.28.1"],
+  "version": "0.0.1",
   "integration_type": "hub",
   "iot_class": "local_polling"
 }

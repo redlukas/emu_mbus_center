@@ -14,18 +14,11 @@
 [![Discord][discord-shield]][discord]
 [![Community Forum][forum-shield]][forum]
 
-**TO BE REMOVED: If you need help, as a developer, to use this custom component tempalte,
-please look at the [User Guide in the Cookiecutter documentation](https://cookiecutter-homeassistant-custom-component.readthedocs.io/en/stable/quickstart.html)**
-
 **This component will set up the following platforms.**
 
-| Platform        | Description                          |
-| --------------- | ------------------------------------ |
-| `binary_sensor` | Show something `True` or `False`.    |
-| `sensor`        | Show info from Emu M-Bus Center API. |
-| `switch`        | Switch something `True` or `False`.  |
-
-![example][exampleimg]
+| Platform | Description                          |
+| -------- | ------------------------------------ |
+| `sensor` | Show info from Emu M-Bus Center API. |
 
 ## Installation
 
@@ -40,21 +33,10 @@ please look at the [User Guide in the Cookiecutter documentation](https://cookie
 Using your HA configuration directory (folder) as a starting point you should now also have this:
 
 ```text
-custom_components/emu_m_bus_center/translations/en.json
-custom_components/emu_m_bus_center/translations/fr.json
-custom_components/emu_m_bus_center/translations/nb.json
-custom_components/emu_m_bus_center/translations/sensor.en.json
-custom_components/emu_m_bus_center/translations/sensor.fr.json
-custom_components/emu_m_bus_center/translations/sensor.nb.json
-custom_components/emu_m_bus_center/translations/sensor.nb.json
 custom_components/emu_m_bus_center/__init__.py
-custom_components/emu_m_bus_center/api.py
-custom_components/emu_m_bus_center/binary_sensor.py
 custom_components/emu_m_bus_center/config_flow.py
-custom_components/emu_m_bus_center/const.py
 custom_components/emu_m_bus_center/manifest.json
 custom_components/emu_m_bus_center/sensor.py
-custom_components/emu_m_bus_center/switch.py
 ```
 
 ## Configuration is done in the UI
@@ -84,7 +66,6 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 [hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
 [discord]: https://discord.gg/Qa5fW2R
 [discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style=for-the-badge
-[exampleimg]: example.png
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge
 [forum]: https://community.home-assistant.io/
 [license-shield]: https://img.shields.io/github/license/redlukas/emu_mbus_center.svg?style=for-the-badge
