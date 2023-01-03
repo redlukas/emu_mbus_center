@@ -22,6 +22,12 @@
 
 ## Installation
 
+### Automated (suggested):
+
+Just click here: [![Open in HACS.][my-hacs-badge]][open-in-hacs]
+
+### Manual:
+
 1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
 2. If you do not have a `custom_components` directory (folder) there, you need to create it.
 3. In the `custom_components` directory (folder) create a new folder called `emu_m_bus_center`.
@@ -39,9 +45,19 @@ custom_components/emu_m_bus_center/manifest.json
 custom_components/emu_m_bus_center/sensor.py
 ```
 
-## Configuration is done in the UI
+## Configuration
 
-<!---->
+Add an entry in your `configuration.yaml` like this:
+
+```yaml
+sensor:
+  - platform: emu_m_bus_center
+    ip_address: "IpOfYourSensor"
+    unique_id:
+      - "name_of_sensor_1": "id_of_sensor_1"
+      - "name_of_sensor_2": "id_of_sensor_2"
+      - "name_of_sensor_3": "id_of_sensor_3"
+```
 
 ## Contributions are welcome!
 
@@ -75,3 +91,5 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 [user_profile]: https://github.com/redlukas
 [hassfest-badge]: https://github.com/redlukas/emu_mbus_center/workflows/Validate%20with%20Hassfest/badge.svg
 [hassfest]: https://developers.home-assistant.io/blog/2020/04/16/hassfest/
+[open-in-hacs]: https://my.home-assistant.io/redirect/hacs_repository/?owner=redlukas&repository=emu_mbus_center&category=integration
+[my-hacs-badge]: https://my.home-assistant.io/badges/hacs_repository.svg
