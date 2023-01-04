@@ -20,6 +20,13 @@
 | -------- | ------------------------------------ |
 | `sensor` | Show info from Emu M-Bus Center API. |
 
+## Overview
+
+This Integration will help you pull data from an [Emu M-Bus Center](https://www.emuag.ch/en/products/m-bus-data-logger/) into Home Assistant.
+This Work is done independently and is in no way affiliated, endorsed or funded by Emu.
+I bought all my own hardware. Due to that, the Integration is currently only tested with the Emu M-Bus Center 250 with Emu Allrounder 3/75 Meters.
+If someone from Emu wants to get in touch with me, open an issue on this Repo with your info.
+
 ## Installation
 
 ### Automated (suggested):
@@ -47,6 +54,8 @@ custom_components/emu_m_bus_center/sensor.py
 
 ## Configuration
 
+No matter which way you installed the Integration, you need to restart Home Assistant before configuring the integration.
+
 Add an entry in your `configuration.yaml` like this:
 
 ```yaml
@@ -58,6 +67,29 @@ sensor:
       - "name_of_sensor_2": "id_of_sensor_2"
       - "name_of_sensor_3": "id_of_sensor_3"
 ```
+
+## How to find the ID of your meter
+
+1. Go to the Web interface of your Meter and load the overview. There you go to "Meter configuration".
+   ![overview][overviewimg]
+2. The IDs will be listed in the leftmost column.
+   ![meters][metersimg]
+
+## Tested devices
+
+The integration has been tested on the following devices:
+
+### Centers
+
+| Manufacturer | Product          | Firmware Version |
+| ------------ | ---------------- | ---------------- |
+| Emu          | M-Bus Center 250 | 1.10.1.0.r0      |
+
+### Meters
+
+| Manufacturer | Product               | Firmware Version |
+| ------------ | --------------------- | ---------------- |
+| Emu          | Allrounder 75/3 M-Bus | 1.4              |
 
 ## Contributions are welcome!
 
@@ -93,3 +125,5 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 [hassfest]: https://developers.home-assistant.io/blog/2020/04/16/hassfest/
 [open-in-hacs]: https://my.home-assistant.io/redirect/hacs_repository/?owner=redlukas&repository=emu_mbus_center&category=integration
 [my-hacs-badge]: https://my.home-assistant.io/badges/hacs_repository.svg
+[overviewimg]: ./images/overview.png
+[metersimg]: ./images/meters.png
