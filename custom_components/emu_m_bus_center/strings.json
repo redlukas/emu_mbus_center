@@ -1,0 +1,16 @@
+{
+  "config": {
+    "abort": {
+      "unsupported_manual_setup": "Configuration is only supported via auto-discovery."
+    },
+    "step": {
+      "user": {
+        "description": "Please enter the IP of your M-Bus Center",
+        "title": "Setup",
+        "data": {
+          "ip": "IP"
+        }
+      }
+    }
+  }
+}
