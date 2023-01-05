@@ -19,6 +19,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.typing import DiscoveryInfoType
+from homeassistant.config_entries import ConfigEntry
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=60)
@@ -32,18 +34,29 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 
-def setup_platform(
-    hass: HomeAssistant,
-    config: ConfigType,
-    add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
-) -> None:
-    """Set up the sensor platform."""
-    for entry in config[CONF_UNIQUE_ID]:
-        item = entry.popitem(True)
-        sensor = {"name": item[0], "ip_address": config[CONF_IP_ADDRESS], "id": item[1]}
-        add_entities([EmuMBusCenterSensor(sensor)], True)
-        """The "true" argument assures the values get fetched before the first write to HA"""
+async def async_setup_entry(
+        hass: HomeAssistant,
+        config_entry: ConfigEntry,
+        async_add_entities: AddEntitiesCallback,
+):
+    _LOGGER.warning("async_setup_entry called")
+    data = hass.data[DOMAIN][config_entry.entry_id]
+    _LOGGER.error(f"data is {data}")
+    async_add_entities([EmuMBusCenterSensor({"name": data.sensors[0][0], "ip_address": data.ip, "id": data.sensors[0][1]})])
+
+
+# def setup_platform(
+#         hass: HomeAssistant,
+#         config: ConfigType,
+#         add_entities: AddEntitiesCallback,
+#         discovery_info: DiscoveryInfoType | None = None,
+# ) -> None:
+#     """Set up the sensor platform."""
+#     for entry in config[CONF_UNIQUE_ID]:
+#         item = entry.popitem(True)
+#         sensor = {"name": item[0], "ip_address": config[CONF_IP_ADDRESS], "id": item[1]}
+#         add_entities([EmuMBusCenterSensor(sensor)], True)
+#         """The "true" argument assures the values get fetched before the first write to HA"""
 
 
 class EmuMBusCenterSensor(SensorEntity):
@@ -87,8 +100,8 @@ class EmuMBusCenterSensor(SensorEntity):
             energy_tarif_1 = next(item for item in parsed if item["Position"] == 0)
             # test if we found the right entry for energy_tarif_1
             if not (
-                energy_tarif_1["UnitStr"] == "Wh"
-                and energy_tarif_1["DescriptionStr"] == "Energy"
+                    energy_tarif_1["UnitStr"] == "Wh"
+                    and energy_tarif_1["DescriptionStr"] == "Energy"
             ):
                 raise ValueError(
                     "Did not find the required Fields for energy_tarif_1 in the JSON response from the "
@@ -98,8 +111,8 @@ class EmuMBusCenterSensor(SensorEntity):
             energy_tarif_2 = next(item for item in parsed if item["Position"] == 1)
             # test if we found the right entry for energy_tarif_2
             if not (
-                energy_tarif_2["UnitStr"] == "Wh"
-                and energy_tarif_2["DescriptionStr"] == "Energy"
+                    energy_tarif_2["UnitStr"] == "Wh"
+                    and energy_tarif_2["DescriptionStr"] == "Energy"
             ):
                 raise ValueError(
                     "Did not find the required Fields for energy_tarif_2 in the JSON response from the "
@@ -109,8 +122,8 @@ class EmuMBusCenterSensor(SensorEntity):
             power_phase_1 = next(item for item in parsed if item["Position"] == 2)
             # test if we found the right entry for power_phase_1
             if not (
-                power_phase_1["UnitStr"] == "W"
-                and power_phase_1["DescriptionStr"] == "Power (vendor specific)"
+                    power_phase_1["UnitStr"] == "W"
+                    and power_phase_1["DescriptionStr"] == "Power (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for power_phase_1 in the JSON response from the "
@@ -120,8 +133,8 @@ class EmuMBusCenterSensor(SensorEntity):
             power_phase_2 = next(item for item in parsed if item["Position"] == 3)
             # test if we found the right entry for power_phase_2
             if not (
-                power_phase_2["UnitStr"] == "W"
-                and power_phase_2["DescriptionStr"] == "Power (vendor specific)"
+                    power_phase_2["UnitStr"] == "W"
+                    and power_phase_2["DescriptionStr"] == "Power (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for power_phase_2 in the JSON response from the "
@@ -131,8 +144,8 @@ class EmuMBusCenterSensor(SensorEntity):
             power_phase_3 = next(item for item in parsed if item["Position"] == 4)
             # test if we found the right entry for power_phase_3
             if not (
-                power_phase_3["UnitStr"] == "W"
-                and power_phase_3["DescriptionStr"] == "Power (vendor specific)"
+                    power_phase_3["UnitStr"] == "W"
+                    and power_phase_3["DescriptionStr"] == "Power (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for power_phase_3 in the JSON response from the "
@@ -142,8 +155,8 @@ class EmuMBusCenterSensor(SensorEntity):
             power_all_phases = next(item for item in parsed if item["Position"] == 5)
             # test if we found the right entry for power_phase_3
             if not (
-                power_all_phases["UnitStr"] == "W"
-                and power_all_phases["DescriptionStr"] == "Power"
+                    power_all_phases["UnitStr"] == "W"
+                    and power_all_phases["DescriptionStr"] == "Power"
             ):
                 raise ValueError(
                     "Did not find the required Fields for power_all_phases in the JSON response from the "
@@ -153,8 +166,8 @@ class EmuMBusCenterSensor(SensorEntity):
             volts_phase_1 = next(item for item in parsed if item["Position"] == 6)
             # test if we found the right entry volts_phase_1
             if not (
-                volts_phase_1["UnitStr"] == "V"
-                and volts_phase_1["DescriptionStr"] == "Volts (vendor specific)"
+                    volts_phase_1["UnitStr"] == "V"
+                    and volts_phase_1["DescriptionStr"] == "Volts (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for volts_phase_1 in the JSON response from the "
@@ -164,8 +177,8 @@ class EmuMBusCenterSensor(SensorEntity):
             volts_phase_2 = next(item for item in parsed if item["Position"] == 7)
             # test if we found the right entry volts_phase_2
             if not (
-                volts_phase_2["UnitStr"] == "V"
-                and volts_phase_2["DescriptionStr"] == "Volts (vendor specific)"
+                    volts_phase_2["UnitStr"] == "V"
+                    and volts_phase_2["DescriptionStr"] == "Volts (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for volts_phase_2 in the JSON response from the "
@@ -175,8 +188,8 @@ class EmuMBusCenterSensor(SensorEntity):
             volts_phase_3 = next(item for item in parsed if item["Position"] == 8)
             # test if we found the right entry volts_phase_3
             if not (
-                volts_phase_3["UnitStr"] == "V"
-                and volts_phase_3["DescriptionStr"] == "Volts (vendor specific)"
+                    volts_phase_3["UnitStr"] == "V"
+                    and volts_phase_3["DescriptionStr"] == "Volts (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for volts_phase_3 in the JSON response from the "
@@ -186,8 +199,8 @@ class EmuMBusCenterSensor(SensorEntity):
             ampere_phase_1 = next(item for item in parsed if item["Position"] == 9)
             # test if we found the right entry ampere_phase_1
             if not (
-                ampere_phase_1["UnitStr"] == "A"
-                and ampere_phase_1["DescriptionStr"] == "Ampere (vendor specific)"
+                    ampere_phase_1["UnitStr"] == "A"
+                    and ampere_phase_1["DescriptionStr"] == "Ampere (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for ampere_phase_1 in the JSON response from the "
@@ -197,8 +210,8 @@ class EmuMBusCenterSensor(SensorEntity):
             ampere_phase_2 = next(item for item in parsed if item["Position"] == 10)
             # test if we found the right entry ampere_phase_2
             if not (
-                ampere_phase_2["UnitStr"] == "A"
-                and ampere_phase_2["DescriptionStr"] == "Ampere (vendor specific)"
+                    ampere_phase_2["UnitStr"] == "A"
+                    and ampere_phase_2["DescriptionStr"] == "Ampere (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for ampere_phase_2 in the JSON response from the "
@@ -208,8 +221,8 @@ class EmuMBusCenterSensor(SensorEntity):
             ampere_phase_3 = next(item for item in parsed if item["Position"] == 11)
             # test if we found the right entry ampere_phase_3
             if not (
-                ampere_phase_3["UnitStr"] == "A"
-                and ampere_phase_3["DescriptionStr"] == "Ampere (vendor specific)"
+                    ampere_phase_3["UnitStr"] == "A"
+                    and ampere_phase_3["DescriptionStr"] == "Ampere (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for ampere_phase_3 in the JSON response from the "
@@ -219,8 +232,8 @@ class EmuMBusCenterSensor(SensorEntity):
             ampere_all_phases = next(item for item in parsed if item["Position"] == 12)
             # test if we found the right entry ampere_all_phases
             if not (
-                ampere_all_phases["UnitStr"] == "A"
-                and ampere_all_phases["DescriptionStr"] == "Ampere"
+                    ampere_all_phases["UnitStr"] == "A"
+                    and ampere_all_phases["DescriptionStr"] == "Ampere"
             ):
                 raise ValueError(
                     "Did not find the required Fields for ampere_all_phases in the JSON response from the "
