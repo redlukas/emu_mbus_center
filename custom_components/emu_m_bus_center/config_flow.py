@@ -16,7 +16,7 @@ class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
 
     async def async_step_user(self, user_input=None):
-        _LOGGER.warning("step called")
+        _LOGGER.warning("step calledddddd")
         if user_input is not None:
             _LOGGER.warning(f"user input is {user_input}")
             return self.async_create_entry(
@@ -29,6 +29,9 @@ class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
-                {vol.Required("ip"): str, vol.Required("sensors"): str}
+                {
+                    vol.Required("ip"): str,
+                    vol.Required("sensors"): str,
+                }  # TODO: properly validate the dict
             ),
         )

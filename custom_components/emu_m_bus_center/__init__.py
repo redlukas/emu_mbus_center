@@ -1,1 +1,45 @@
-"""Emu M-Bus Center Integration over YAML"""
+"""The Emu M-Bus Center integration."""
+from __future__ import annotations
+
+import logging
+
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
+from homeassistant.core import HomeAssistant
+
+from .const import DOMAIN
+from .emu_client import EmuApiClient
+
+_LOGGER = logging.getLogger(__name__)
+
+PLATFORMS: list[Platform] = [Platform.SENSOR]
+
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up Emu M-Bus Center from a config entry."""
+    _LOGGER.warning("Running __init__.async_setup_entry")
+
+    hass.data.setdefault(DOMAIN, {})
+
+    client = EmuApiClient(entry.data["ip"])
+
+    valid_connection = client.validate_connection_async(hass=hass)
+
+    _LOGGER.warning(f"valid connection is {valid_connection}")
+
+    if not valid_connection:
+        return False
+
+    hass.data[DOMAIN][entry.entry_id] = client
+
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    return True
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry."""
+    if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+        hass.data[DOMAIN].pop(entry.entry_id)
+
+    return unload_ok
