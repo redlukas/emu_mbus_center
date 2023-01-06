@@ -6,15 +6,10 @@ import logging
 from datetime import timedelta
 from typing import Any
 
-import homeassistant.helpers.config_validation as cv
-import voluptuous as vol
-from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.components.sensor import SensorStateClass
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_IP_ADDRESS
-from homeassistant.const import CONF_UNIQUE_ID
 from homeassistant.const import ELECTRIC_CURRENT_AMPERE
 from homeassistant.const import ELECTRIC_POTENTIAL_VOLT
 from homeassistant.const import FREQUENCY_HERTZ
@@ -49,14 +44,6 @@ from .emu_client import EmuApiClient
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=60)
-
-# Validation of the user's config
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_IP_ADDRESS): cv.string,
-        vol.Required(CONF_UNIQUE_ID): cv.ensure_list,
-    }
-)
 
 
 async def async_setup_entry(
@@ -107,23 +94,23 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         CoordinatorEntity.__init__(self, coordinator)
         self._name = coordinator.name
         self._suffix = suffix
+        _LOGGER.error(f"Sensor instantiated of class {__class__} with name {self._name} and suffix {self._suffix} gets info {self.device_info} ")
+
+    _attr_has_entity_name: True
+    _attr_should_poll: True
 
     @property
     def name(self) -> str | None:
         return f"{self._name} {self._suffix}"
 
     @property
-    def should_poll(self) -> bool:
-        return True
-
-    @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
         return DeviceInfo(
             identifiers={DOMAIN},
-            name=f"Emu Sensor-{self._name}-{self._suffix}",
+            name=f"Emu Sensor-{self._name}",
             manufacturer="EMU",
-            model="EMU M-Bus Center",
+            model="EMU Allrounder 75/3",
         )
 
     @property
@@ -132,8 +119,6 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
             self.coordinator.config_entry_id
         ).data["ip"]
         return f"Emu Sensor {self._name}-{self._suffix}@{ip}"
-
-    _attr_has_entity_name: True
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -258,28 +243,6 @@ class EmuCoordinator(DataUpdateCoordinator):
             data = await client.read_sensor_async(
                 hass=self._hass, sensor_id=self._sensor_id
             )
-            # self._logger.error(f"data returnig from update is {data}")
             return data
 
         return await fetch_all_values()
-
-
-class EmuMBusCenterSensor(SensorEntity):
-    """emu_m_bus_center Sensor class."""
-
-    _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
-    _attr_state_class = SensorStateClass.TOTAL_INCREASING
-    _attr_device_class = SensorDeviceClass.ENERGY
-    _attr_has_entity_name: True
-    _attr_icon = "mdi:lightning-bolt"
-    _attr_should_poll: True
-
-    def __init__(self, sensor) -> None:
-        self._name = sensor["name"]
-        self._ip = sensor["ip_address"]
-        self._id = sensor["id"]
-
-    @property
-    def name(self) -> str:
-        """Return the display name of this sensor."""
-        return self._name
