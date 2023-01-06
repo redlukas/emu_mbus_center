@@ -11,14 +11,11 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    _LOGGER.warning("Flow called")
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
 
     async def async_step_user(self, user_input=None):
-        _LOGGER.warning("step calledddddd")
         if user_input is not None:
-            _LOGGER.warning(f"user input is {user_input}")
             return self.async_create_entry(
                 title="",
                 data={

@@ -18,7 +18,6 @@ from homeassistant.const import CONF_UNIQUE_ID
 from homeassistant.const import ELECTRIC_CURRENT_AMPERE
 from homeassistant.const import ELECTRIC_POTENTIAL_VOLT
 from homeassistant.const import FREQUENCY_HERTZ
-from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.const import UnitOfEnergy
 from homeassistant.const import UnitOfPower
 from homeassistant.core import callback
@@ -47,7 +46,6 @@ from .const import VOLTAGE_PHASE_1
 from .const import VOLTAGE_PHASE_2
 from .const import VOLTAGE_PHASE_3
 from .emu_client import EmuApiClient
-from .emu_client import EmuApiError
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=60)
@@ -127,6 +125,13 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
             manufacturer="EMU",
             model="EMU M-Bus Center",
         )
+
+    @property
+    def unique_id(self) -> str | None:
+        ip = self.coordinator.get_hass.config_entries.async_get_entry(
+            self.coordinator.config_entry_id
+        ).data["ip"]
+        return f"Emu Sensor {self._name}-{self._suffix}@{ip}"
 
     _attr_has_entity_name: True
 
@@ -215,7 +220,7 @@ class EmuCoordinator(DataUpdateCoordinator):
         name: str,
         sensor_id: int,
     ) -> None:
-        _LOGGER.error(f"initializing Coordinator for {name}")
+        _LOGGER.debug(f"instantiating Coordinator for {name}")
         self._config_entry_id = config_entry_id
         self._hass = hass
         self._name = name
@@ -229,6 +234,14 @@ class EmuCoordinator(DataUpdateCoordinator):
             update_interval=timedelta(seconds=60),
         )
 
+    @property
+    def get_hass(self):
+        return self._hass
+
+    @property
+    def config_entry_id(self):
+        return self._config_entry_id
+
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from API endpoint.
         This is the place to pre-process the data to lookup tables
@@ -240,30 +253,6 @@ class EmuCoordinator(DataUpdateCoordinator):
 
         self.update_interval = timedelta(seconds=60)
 
-        def _safe_fetch(func: callable, num_ret: int, *args, **kwargs):
-            if num_ret == 1:
-                ret = STATE_UNAVAILABLE
-            else:
-                ret = [STATE_UNAVAILABLE] * num_ret
-
-            try:
-                ret = func(*args, **kwargs)
-            except EmuApiError as err:
-                _LOGGER.error(
-                    "Error fetching data in coordinator: function %s, %s",
-                    func.__name__,
-                    err,
-                )
-
-            if num_ret == 1:
-                # only one return value
-                return ret
-            if len(ret) != num_ret:
-                raise ValueError(
-                    f"Number of return args doesn't match, expected: {num_ret}, got: {len(ret)}"
-                )
-            return ret
-
         async def fetch_all_values() -> dict[str, float]:
             client = EmuApiClient(config["ip"])
             data = await client.read_sensor_async(
@@ -273,20 +262,6 @@ class EmuCoordinator(DataUpdateCoordinator):
             return data
 
         return await fetch_all_values()
-
-
-# def setup_platform(
-#         hass: HomeAssistant,
-#         config: ConfigType,
-#         add_entities: AddEntitiesCallback,
-#         discovery_info: DiscoveryInfoType | None = None,
-# ) -> None:
-#     """Set up the sensor platform."""
-#     for entry in config[CONF_UNIQUE_ID]:
-#         item = entry.popitem(True)
-#         sensor = {"name": item[0], "ip_address": config[CONF_IP_ADDRESS], "id": item[1]}
-#         add_entities([EmuMBusCenterSensor(sensor)], True)
-#         """The "true" argument assures the values get fetched before the first write to HA"""
 
 
 class EmuMBusCenterSensor(SensorEntity):
