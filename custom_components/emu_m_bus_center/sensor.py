@@ -73,7 +73,7 @@ async def async_setup_entry(
             config_entry_id=config_entry.entry_id,
             logger=_LOGGER,
             name=name,
-            sensor_id=sensor_id,
+            sensor_id=int(sensor_id),
         )
         sensors = [
             EmuEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_1),
@@ -206,7 +206,7 @@ class EmuCoordinator(DataUpdateCoordinator):
         name: str,
         sensor_id: int,
     ) -> None:
-        _LOGGER.error("initializing Coordinator")
+        _LOGGER.error(f"initializing Coordinator for {name}")
         self._config_entry_id = config_entry_id
         self._hass = hass
         self._name = name
@@ -225,13 +225,12 @@ class EmuCoordinator(DataUpdateCoordinator):
         This is the place to pre-process the data to lookup tables
         so entities can quickly look up their data.
         """
+        _LOGGER.error(f"_async_update_data called for {self._name}")
         config = dict(
             self._hass.config_entries.async_get_entry(self._config_entry_id).data
         )
 
         self.update_interval = timedelta(seconds=60)
-        _LOGGER.debug("Coordinator update interval: %d", self.update_interval.seconds)
-        _LOGGER.debug("Coordinator update started")
 
         def _safe_fetch(func: callable, num_ret: int, *args, **kwargs):
             if num_ret == 1:
@@ -257,13 +256,14 @@ class EmuCoordinator(DataUpdateCoordinator):
                 )
             return ret
 
-        def fetch_all_values() -> dict:
+        async def fetch_all_values() -> dict[str, float]:
+            _LOGGER.error(f"fetch_all_values called for {self._name}")
             client = EmuApiClient(config["ip"])
-            data = client.read_sensor_async(hass=self._hass, sensor_id=self._sensor_id)
-            self._logger.error(f"data returnig from update is {data}")
+            data = await client.read_sensor_async(hass=self._hass, sensor_id=self._sensor_id)
+            # self._logger.error(f"data returnig from update is {data}")
             return data
 
-        return fetch_all_values()
+        return await fetch_all_values()
 
 
 # def setup_platform(

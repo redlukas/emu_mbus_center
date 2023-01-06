@@ -101,6 +101,8 @@ This project was generated from [@oncleben31](https://github.com/oncleben31)'s [
 
 Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [integration_blueprint][integration_blueprint] template
 
+For the config flow, the initialisatioon and update of the sensors I looked at many existing repos, chief among them [@CubicPill](https://github.com/CubicPill)'s [China Southern Power Grid Statistics](https://github.com/CubicPill/china_southern_power_grid_stat)
+
 ---
 
 [integration_blueprint]: https://github.com/custom-components/integration_blueprint

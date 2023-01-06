@@ -1,6 +1,7 @@
 """The Emu M-Bus Center integration."""
 from __future__ import annotations
 
+import json
 import logging
 
 from homeassistant.config_entries import ConfigEntry
@@ -15,24 +16,23 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS: list[Platform] = [Platform.SENSOR]
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up Emu M-Bus Center from a config entry."""
     _LOGGER.warning("Running __init__.async_setup_entry")
 
     hass.data.setdefault(DOMAIN, {})
 
-    client = EmuApiClient(entry.data["ip"])
+    client = EmuApiClient(config_entry.data["ip"])
+    parsed = json.loads(config_entry.data["sensors"])
 
-    valid_connection = client.validate_connection_async(hass=hass)
-
-    _LOGGER.warning(f"valid connection is {valid_connection}")
+    valid_connection = await client.validate_connection_async(hass=hass, sensors=parsed)
 
     if not valid_connection:
         return False
 
-    hass.data[DOMAIN][entry.entry_id] = client
+    hass.data[DOMAIN][config_entry.entry_id] = client
 
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
 
     return True
 
