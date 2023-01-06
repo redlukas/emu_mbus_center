@@ -21,6 +21,7 @@ from homeassistant.const import FREQUENCY_HERTZ
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.const import UnitOfEnergy
 from homeassistant.const import UnitOfPower
+from homeassistant.core import callback
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -96,6 +97,7 @@ async def async_setup_entry(
         ]
 
         all_sensors.extend(sensors)
+        await coordinator.async_config_entry_first_refresh()
     async_add_entities(all_sensors)
 
 
@@ -127,6 +129,13 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         )
 
     _attr_has_entity_name: True
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        value = self.coordinator.data[self._suffix]
+        self._attr_native_value = value
+        self.async_write_ha_state()
 
 
 class EmuEnergySensor(EmuBaseSensor):
@@ -225,7 +234,6 @@ class EmuCoordinator(DataUpdateCoordinator):
         This is the place to pre-process the data to lookup tables
         so entities can quickly look up their data.
         """
-        _LOGGER.error(f"_async_update_data called for {self._name}")
         config = dict(
             self._hass.config_entries.async_get_entry(self._config_entry_id).data
         )
@@ -257,9 +265,10 @@ class EmuCoordinator(DataUpdateCoordinator):
             return ret
 
         async def fetch_all_values() -> dict[str, float]:
-            _LOGGER.error(f"fetch_all_values called for {self._name}")
             client = EmuApiClient(config["ip"])
-            data = await client.read_sensor_async(hass=self._hass, sensor_id=self._sensor_id)
+            data = await client.read_sensor_async(
+                hass=self._hass, sensor_id=self._sensor_id
+            )
             # self._logger.error(f"data returnig from update is {data}")
             return data
 

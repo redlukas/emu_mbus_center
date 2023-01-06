@@ -3,6 +3,7 @@ import logging
 
 import requests
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 
 from .const import ACTIVE_ENERGY_TARIFF_1
 from .const import ACTIVE_ENERGY_TARIFF_2
@@ -23,19 +24,6 @@ from .const import VOLTAGE_PHASE_2
 from .const import VOLTAGE_PHASE_3
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class EmuApiError(Exception):
-    """Generic API errors"""
-
-    def __init__(self, sta: str, msg: str | None = None) -> None:
-        """sta: status code, msg: message"""
-        Exception.__init__(self)
-        self.sta = sta
-        self.msg = msg
-
-    def __str__(self):
-        return f"<Emu API Error sta:{self.sta} message:{self.msg}>"
 
 
 class EmuApiClient:
@@ -76,7 +64,7 @@ class EmuApiClient:
         except requests.exceptions.ConnectionError as ce:
             if "Max retries exceeded" in ce.__str__():
                 _LOGGER.error(f"Could not reach M-Bus Center on {self._ip}")
-            return False
+            raise CannotConnect
         except BaseException as e:
             _LOGGER.error(
                 f"generic exception while validation connection to center {self._ip}: {e}"
@@ -84,9 +72,7 @@ class EmuApiClient:
             return False
 
     async def validate_connection_async(self, hass: HomeAssistant, sensors: dict):
-        return await hass.async_add_executor_job(
-            self.validate_connection_sync, sensors
-        )
+        return await hass.async_add_executor_job(self.validate_connection_sync, sensors)
 
     def read_sensor_sync(self, sensor_id: int) -> dict[str, float]:
         """Fetch new state data for the sensor."""
@@ -339,6 +325,7 @@ class EmuApiClient:
                 )
             else:
                 _LOGGER.error("generic connection error", ce)
+            raise CannotConnect
         except json.decoder.JSONDecodeError:
             _LOGGER.error(
                 f"Center on {self._ip} did not return a valid JSON for Sensor {sensor_id}"
@@ -350,3 +337,24 @@ class EmuApiClient:
         result = await hass.async_add_executor_job(self.read_sensor_sync, sensor_id)
         # _LOGGER.error(f"result in read_sensor_async is {result}")
         return result
+
+
+class CannotConnect(HomeAssistantError):
+    """Error to indicate we cannot connect."""
+
+
+class InvalidAuth(HomeAssistantError):
+    """Error to indicate there is invalid auth."""
+
+
+class EmuApiError(HomeAssistantError):
+    """Generic API errors"""
+
+    def __init__(self, sta: str, msg: str | None = None) -> None:
+        """sta: status code, msg: message"""
+        Exception.__init__(self)
+        self.sta = sta
+        self.msg = msg
+
+    def __str__(self):
+        return f"<Emu API Error sta:{self.sta} message:{self.msg}>"
