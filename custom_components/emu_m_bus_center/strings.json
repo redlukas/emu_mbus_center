@@ -8,7 +8,12 @@
         "description": "Please enter the IP of your M-Bus Center",
         "title": "Setup",
         "data": {
-          "ip": "IP"
+          "ip": "IP",
+          "sensors": "Sensors"
+        },
+        "data_description": {
+          "ip": "The IP of the M-Bus Center",
+          "sensors": "The sensors and their names, as a dict. Example: {\"PP\":\"14\", \"OG\":\"13\"}"
         }
       }
     }

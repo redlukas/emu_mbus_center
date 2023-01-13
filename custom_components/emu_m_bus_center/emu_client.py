@@ -30,34 +30,35 @@ class EmuApiClient:
     def __init__(self, ip):
         self._ip = ip
 
-    def validate_connection_sync(self, sensors: dict):
+    def validate_connection_sync(self, sensors: dict | None):
         try:
             res = requests.get(f"http://{self._ip}")
             if "emu_logo_128px" not in res.text:
                 return False
 
-            for name, sensor_id in sensors.items():
-                res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
-                try:
-                    parsed = json.loads(res.text)["Device"]
+            if sensors is not None:
+                for name, sensor_id in sensors.items():
+                    res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
+                    try:
+                        parsed = json.loads(res.text)["Device"]
 
-                    # test if we got the Info for the right device
-                    if not parsed["Id"] == int(sensor_id):
+                        # test if we got the Info for the right device
+                        if not parsed["Id"] == int(sensor_id):
+                            _LOGGER.error(
+                                f"Got Info for the wrong Sensor! Expected {sensor_id}, got {parsed['Id']}"
+                            )
+                            return False
+                        # test if the sensor we read out does in fact provide electricity measurements
+                        if not parsed["Medium"] == "Electricity":
+                            _LOGGER.error(
+                                f"Sensor {sensor_id} does not provide electricity measurements"
+                            )
+                            return False
+                    except json.decoder.JSONDecodeError:
                         _LOGGER.error(
-                            f"Got Info for the wrong Sensor! Expected {sensor_id}, got {parsed['Id']}"
+                            f"Center on {self._ip} did not return a valid JSON for Sensor {sensor_id}"
                         )
                         return False
-                    # test if the sensor we read out does in fact provide electricity measurements
-                    if not parsed["Medium"] == "Electricity":
-                        _LOGGER.error(
-                            f"Sensor {sensor_id} does not provide electricity measurements"
-                        )
-                        return False
-                except json.decoder.JSONDecodeError:
-                    _LOGGER.error(
-                        f"Center on {self._ip} did not return a valid JSON for Sensor {sensor_id}"
-                    )
-                    return False
 
             return True
 
@@ -71,8 +72,33 @@ class EmuApiClient:
             )
             return False
 
-    async def validate_connection_async(self, hass: HomeAssistant, sensors: dict):
+    async def validate_connection_async(
+        self, hass: HomeAssistant, sensors: dict | None
+    ):
         return await hass.async_add_executor_job(self.validate_connection_sync, sensors)
+
+    def scan_for_sensors_sync(self) -> list[int]:
+        list_of_ids = list()
+        for sensor_id in range(250):
+            try:
+                res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
+                parsed = json.loads(res.text)["Device"]
+                if parsed["Medium"] == "Electricity":
+                    list_of_ids.append(sensor_id)
+            except requests.exceptions.ConnectionError:
+                _LOGGER.debug(f"No Sensor on ID {sensor_id}")
+            except json.decoder.JSONDecodeError:
+                _LOGGER.debug(
+                    f"Center on {self._ip} did not return a valid JSON for Sensor {sensor_id}"
+                )
+            except (ValueError, KeyError) as e:
+                _LOGGER.debug(
+                    "Response from M-Bus Center did not satisfy expectations:", e
+                )
+        return list_of_ids
+
+    async def scan_for_sensors_async(self, hass: HomeAssistant):
+        return await hass.async_add_executor_job(self.scan_for_sensors_sync)
 
     def read_sensor_sync(self, sensor_id: int) -> dict[str, float]:
         """Fetch new state data for the sensor."""

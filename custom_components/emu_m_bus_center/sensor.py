@@ -94,7 +94,6 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         CoordinatorEntity.__init__(self, coordinator)
         self._name = coordinator.name
         self._suffix = suffix
-        _LOGGER.error(f"Sensor instantiated of class {__class__} with name {self._name} and suffix {self._suffix} gets info {self.device_info} ")
 
     _attr_has_entity_name: True
     _attr_should_poll: True
@@ -104,14 +103,19 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         return f"{self._name} {self._suffix}"
 
     @property
+    def friendly_name(self) -> str | None:
+        return f"{self._name} {self._suffix.replace('_', ' ').capitalize()}"
+
+    @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
-        return DeviceInfo(
-            identifiers={DOMAIN},
+        info = DeviceInfo(
+            identifiers={(DOMAIN, self._name)},
             name=f"Emu Sensor-{self._name}",
             manufacturer="EMU",
             model="EMU Allrounder 75/3",
         )
+        return info
 
     @property
     def unique_id(self) -> str | None:
@@ -205,7 +209,6 @@ class EmuCoordinator(DataUpdateCoordinator):
         name: str,
         sensor_id: int,
     ) -> None:
-        _LOGGER.debug(f"instantiating Coordinator for {name}")
         self._config_entry_id = config_entry_id
         self._hass = hass
         self._name = name
@@ -213,8 +216,8 @@ class EmuCoordinator(DataUpdateCoordinator):
         self._logger = logger
 
         super().__init__(
-            hass,
-            logger,
+            hass=hass,
+            logger=logger,
             name=name,
             update_interval=timedelta(seconds=60),
         )
