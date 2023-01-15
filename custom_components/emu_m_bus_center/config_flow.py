@@ -17,6 +17,8 @@ _LOGGER = logging.getLogger(__name__)
 class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
+    _sensor_tuples = {}
+    _ip = ""
 
     async def async_step_user(self, user_input=None):
         if user_input is not None:
@@ -26,33 +28,41 @@ class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 hass=self.hass, sensors=None
             )
             if valid_connection:
-                _LOGGER.error("async step_user determined valid connection")
                 sensor_ids = await client.scan_for_sensors_async(hass=self.hass)
-                _LOGGER.debug(f"found sensors {sensor_ids}")
-                return self.async_create_entry(
-                    title="",
-                    data={
-                        "ip": user_input.get("ip", ""),
-                        "sensors": user_input.get("sensors", ""),
-                    },
-                )
+                return await self.async_step_sensors(ip=ip, sensor_ids=sensor_ids)
             else:
                 _LOGGER.error("async step_user determined invalid connection")
-                return self.async_create_entry(
-                    title="",
-                    data={
-                        "ip": user_input.get("ip", ""),
-                        "sensors": user_input.get("sensors", ""),
-                    },
-                )
+                # TODO: show abort dialog
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
                 {
                     vol.Required("ip"): TextSelector(
                         TextSelectorConfig(type=TextSelectorType.URL)
-                    ),
-                    vol.Required("sensors"): str,
-                }  # TODO: properly validate the dict
+                    )
+                }
             ),
         )
+
+    async def async_step_sensors(self, user_input=None, ip=None, sensor_ids=None):
+        if user_input is not None:
+            sensors = list()
+            for (_id, _serial) in self._sensor_tuples:
+                sensors.append((_id, _serial, user_input.get(str(_id), "")))
+            return self.async_create_entry(
+                title="",
+                data={
+                    "ip": self._ip,
+                    "sensors": sensors,
+                },
+            )
+
+        else:
+            schema = {}
+            self._sensor_tuples = sensor_ids
+            self._ip = ip
+            for (_id, _serial) in sensor_ids:
+                schema[vol.Required(f"{_id}")] = str
+            return self.async_show_form(
+                step_id="sensors", data_schema=vol.Schema(schema)
+            )

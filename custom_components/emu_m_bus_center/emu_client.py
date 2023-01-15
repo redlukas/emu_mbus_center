@@ -30,14 +30,14 @@ class EmuApiClient:
     def __init__(self, ip):
         self._ip = ip
 
-    def validate_connection_sync(self, sensors: dict | None):
+    def validate_connection_sync(self, sensors: list | None):
         try:
             res = requests.get(f"http://{self._ip}")
             if "emu_logo_128px" not in res.text:
                 return False
 
             if sensors is not None:
-                for name, sensor_id in sensors.items():
+                for (sensor_id, serial, name) in sensors:
                     res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
                     try:
                         parsed = json.loads(res.text)["Device"]
@@ -73,18 +73,23 @@ class EmuApiClient:
             return False
 
     async def validate_connection_async(
-        self, hass: HomeAssistant, sensors: dict | None
+        self, hass: HomeAssistant, sensors: list | None
     ):
         return await hass.async_add_executor_job(self.validate_connection_sync, sensors)
 
-    def scan_for_sensors_sync(self) -> list[int]:
+    def scan_for_sensors_sync(self) -> list[(int, int)]:
         list_of_ids = list()
         for sensor_id in range(250):
             try:
                 res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
                 parsed = json.loads(res.text)["Device"]
                 if parsed["Medium"] == "Electricity":
-                    list_of_ids.append(sensor_id)
+                    if parsed["Serial"] and int(parsed["Serial"]):
+                        list_of_ids.append((sensor_id, int(parsed["Serial"])))
+                    else:
+                        _LOGGER.error(
+                            f"Sensor {sensor_id} did not supply a proper serial number"
+                        )
             except requests.exceptions.ConnectionError:
                 _LOGGER.debug(f"No Sensor on ID {sensor_id}")
             except json.decoder.JSONDecodeError:

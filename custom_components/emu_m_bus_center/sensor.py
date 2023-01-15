@@ -1,8 +1,8 @@
 """Platform for sensor integration."""
 from __future__ import annotations
 
-import json
 import logging
+import random
 from datetime import timedelta
 from typing import Any
 
@@ -40,6 +40,7 @@ from .const import RESET_COUNTER
 from .const import VOLTAGE_PHASE_1
 from .const import VOLTAGE_PHASE_2
 from .const import VOLTAGE_PHASE_3
+from .const import SERIAL_NO
 from .emu_client import EmuApiClient
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,19 +48,20 @@ SCAN_INTERVAL = timedelta(seconds=60)
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+        hass: HomeAssistant,
+        config_entry: ConfigEntry,
+        async_add_entities: AddEntitiesCallback,
 ):
-    parsed = json.loads(config_entry.data["sensors"])
+    sensors_from_config = config_entry.data["sensors"]
     all_sensors = []
-    for name, sensor_id in parsed.items():
+    for (sensor_id, serial_no, name) in sensors_from_config:
         coordinator = EmuCoordinator(
             hass=hass,
             config_entry_id=config_entry.entry_id,
             logger=_LOGGER,
             name=name,
             sensor_id=int(sensor_id),
+            serial_no=serial_no
         )
         sensors = [
             EmuEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_1),
@@ -94,6 +96,8 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         CoordinatorEntity.__init__(self, coordinator)
         self._name = coordinator.name
         self._suffix = suffix
+        self._serial_no = coordinator.serial_no
+        _LOGGER.error(f"created Sensor of class {__class__} with name  {self._name} and serial {self._serial_no}")
 
     _attr_has_entity_name: True
     _attr_should_poll: True
@@ -112,17 +116,15 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         info = DeviceInfo(
             identifiers={(DOMAIN, self._name)},
             name=f"Emu Sensor-{self._name}",
-            manufacturer="EMU",
-            model="EMU Allrounder 75/3",
+            default_manufacturer="EMU",
+            default_model="EMU Allrounder 75/3",
         )
         return info
 
     @property
     def unique_id(self) -> str | None:
-        ip = self.coordinator.get_hass.config_entries.async_get_entry(
-            self.coordinator.config_entry_id
-        ).data["ip"]
-        return f"Emu Sensor {self._name}-{self._suffix}@{ip}"
+        return f"Emu Sensor {self._serial_no} - {self._name} - {self._suffix}"
+
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -202,18 +204,20 @@ class EmuCoordinator(DataUpdateCoordinator):
     """Custom M-Bus Center Coordinator"""
 
     def __init__(
-        self,
-        hass: HomeAssistant,
-        config_entry_id: str,
-        logger: logging.Logger,
-        name: str,
-        sensor_id: int,
+            self,
+            hass: HomeAssistant,
+            config_entry_id: str,
+            logger: logging.Logger,
+            name: str,
+            sensor_id: int,
+            serial_no: str
     ) -> None:
         self._config_entry_id = config_entry_id
         self._hass = hass
         self._name = name
         self._sensor_id = sensor_id
         self._logger = logger
+        self._serial_no = serial_no
 
         super().__init__(
             hass=hass,
@@ -229,6 +233,10 @@ class EmuCoordinator(DataUpdateCoordinator):
     @property
     def config_entry_id(self):
         return self._config_entry_id
+
+    @property
+    def serial_no(self):
+        return self._serial_no
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from API endpoint.

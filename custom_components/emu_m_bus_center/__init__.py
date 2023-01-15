@@ -1,7 +1,6 @@
 """The Emu M-Bus Center integration."""
 from __future__ import annotations
 
-import json
 import logging
 
 from homeassistant.config_entries import ConfigEntry
@@ -22,9 +21,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     hass.data.setdefault(DOMAIN, {})
 
     client = EmuApiClient(config_entry.data["ip"])
-    parsed = json.loads(config_entry.data["sensors"])
+    sensors = config_entry.data["sensors"]
 
-    valid_connection = await client.validate_connection_async(hass=hass, sensors=parsed)
+    valid_connection = await client.validate_connection_async(hass=hass, sensors=sensors)
 
     if not valid_connection:
         return False
