@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-import random
 from datetime import timedelta
 from typing import Any
 
@@ -40,7 +39,6 @@ from .const import RESET_COUNTER
 from .const import VOLTAGE_PHASE_1
 from .const import VOLTAGE_PHASE_2
 from .const import VOLTAGE_PHASE_3
-from .const import SERIAL_NO
 from .emu_client import EmuApiClient
 
 _LOGGER = logging.getLogger(__name__)
@@ -48,9 +46,9 @@ SCAN_INTERVAL = timedelta(seconds=60)
 
 
 async def async_setup_entry(
-        hass: HomeAssistant,
-        config_entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ):
     sensors_from_config = config_entry.data["sensors"]
     all_sensors = []
@@ -61,7 +59,7 @@ async def async_setup_entry(
             logger=_LOGGER,
             name=name,
             sensor_id=int(sensor_id),
-            serial_no=serial_no
+            serial_no=serial_no,
         )
         sensors = [
             EmuEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_1),
@@ -91,13 +89,13 @@ async def async_setup_entry(
 class EmuBaseSensor(CoordinatorEntity, SensorEntity):
     """base Emu Sensor, all sensors inherit from it"""
 
-    def __init__(self, coordinator: DataUpdateCoordinator, suffix: str):
+    def __init__(self, coordinator: EmuCoordinator, suffix: str):
         SensorEntity.__init__(self)
         CoordinatorEntity.__init__(self, coordinator)
         self._name = coordinator.name
         self._suffix = suffix
         self._serial_no = coordinator.serial_no
-        _LOGGER.error(f"created Sensor of class {__class__} with name  {self._name} and serial {self._serial_no}")
+        _LOGGER.debug(f"created Sensor of class {__class__} with uid {self.unique_id}")
 
     _attr_has_entity_name: True
     _attr_should_poll: True
@@ -124,7 +122,6 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
     @property
     def unique_id(self) -> str | None:
         return f"Emu Sensor {self._serial_no} - {self._name} - {self._suffix}"
-
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -204,13 +201,13 @@ class EmuCoordinator(DataUpdateCoordinator):
     """Custom M-Bus Center Coordinator"""
 
     def __init__(
-            self,
-            hass: HomeAssistant,
-            config_entry_id: str,
-            logger: logging.Logger,
-            name: str,
-            sensor_id: int,
-            serial_no: str
+        self,
+        hass: HomeAssistant,
+        config_entry_id: str,
+        logger: logging.Logger,
+        name: str,
+        sensor_id: int,
+        serial_no: str,
     ) -> None:
         self._config_entry_id = config_entry_id
         self._hass = hass

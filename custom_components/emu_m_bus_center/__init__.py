@@ -23,7 +23,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     client = EmuApiClient(config_entry.data["ip"])
     sensors = config_entry.data["sensors"]
 
-    valid_connection = await client.validate_connection_async(hass=hass, sensors=sensors)
+    valid_connection = await client.validate_connection_async(
+        hass=hass, sensors=sensors
+    )
 
     if not valid_connection:
         return False
