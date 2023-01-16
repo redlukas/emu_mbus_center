@@ -7,6 +7,7 @@ from homeassistant import config_entries
 from homeassistant.helpers.selector import TextSelector
 from homeassistant.helpers.selector import TextSelectorConfig
 from homeassistant.helpers.selector import TextSelectorType
+from homeassistant.util.network import is_host_valid
 
 from . import EmuApiClient
 from .const import DOMAIN
@@ -23,15 +24,19 @@ class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None):
         if user_input is not None:
             ip = user_input.get("ip", "")
-            client = EmuApiClient(ip)
-            valid_connection = await client.validate_connection_async(
-                hass=self.hass, sensors=None
-            )
-            if valid_connection:
-                sensor_ids = await client.scan_for_sensors_async(hass=self.hass)
-                return await self.async_step_sensors(ip=ip, sensor_ids=sensor_ids)
+            if is_host_valid(ip):
+                client = EmuApiClient(ip)
+                valid_connection = await client.validate_connection_async(
+                    hass=self.hass, sensors=None
+                )
+                if valid_connection:
+                    sensor_ids = await client.scan_for_sensors_async(hass=self.hass)
+                    return await self.async_step_sensors(ip=ip, sensor_ids=sensor_ids)
+                else:
+                    _LOGGER.error("async step_user determined invalid connection")
+                    # TODO: show abort dialog
             else:
-                _LOGGER.error("async step_user determined invalid connection")
+                _LOGGER.error("user input is invalid IP")
                 # TODO: show abort dialog
         return self.async_show_form(
             step_id="user",
