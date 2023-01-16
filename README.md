@@ -41,7 +41,6 @@ Just click here: [![Open in HACS.][my-hacs-badge]][open-in-hacs]
 4. Download _all_ the files from the `custom_components/emu_m_bus_center/` directory (folder) in this repository.
 5. Place the files you downloaded in the new directory (folder) you created.
 6. Restart Home Assistant
-7. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "Emu M-Bus Center"
 
 Using your HA configuration directory (folder) as a starting point you should now also have this:
 
@@ -56,17 +55,13 @@ custom_components/emu_m_bus_center/sensor.py
 
 No matter which way you installed the Integration, you need to restart Home Assistant before configuring the integration.
 
-Add an entry in your `configuration.yaml` like this:
-
-```yaml
-sensor:
-  - platform: emu_m_bus_center
-    ip_address: "IpOfYourSensor"
-    unique_id:
-      - "name_of_sensor_1": "id_of_sensor_1"
-      - "name_of_sensor_2": "id_of_sensor_2"
-      - "name_of_sensor_3": "id_of_sensor_3"
-```
+Go to the `Settings -> Devices & Services -> Integrations` tab of your Home Assistant instance.
+Click `ADD INTEGRATION` and search for "Emu M-Bus Center".
+The Configuration flow will start when you click install.
+It will first ask you for the IP address of your M-Bus Center.
+Then it will scan your Center for available Sensors and list them, labeled by their ID.
+Assign each ID a human-readable name like "Heatpump" or "Basement".
+Click "Finish", the Setup is now complete!
 
 ## How to find the ID of your meter
 
