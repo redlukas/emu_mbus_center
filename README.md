@@ -111,9 +111,9 @@ For the config flow, the initialisatioon and update of the sensors I looked at m
 [commits-shield]: https://img.shields.io/github/commit-activity/y/redlukas/emu_mbus_center.svg
 [commits]: https://github.com/redlukas/emu_mbus_center/commits/main
 [hacs]: https://hacs.xyz
-[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg
+[hacsbadge]: https://img.shields.io/badge/HACS-Default-green.svg
 [discord]: https://discord.gg/Qa5fW2R
-[discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style
+[discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style=flat&logo=discord
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg
 [forum]: https://community.home-assistant.io/
 [license-shield]: https://img.shields.io/github/license/redlukas/emu_mbus_center.svg
