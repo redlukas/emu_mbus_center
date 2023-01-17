@@ -10,7 +10,6 @@
     "step": {
       "user": {
         "description": "Please enter the IP and Name of your M-Bus Center",
-        "title": "Emu M-Bus Center",
         "data": {
           "ip": "IP",
           "name": "Name"
