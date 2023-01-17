@@ -51,15 +51,16 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ):
     sensors_from_config = config_entry.data["sensors"]
+    center_name = config_entry.data["name"]
     all_sensors = []
-    for (sensor_id, serial_no, name) in sensors_from_config:
+    for (sensor_id, serial_no) in sensors_from_config:
         coordinator = EmuCoordinator(
             hass=hass,
             config_entry_id=config_entry.entry_id,
             logger=_LOGGER,
-            name=name,
             sensor_id=int(sensor_id),
             serial_no=serial_no,
+            center_name=center_name,
         )
         sensors = [
             EmuEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_1),
@@ -113,7 +114,7 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         """Return the device info."""
         info = DeviceInfo(
             identifiers={(DOMAIN, self._name)},
-            name=f"Emu Sensor-{self._name}",
+            name=f"Emu Sensor-{self._name}@{self.coordinator.center_name}",
             default_manufacturer="EMU",
             default_model="EMU Allrounder 75/3",
         )
@@ -121,7 +122,7 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def unique_id(self) -> str | None:
-        return f"Emu Sensor {self._serial_no} - {self._name} - {self._suffix}"
+        return f"Emu Sensor - {self._name} - {self._suffix}"
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -205,21 +206,22 @@ class EmuCoordinator(DataUpdateCoordinator):
         hass: HomeAssistant,
         config_entry_id: str,
         logger: logging.Logger,
-        name: str,
         sensor_id: int,
         serial_no: str,
+        center_name: str,
     ) -> None:
         self._config_entry_id = config_entry_id
         self._hass = hass
-        self._name = name
+        self._name = f"{sensor_id}/{serial_no}"
         self._sensor_id = sensor_id
         self._logger = logger
         self._serial_no = serial_no
+        self._center_name = center_name
 
         super().__init__(
             hass=hass,
             logger=logger,
-            name=name,
+            name=self._name,
             update_interval=timedelta(seconds=60),
         )
 
@@ -234,6 +236,10 @@ class EmuCoordinator(DataUpdateCoordinator):
     @property
     def serial_no(self):
         return self._serial_no
+
+    @property
+    def center_name(self):
+        return self._center_name
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from API endpoint.

@@ -58,10 +58,12 @@ No matter which way you installed the Integration, you need to restart Home Assi
 Go to the `Settings -> Devices & Services -> Integrations` tab of your Home Assistant instance.
 Click `ADD INTEGRATION` and search for "Emu M-Bus Center".
 The Configuration flow will start when you click install.
-It will first ask you for the IP address of your M-Bus Center.
-Then it will scan your Center for available Sensors and list them, labeled by their ID.
-Assign each ID a human-readable name like "Heatpump" or "Basement".
-Click "Finish", the Setup is now complete!
+It will ask you for the IP address and Name of your M-Bus Center.
+Then it will scan your Center for available Sensors and add them to Home Assistant.
+If you do not want the default names for the meters, go to Integrations one more time, look for the Integration you just installed and click on the "x Devices".
+You will find a list of the sensors that were found. If you click on a single sensor, you'll get a dialog with a pencil in the upper right corner.
+Click that pencil and enter the Name you desire in the popup. By default, the name will be in the format `Emu Sensor-$ID/$SERIAL_NO@$CENTER_NAME`.
+Use the Web interface of your M-Bus Center as described below to match ID/Serial Number to the M-Bus Address you set on the meter itself.
 
 ## How to find the ID of your meter
 

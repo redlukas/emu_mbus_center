@@ -7,7 +7,8 @@ from homeassistant import config_entries
 from homeassistant.helpers.selector import TextSelector
 from homeassistant.helpers.selector import TextSelectorConfig
 from homeassistant.helpers.selector import TextSelectorType
-from homeassistant.util.network import is_host_valid
+from homeassistant.util.network import is_ipv4_address
+from homeassistant.util.network import is_ipv6_address
 
 from . import EmuApiClient
 from .const import DOMAIN
@@ -22,52 +23,39 @@ class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     _ip = ""
 
     async def async_step_user(self, user_input=None):
+        errors = {}
         if user_input is not None:
             ip = user_input.get("ip", "")
-            if is_host_valid(ip):
+            if is_ipv4_address(ip) or is_ipv6_address(ip):
                 client = EmuApiClient(ip)
                 valid_connection = await client.validate_connection_async(
                     hass=self.hass, sensors=None
                 )
                 if valid_connection:
                     sensor_ids = await client.scan_for_sensors_async(hass=self.hass)
-                    return await self.async_step_sensors(ip=ip, sensor_ids=sensor_ids)
+                    return self.async_create_entry(
+                        title="emu_m-bus_center",
+                        data={
+                            "sensors": sensor_ids,
+                            "ip": ip,
+                            "name": user_input.get("name", "Emu M-Bus Center"),
+                        },
+                    )
                 else:
                     _LOGGER.error("async step_user determined invalid connection")
-                    # TODO: show abort dialog
+                    errors["base"] = "invalid_connection"
             else:
                 _LOGGER.error("user input is invalid IP")
-                # TODO: show abort dialog
+                errors["invalid_ip"] = "invalid_ip"
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
                 {
                     vol.Required("ip"): TextSelector(
                         TextSelectorConfig(type=TextSelectorType.URL)
-                    )
+                    ),
+                    vol.Required("name"): str,
                 }
             ),
+            errors=errors,
         )
-
-    async def async_step_sensors(self, user_input=None, ip=None, sensor_ids=None):
-        if user_input is not None:
-            sensors = list()
-            for (_id, _serial) in self._sensor_tuples:
-                sensors.append((_id, _serial, user_input.get(str(_id), "")))
-            return self.async_create_entry(
-                title="",
-                data={
-                    "ip": self._ip,
-                    "sensors": sensors,
-                },
-            )
-
-        else:
-            schema = {}
-            self._sensor_tuples = sensor_ids
-            self._ip = ip
-            for (_id, _serial) in sensor_ids:
-                schema[vol.Required(f"{_id}")] = str
-            return self.async_show_form(
-                step_id="sensors", data_schema=vol.Schema(schema)
-            )
