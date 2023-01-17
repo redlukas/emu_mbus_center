@@ -41,7 +41,6 @@ Just click here: [![Open in HACS.][my-hacs-badge]][open-in-hacs]
 4. Download _all_ the files from the `custom_components/emu_m_bus_center/` directory (folder) in this repository.
 5. Place the files you downloaded in the new directory (folder) you created.
 6. Restart Home Assistant
-7. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "Emu M-Bus Center"
 
 Using your HA configuration directory (folder) as a starting point you should now also have this:
 
@@ -56,17 +55,15 @@ custom_components/emu_m_bus_center/sensor.py
 
 No matter which way you installed the Integration, you need to restart Home Assistant before configuring the integration.
 
-Add an entry in your `configuration.yaml` like this:
-
-```yaml
-sensor:
-  - platform: emu_m_bus_center
-    ip_address: "IpOfYourSensor"
-    unique_id:
-      - "name_of_sensor_1": "id_of_sensor_1"
-      - "name_of_sensor_2": "id_of_sensor_2"
-      - "name_of_sensor_3": "id_of_sensor_3"
-```
+Go to the `Settings -> Devices & Services -> Integrations` tab of your Home Assistant instance.
+Click `ADD INTEGRATION` and search for "Emu M-Bus Center".
+The Configuration flow will start when you click install.
+It will ask you for the IP address and Name of your M-Bus Center.
+Then it will scan your Center for available Sensors and add them to Home Assistant.
+If you do not want the default names for the meters, go to Integrations one more time, look for the Integration you just installed and click on the "x Devices".
+You will find a list of the sensors that were found. If you click on a single sensor, you'll get a dialog with a pencil in the upper right corner.
+Click that pencil and enter the Name you desire in the popup. By default, the name will be in the format `Emu Sensor-$ID/$SERIAL_NO@$CENTER_NAME`.
+Use the Web interface of your M-Bus Center as described below to match ID/Serial Number to the M-Bus Address you set on the meter itself.
 
 ## How to find the ID of your meter
 
@@ -101,6 +98,8 @@ This project was generated from [@oncleben31](https://github.com/oncleben31)'s [
 
 Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [integration_blueprint][integration_blueprint] template
 
+For the config flow, the initialisatioon and update of the sensors I looked at many existing repos, chief among them [@CubicPill](https://github.com/CubicPill)'s [China Southern Power Grid Statistics](https://github.com/CubicPill/china_southern_power_grid_stat)
+
 ---
 
 [integration_blueprint]: https://github.com/custom-components/integration_blueprint
@@ -109,9 +108,9 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 [commits-shield]: https://img.shields.io/github/commit-activity/y/redlukas/emu_mbus_center.svg
 [commits]: https://github.com/redlukas/emu_mbus_center/commits/main
 [hacs]: https://hacs.xyz
-[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg
+[hacsbadge]: https://img.shields.io/badge/HACS-Default-green.svg
 [discord]: https://discord.gg/Qa5fW2R
-[discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style
+[discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style=flat&logo=discord
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg
 [forum]: https://community.home-assistant.io/
 [license-shield]: https://img.shields.io/github/license/redlukas/emu_mbus_center.svg

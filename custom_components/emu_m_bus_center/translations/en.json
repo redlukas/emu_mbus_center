@@ -1,0 +1,21 @@
+{
+  "config": {
+    "create_entry": {
+      "default": "The Entities for your sensors have been created.\n Please use the frontend to give each of them the desired name."
+    },
+    "error": {
+      "invalid_connection": "Could not connect to the M-Bus Center on the specified IP",
+      "invalid_ip": "The address you entered is not a valid IP"
+    },
+    "step": {
+      "user": {
+        "description": "Please enter the IP and Name of your M-Bus Center",
+        "title": "Emu M-Bus Center",
+        "data": {
+          "ip": "IP",
+          "name": "Name"
+        }
+      }
+    }
+  }
+}

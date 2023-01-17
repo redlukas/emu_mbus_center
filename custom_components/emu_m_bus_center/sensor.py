@@ -1,259 +1,262 @@
 """Platform for sensor integration."""
 from __future__ import annotations
 
-import json
 import logging
 from datetime import timedelta
+from typing import Any
 
-import homeassistant.helpers.config_validation as cv
-import requests
-import voluptuous as vol
-from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.components.sensor import SensorStateClass
-from homeassistant.const import CONF_IP_ADDRESS
-from homeassistant.const import CONF_UNIQUE_ID
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import ELECTRIC_CURRENT_AMPERE
+from homeassistant.const import ELECTRIC_POTENTIAL_VOLT
+from homeassistant.const import FREQUENCY_HERTZ
 from homeassistant.const import UnitOfEnergy
+from homeassistant.const import UnitOfPower
+from homeassistant.core import callback
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType
-from homeassistant.helpers.typing import DiscoveryInfoType
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+
+from .const import ACTIVE_ENERGY_TARIFF_1
+from .const import ACTIVE_ENERGY_TARIFF_2
+from .const import ACTIVE_POWER_ALL_PHASES
+from .const import ACTIVE_POWER_PHASE_1
+from .const import ACTIVE_POWER_PHASE_2
+from .const import ACTIVE_POWER_PHASE_3
+from .const import CURRENT_ALL_PHASES
+from .const import CURRENT_PHASE_1
+from .const import CURRENT_PHASE_2
+from .const import CURRENT_PHASE_3
+from .const import CURRENT_TRANSFORMER_FACTOR
+from .const import DOMAIN
+from .const import ERROR_FLAGS
+from .const import FREQUENCY
+from .const import RESET_COUNTER
+from .const import VOLTAGE_PHASE_1
+from .const import VOLTAGE_PHASE_2
+from .const import VOLTAGE_PHASE_3
+from .emu_client import EmuApiClient
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=60)
 
-# Validation of the user's config
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_IP_ADDRESS): cv.string,
-        vol.Required(CONF_UNIQUE_ID): cv.ensure_list,
-    }
-)
 
-
-def setup_platform(
+async def async_setup_entry(
     hass: HomeAssistant,
-    config: ConfigType,
-    add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
-) -> None:
-    """Set up the sensor platform."""
-    for entry in config[CONF_UNIQUE_ID]:
-        item = entry.popitem(True)
-        sensor = {"name": item[0], "ip_address": config[CONF_IP_ADDRESS], "id": item[1]}
-        add_entities([EmuMBusCenterSensor(sensor)], True)
-        """The "true" argument assures the values get fetched before the first write to HA"""
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+):
+    sensors_from_config = config_entry.data["sensors"]
+    center_name = config_entry.data["name"]
+    all_sensors = []
+    for (sensor_id, serial_no) in sensors_from_config:
+        coordinator = EmuCoordinator(
+            hass=hass,
+            config_entry_id=config_entry.entry_id,
+            logger=_LOGGER,
+            sensor_id=int(sensor_id),
+            serial_no=serial_no,
+            center_name=center_name,
+        )
+        sensors = [
+            EmuEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_1),
+            EmuEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_2),
+            EmuPowerSensor(coordinator, ACTIVE_POWER_PHASE_1),
+            EmuPowerSensor(coordinator, ACTIVE_POWER_PHASE_2),
+            EmuPowerSensor(coordinator, ACTIVE_POWER_PHASE_3),
+            EmuPowerSensor(coordinator, ACTIVE_POWER_ALL_PHASES),
+            EmuVoltageSensor(coordinator, VOLTAGE_PHASE_1),
+            EmuVoltageSensor(coordinator, VOLTAGE_PHASE_2),
+            EmuVoltageSensor(coordinator, VOLTAGE_PHASE_3),
+            EmuCurrentSensor(coordinator, CURRENT_PHASE_1),
+            EmuCurrentSensor(coordinator, CURRENT_PHASE_2),
+            EmuCurrentSensor(coordinator, CURRENT_PHASE_3),
+            EmuCurrentSensor(coordinator, CURRENT_ALL_PHASES),
+            EmuFrequencySensor(coordinator, FREQUENCY),
+            EmuResetSensor(coordinator, RESET_COUNTER),
+            EmuTransformerFactorSensor(coordinator, CURRENT_TRANSFORMER_FACTOR),
+            EmuErrorSensor(coordinator, ERROR_FLAGS),
+        ]
+
+        all_sensors.extend(sensors)
+        await coordinator.async_config_entry_first_refresh()
+    async_add_entities(all_sensors)
 
 
-class EmuMBusCenterSensor(SensorEntity):
-    """emu_m_bus_center Sensor class."""
+class EmuBaseSensor(CoordinatorEntity, SensorEntity):
+    """base Emu Sensor, all sensors inherit from it"""
+
+    def __init__(self, coordinator: EmuCoordinator, suffix: str):
+        SensorEntity.__init__(self)
+        CoordinatorEntity.__init__(self, coordinator)
+        self._name = coordinator.name
+        self._suffix = suffix
+        self._serial_no = coordinator.serial_no
+        _LOGGER.debug(f"created Sensor of class {__class__} with uid {self.unique_id}")
+
+    _attr_has_entity_name: True
+    _attr_should_poll: True
+
+    @property
+    def name(self) -> str | None:
+        return f"{self._name} {self._suffix}"
+
+    @property
+    def friendly_name(self) -> str | None:
+        return f"{self._name} {self._suffix.replace('_', ' ').capitalize()}"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return the device info."""
+        info = DeviceInfo(
+            identifiers={(DOMAIN, self._name)},
+            name=f"Emu Sensor-{self._name}@{self.coordinator.center_name}",
+            default_manufacturer="EMU",
+            default_model="EMU Allrounder 75/3",
+        )
+        return info
+
+    @property
+    def unique_id(self) -> str | None:
+        return f"Emu Sensor - {self._name} - {self._suffix}"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        value = self.coordinator.data[self._suffix]
+        self._attr_native_value = value
+        self.async_write_ha_state()
+
+
+class EmuEnergySensor(EmuBaseSensor):
+    """Sensor for active energy in kWh"""
 
     _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
     _attr_state_class = SensorStateClass.TOTAL_INCREASING
     _attr_device_class = SensorDeviceClass.ENERGY
-    _attr_has_entity_name: True
     _attr_icon = "mdi:lightning-bolt"
-    _attr_should_poll: True
 
-    def __init__(self, sensor) -> None:
-        self._name = sensor["name"]
-        self._ip = sensor["ip_address"]
-        self._id = sensor["id"]
+
+class EmuPowerSensor(EmuBaseSensor):
+    """Sensor for active power in kW"""
+
+    _attr_native_unit_of_measurement = UnitOfPower.KILO_WATT
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_icon = "mdi:lightning-bolt-circle"
+
+
+class EmuVoltageSensor(EmuBaseSensor):
+    """Sensor for Voltage in V"""
+
+    _attr_native_unit_of_measurement = ELECTRIC_POTENTIAL_VOLT
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_device_class = SensorDeviceClass.VOLTAGE
+    _attr_icon = "mdi:lightning-bolt"
+
+
+class EmuCurrentSensor(EmuBaseSensor):
+    """Sensor for the Current in A"""
+
+    _attr_native_unit_of_measurement = ELECTRIC_CURRENT_AMPERE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_device_class = SensorDeviceClass.CURRENT
+    _attr_icon = "mdi:flash-triangle"
+
+
+class EmuFrequencySensor(EmuBaseSensor):
+    """Sensor for the Grid frequency in Hz"""
+
+    _attr_native_unit_of_measurement = FREQUENCY_HERTZ
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_device_class = SensorDeviceClass.FREQUENCY
+    _attr_icon = "mdi:sine-wave"
+
+
+class EmuResetSensor(EmuBaseSensor):
+    """Sensor for the number of Resets"""
+
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
+    _attr_icon = "mdi:lock-reset"
+
+
+class EmuTransformerFactorSensor(EmuBaseSensor):
+    """Sensor for factor of the current transformer"""
+
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:close-outline"
+
+
+class EmuErrorSensor(EmuBaseSensor):
+    """sensor for the Error on the physical emu appliance"""
+
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:alert-circle-outline"
+
+
+class EmuCoordinator(DataUpdateCoordinator):
+    """Custom M-Bus Center Coordinator"""
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        config_entry_id: str,
+        logger: logging.Logger,
+        sensor_id: int,
+        serial_no: str,
+        center_name: str,
+    ) -> None:
+        self._config_entry_id = config_entry_id
+        self._hass = hass
+        self._name = f"{sensor_id}/{serial_no}"
+        self._sensor_id = sensor_id
+        self._logger = logger
+        self._serial_no = serial_no
+        self._center_name = center_name
+
+        super().__init__(
+            hass=hass,
+            logger=logger,
+            name=self._name,
+            update_interval=timedelta(seconds=60),
+        )
 
     @property
-    def name(self) -> str:
-        """Return the display name of this sensor."""
-        return self._name
+    def get_hass(self):
+        return self._hass
 
-    def update(self) -> None:
-        """Fetch new state data for the sensor."""
-        try:
-            res = requests.get(f"http://{self._ip}/app/api/id/{self._id}.json")
-            parsed = json.loads(res.text)["Device"]
+    @property
+    def config_entry_id(self):
+        return self._config_entry_id
 
-            # test if we got the Info for the right device
-            if not parsed["Id"] == int(self._id):
-                raise ValueError("Got Info for the wrong Sensor!")
-            # test if the sensor we read out does in fact provide electricity measurements
-            if not parsed["Medium"] == "Electricity":
-                raise ValueError(
-                    "The M-Bus Center sent a valid response, but the sensor does not provide Electricity "
-                    "measurements"
-                )
+    @property
+    def serial_no(self):
+        return self._serial_no
 
-            parsed = parsed["ValueDescs"]
+    @property
+    def center_name(self):
+        return self._center_name
 
-            energy_tarif_1 = next(item for item in parsed if item["Position"] == 0)
-            # test if we found the right entry for energy_tarif_1
-            if not (
-                energy_tarif_1["UnitStr"] == "Wh"
-                and energy_tarif_1["DescriptionStr"] == "Energy"
-            ):
-                raise ValueError(
-                    "Did not find the required Fields for energy_tarif_1 in the JSON response from the "
-                    "M-Bus Center"
-                )
+    async def _async_update_data(self) -> dict[str, Any]:
+        """Fetch data from API endpoint.
+        This is the place to pre-process the data to lookup tables
+        so entities can quickly look up their data.
+        """
+        config = dict(
+            self._hass.config_entries.async_get_entry(self._config_entry_id).data
+        )
 
-            energy_tarif_2 = next(item for item in parsed if item["Position"] == 1)
-            # test if we found the right entry for energy_tarif_2
-            if not (
-                energy_tarif_2["UnitStr"] == "Wh"
-                and energy_tarif_2["DescriptionStr"] == "Energy"
-            ):
-                raise ValueError(
-                    "Did not find the required Fields for energy_tarif_2 in the JSON response from the "
-                    "M-Bus Center"
-                )
+        self.update_interval = timedelta(seconds=60)
 
-            power_phase_1 = next(item for item in parsed if item["Position"] == 2)
-            # test if we found the right entry for power_phase_1
-            if not (
-                power_phase_1["UnitStr"] == "W"
-                and power_phase_1["DescriptionStr"] == "Power (vendor specific)"
-            ):
-                raise ValueError(
-                    "Did not find the required Fields for power_phase_1 in the JSON response from the "
-                    "M-Bus Center"
-                )
-
-            power_phase_2 = next(item for item in parsed if item["Position"] == 3)
-            # test if we found the right entry for power_phase_2
-            if not (
-                power_phase_2["UnitStr"] == "W"
-                and power_phase_2["DescriptionStr"] == "Power (vendor specific)"
-            ):
-                raise ValueError(
-                    "Did not find the required Fields for power_phase_2 in the JSON response from the "
-                    "M-Bus Center"
-                )
-
-            power_phase_3 = next(item for item in parsed if item["Position"] == 4)
-            # test if we found the right entry for power_phase_3
-            if not (
-                power_phase_3["UnitStr"] == "W"
-                and power_phase_3["DescriptionStr"] == "Power (vendor specific)"
-            ):
-                raise ValueError(
-                    "Did not find the required Fields for power_phase_3 in the JSON response from the "
-                    "M-Bus Center"
-                )
-
-            power_all_phases = next(item for item in parsed if item["Position"] == 5)
-            # test if we found the right entry for power_phase_3
-            if not (
-                power_all_phases["UnitStr"] == "W"
-                and power_all_phases["DescriptionStr"] == "Power"
-            ):
-                raise ValueError(
-                    "Did not find the required Fields for power_all_phases in the JSON response from the "
-                    "M-Bus Center"
-                )
-
-            volts_phase_1 = next(item for item in parsed if item["Position"] == 6)
-            # test if we found the right entry volts_phase_1
-            if not (
-                volts_phase_1["UnitStr"] == "V"
-                and volts_phase_1["DescriptionStr"] == "Volts (vendor specific)"
-            ):
-                raise ValueError(
-                    "Did not find the required Fields for volts_phase_1 in the JSON response from the "
-                    "M-Bus Center"
-                )
-
-            volts_phase_2 = next(item for item in parsed if item["Position"] == 7)
-            # test if we found the right entry volts_phase_2
-            if not (
-                volts_phase_2["UnitStr"] == "V"
-                and volts_phase_2["DescriptionStr"] == "Volts (vendor specific)"
-            ):
-                raise ValueError(
-                    "Did not find the required Fields for volts_phase_2 in the JSON response from the "
-                    "M-Bus Center"
-                )
-
-            volts_phase_3 = next(item for item in parsed if item["Position"] == 8)
-            # test if we found the right entry volts_phase_3
-            if not (
-                volts_phase_3["UnitStr"] == "V"
-                and volts_phase_3["DescriptionStr"] == "Volts (vendor specific)"
-            ):
-                raise ValueError(
-                    "Did not find the required Fields for volts_phase_3 in the JSON response from the "
-                    "M-Bus Center"
-                )
-
-            ampere_phase_1 = next(item for item in parsed if item["Position"] == 9)
-            # test if we found the right entry ampere_phase_1
-            if not (
-                ampere_phase_1["UnitStr"] == "A"
-                and ampere_phase_1["DescriptionStr"] == "Ampere (vendor specific)"
-            ):
-                raise ValueError(
-                    "Did not find the required Fields for ampere_phase_1 in the JSON response from the "
-                    "M-Bus Center"
-                )
-
-            ampere_phase_2 = next(item for item in parsed if item["Position"] == 10)
-            # test if we found the right entry ampere_phase_2
-            if not (
-                ampere_phase_2["UnitStr"] == "A"
-                and ampere_phase_2["DescriptionStr"] == "Ampere (vendor specific)"
-            ):
-                raise ValueError(
-                    "Did not find the required Fields for ampere_phase_2 in the JSON response from the "
-                    "M-Bus Center"
-                )
-
-            ampere_phase_3 = next(item for item in parsed if item["Position"] == 11)
-            # test if we found the right entry ampere_phase_3
-            if not (
-                ampere_phase_3["UnitStr"] == "A"
-                and ampere_phase_3["DescriptionStr"] == "Ampere (vendor specific)"
-            ):
-                raise ValueError(
-                    "Did not find the required Fields for ampere_phase_3 in the JSON response from the "
-                    "M-Bus Center"
-                )
-
-            ampere_all_phases = next(item for item in parsed if item["Position"] == 12)
-            # test if we found the right entry ampere_all_phases
-            if not (
-                ampere_all_phases["UnitStr"] == "A"
-                and ampere_all_phases["DescriptionStr"] == "Ampere"
-            ):
-                raise ValueError(
-                    "Did not find the required Fields for ampere_all_phases in the JSON response from the "
-                    "M-Bus Center"
-                )
-
-            self._attr_native_value = energy_tarif_1["LoggerLastValue"] / 1000
-            self._attr_extra_state_attributes = {
-                "energy_tarif_2": energy_tarif_2["LoggerLastValue"] / 1000,
-                "power_phase_1": power_phase_1["LoggerLastValue"] / 1000,
-                "power_phase_2": power_phase_2["LoggerLastValue"] / 1000,
-                "power_phase_3": power_phase_3["LoggerLastValue"] / 1000,
-                "power_all_phases": power_all_phases["LoggerLastValue"] / 1000,
-                "volts_phase_1": volts_phase_1["LoggerLastValue"],
-                "volts_phase_2": volts_phase_2["LoggerLastValue"],
-                "volts_phase_3": volts_phase_3["LoggerLastValue"],
-                "ampere_phase_1": ampere_phase_1["LoggerLastValue"],
-                "ampere_phase_2": ampere_phase_2["LoggerLastValue"],
-                "ampere_phase_3": ampere_phase_3["LoggerLastValue"],
-                "ampere_all_phases": ampere_all_phases["LoggerLastValue"],
-            }
-        except requests.exceptions.ConnectionError as ce:
-            if "Max retries exceeded" in ce.__str__():
-                _LOGGER.error(f"Could not reach M-Bus Center on {self._ip}")
-            elif "Remote end closed connection without response" in ce.__str__():
-                _LOGGER.error(
-                    f"Could not find sensor with ID {self._id} on M-Bus Center {self._ip}"
-                )
-            else:
-                _LOGGER.error("generic connection error", ce)
-        except json.decoder.JSONDecodeError:
-            _LOGGER.error(
-                f"Center on {self._ip} did not return a valid JSON for Sensor {self._id}"
+        async def fetch_all_values() -> dict[str, float]:
+            client = EmuApiClient(config["ip"])
+            data = await client.read_sensor_async(
+                hass=self._hass, sensor_id=self._sensor_id
             )
-        except (ValueError, KeyError) as e:
-            _LOGGER.error("Response from M-Bus Center did not satisfy expectations:", e)
+            return data
+
+        return await fetch_all_values()
