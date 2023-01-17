@@ -37,7 +37,7 @@ class EmuApiClient:
                 return False
 
             if sensors is not None:
-                for (sensor_id, serial) in sensors:
+                for sensor_id, serial in sensors:
                     res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
                     try:
                         parsed = json.loads(res.text)["Device"]

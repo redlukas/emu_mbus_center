@@ -53,7 +53,7 @@ async def async_setup_entry(
     sensors_from_config = config_entry.data["sensors"]
     center_name = config_entry.data["name"]
     all_sensors = []
-    for (sensor_id, serial_no) in sensors_from_config:
+    for sensor_id, serial_no in sensors_from_config:
         coordinator = EmuCoordinator(
             hass=hass,
             config_entry_id=config_entry.entry_id,
