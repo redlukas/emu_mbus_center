@@ -1,3 +1,3 @@
 -r requirements_dev.txt
-pytest-homeassistant-custom-component==0.12.51
+pytest-homeassistant-custom-component==0.12.52
 pytest-cov
