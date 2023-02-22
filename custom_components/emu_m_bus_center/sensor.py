@@ -53,7 +53,7 @@ async def async_setup_entry(
     sensors_from_config = config_entry.data["sensors"]
     center_name = config_entry.data["name"]
     all_sensors = []
-    for sensor_id, serial_no in sensors_from_config:
+    for sensor_id, serial_no, given_name in sensors_from_config:
         coordinator = EmuCoordinator(
             hass=hass,
             config_entry_id=config_entry.entry_id,
@@ -61,6 +61,7 @@ async def async_setup_entry(
             sensor_id=int(sensor_id),
             serial_no=serial_no,
             center_name=center_name,
+            sensor_given_name=given_name,
         )
         sensors = [
             EmuEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_1),
@@ -114,7 +115,7 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         """Return the device info."""
         info = DeviceInfo(
             identifiers={(DOMAIN, self._name)},
-            name=f"Emu Sensor-{self._name}@{self.coordinator.center_name}",
+            name=f"{self._name}",
             default_manufacturer="EMU",
             default_model="EMU Allrounder 75/3",
         )
@@ -209,10 +210,13 @@ class EmuCoordinator(DataUpdateCoordinator):
         sensor_id: int,
         serial_no: str,
         center_name: str,
+        sensor_given_name: str,
     ) -> None:
         self._config_entry_id = config_entry_id
         self._hass = hass
-        self._name = f"{sensor_id}/{serial_no}"
+        self._name = (
+            sensor_given_name if sensor_given_name else f"{sensor_id}/{serial_no}"
+        )
         self._sensor_id = sensor_id
         self._logger = logger
         self._serial_no = serial_no
