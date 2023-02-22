@@ -61,7 +61,7 @@ async def async_setup_entry(
             sensor_id=int(sensor_id),
             serial_no=serial_no,
             center_name=center_name,
-            sensor_given_name=given_name
+            sensor_given_name=given_name,
         )
         sensors = [
             EmuEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_1),
@@ -214,7 +214,9 @@ class EmuCoordinator(DataUpdateCoordinator):
     ) -> None:
         self._config_entry_id = config_entry_id
         self._hass = hass
-        self._name = sensor_given_name if sensor_given_name else f"{sensor_id}/{serial_no}"
+        self._name = (
+            sensor_given_name if sensor_given_name else f"{sensor_id}/{serial_no}"
+        )
         self._sensor_id = sensor_id
         self._logger = logger
         self._serial_no = serial_no

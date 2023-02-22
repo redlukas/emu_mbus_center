@@ -85,7 +85,13 @@ class EmuApiClient:
                 parsed = json.loads(res.text)["Device"]
                 if parsed["Medium"] == "Electricity":
                     if parsed["Serial"] and int(parsed["Serial"]):
-                        list_of_ids.append((sensor_id, int(parsed["Serial"]), parsed["Name"] if parsed["Name"] else None))
+                        list_of_ids.append(
+                            (
+                                sensor_id,
+                                int(parsed["Serial"]),
+                                parsed["Name"] if parsed["Name"] else None,
+                            )
+                        )
                     else:
                         _LOGGER.error(
                             f"Sensor {sensor_id} did not supply a proper serial number"
