@@ -1,0 +1,20 @@
+{
+  "config": {
+    "create_entry": {
+      "default": "Entity pre vaše senzory boli vytvorené.\n Pomocou rozhrania priraďte každému z nich požadovaný názov."
+    },
+    "error": {
+      "invalid_connection": "Nepodarilo sa pripojiť k M-Bus Center na zadanej IP",
+      "invalid_ip": "Zadaná adresa nie je platná IP"
+    },
+    "step": {
+      "user": {
+        "description": "Zadajte IP a názov vášho M-Bus centra",
+        "data": {
+          "ip": "IP",
+          "name": "Názov"
+        }
+      }
+    }
+  }
+}
