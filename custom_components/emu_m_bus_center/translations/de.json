@@ -1,7 +1,7 @@
 {
   "config": {
     "create_entry": {
-      "default": "Die Entitäten für die Sendoren sind erstellt worden.\n Bitte benutze das Frontend um den Entitäten den gewünschten Namen zu geben."
+      "default": "Die Entitäten für die Sensoren sind erstellt worden.\n Bitte benutze das Frontend um den Entitäten den gewünschten Namen zu geben."
     },
     "error": {
       "invalid_connection": "Konnte das M-Bus Center auf der angegebenen IP nicht erreichen",
