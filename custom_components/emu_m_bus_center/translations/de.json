@@ -1,0 +1,20 @@
+{
+  "config": {
+    "create_entry": {
+      "default": "Die Entitäten für die Sensoren sind erstellt worden.\n Bitte benutze das Frontend um den Entitäten den gewünschten Namen zu geben."
+    },
+    "error": {
+      "invalid_connection": "Konnte das M-Bus Center auf der angegebenen IP nicht erreichen",
+      "invalid_ip": "Die angegebene IP ist nicht gültig"
+    },
+    "step": {
+      "user": {
+        "description": "Bitte gib die IP und den Namen des M-Bus Centers an",
+        "data": {
+          "ip": "IP",
+          "name": "Name"
+        }
+      }
+    }
+  }
+}
