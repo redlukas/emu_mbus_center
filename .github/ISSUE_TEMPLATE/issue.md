@@ -41,4 +41,3 @@ Firmware version of the Emu M-Bus Center:
 Make and Model of the meter:
 
 Firmware version of the meter:
-
