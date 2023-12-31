@@ -41,3 +41,17 @@ Firmware version of the Emu M-Bus Center:
 Make and Model of the meter:
 
 Firmware version of the meter:
+
+## Meter Readout
+
+<!-- Post the JSON you get by accessing the REST API of the Emu M-Bus Center.
+For this you need to know the IP address of the Emu M-Bus Center and the ID of the Meter(s) you have an issue with.
+Then go to http://{center_ip}/app/api/id/{sensor_id}.json.
+Post the resulting JSON here.
+-->
+
+```json
+
+Add your JSON here.
+
+```
