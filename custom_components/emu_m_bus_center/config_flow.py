@@ -34,7 +34,7 @@ class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if valid_connection:
                     sensor_ids = await client.scan_for_sensors_async(hass=self.hass)
                     return self.async_create_entry(
-                        title="emu_m-bus_center",
+                        title=user_input.get("name", "Emu M-Bus Center"),
                         data={
                             "sensors": sensor_ids,
                             "ip": ip,
