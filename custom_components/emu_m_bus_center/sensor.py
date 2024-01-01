@@ -46,9 +46,9 @@ SCAN_INTERVAL = timedelta(seconds=60)
 
 
 async def async_setup_entry(
-        hass: HomeAssistant,
-        config_entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ):
     sensors_from_config = config_entry.data["sensors"]
     center_name = config_entry.data["name"]
@@ -63,7 +63,7 @@ async def async_setup_entry(
             center_name=center_name,
             sensor_given_name=given_name,
             manufacturer_name=manufacturer,
-            version=version
+            version=version,
         )
         sensors = [
             EmuEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_1),
@@ -121,7 +121,7 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
             manufacturer=self.coordinator.manufacturer_name,
             connections={(self.coordinator.center_name, self.coordinator.sensor_id)},
             sw_version=self.coordinator.version,
-            configuration_url=f"http://{self.coordinator.ip}/app/"
+            configuration_url=f"http://{self.coordinator.ip}/app/",
         )
         return info
 
@@ -207,16 +207,16 @@ class EmuCoordinator(DataUpdateCoordinator):
     """Custom M-Bus Center Coordinator"""
 
     def __init__(
-            self,
-            hass: HomeAssistant,
-            config_entry_id: str,
-            logger: logging.Logger,
-            sensor_id: int,
-            serial_no: str,
-            center_name: str,
-            sensor_given_name: str,
-            manufacturer_name: str,
-            version: int
+        self,
+        hass: HomeAssistant,
+        config_entry_id: str,
+        logger: logging.Logger,
+        sensor_id: int,
+        serial_no: str,
+        center_name: str,
+        sensor_given_name: str,
+        manufacturer_name: str,
+        version: int
     ) -> None:
         self._config_entry_id = config_entry_id
         self._hass = hass
