@@ -73,7 +73,7 @@ class EmuApiClient:
             return False
 
     async def validate_connection_async(
-            self, hass: HomeAssistant, sensors: list | None
+        self, hass: HomeAssistant, sensors: list | None
     ):
         return await hass.async_add_executor_job(self.validate_connection_sync, sensors)
 
@@ -136,8 +136,8 @@ class EmuApiClient:
             )
             # test if we found the right entry for active_energy_tariff_1
             if not (
-                    active_energy_tariff_1["UnitStr"] == "Wh"
-                    and active_energy_tariff_1["DescriptionStr"] == "Energy"
+                active_energy_tariff_1["UnitStr"] == "Wh"
+                and active_energy_tariff_1["DescriptionStr"] == "Energy"
             ):
                 raise ValueError(
                     "Did not find the required Fields for active_energy_tariff_1 in the JSON response from the "
@@ -149,8 +149,8 @@ class EmuApiClient:
             )
             # test if we found the right entry for active_energy_tariff_2
             if not (
-                    active_energy_tariff_2["UnitStr"] == "Wh"
-                    and active_energy_tariff_2["DescriptionStr"] == "Energy"
+                active_energy_tariff_2["UnitStr"] == "Wh"
+                and active_energy_tariff_2["DescriptionStr"] == "Energy"
             ):
                 raise ValueError(
                     "Did not find the required Fields for active_energy_tariff_2 in the JSON response from the "
@@ -162,8 +162,8 @@ class EmuApiClient:
             )
             # test if we found the right entry for active_power_phase_1
             if not (
-                    active_power_phase_1["UnitStr"] == "W"
-                    and active_power_phase_1["DescriptionStr"] == "Power (vendor specific)"
+                active_power_phase_1["UnitStr"] == "W"
+                and active_power_phase_1["DescriptionStr"] == "Power (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for active_power_phase_1 in the JSON response from the "
@@ -175,8 +175,8 @@ class EmuApiClient:
             )
             # test if we found the right entry for active_power_phase_2
             if not (
-                    active_power_phase_2["UnitStr"] == "W"
-                    and active_power_phase_2["DescriptionStr"] == "Power (vendor specific)"
+                active_power_phase_2["UnitStr"] == "W"
+                and active_power_phase_2["DescriptionStr"] == "Power (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for active_power_phase_2 in the JSON response from the "
@@ -188,8 +188,8 @@ class EmuApiClient:
             )
             # test if we found the right entry for power_phase_3
             if not (
-                    active_power_phase_3["UnitStr"] == "W"
-                    and active_power_phase_3["DescriptionStr"] == "Power (vendor specific)"
+                active_power_phase_3["UnitStr"] == "W"
+                and active_power_phase_3["DescriptionStr"] == "Power (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for active_power_phase_3 in the JSON response from the "
@@ -199,8 +199,8 @@ class EmuApiClient:
             power_all_phases = next(item for item in parsed if item["Position"] == 5)
             # test if we found the right entry for power_phase_3
             if not (
-                    power_all_phases["UnitStr"] == "W"
-                    and power_all_phases["DescriptionStr"] == "Power"
+                power_all_phases["UnitStr"] == "W"
+                and power_all_phases["DescriptionStr"] == "Power"
             ):
                 raise ValueError(
                     "Did not find the required Fields for power_all_phases in the JSON response from the "
@@ -210,8 +210,8 @@ class EmuApiClient:
             voltage_phase_1 = next(item for item in parsed if item["Position"] == 6)
             # test if we found the right entry voltage_phase_1
             if not (
-                    voltage_phase_1["UnitStr"] == "V"
-                    and voltage_phase_1["DescriptionStr"] == "Volts (vendor specific)"
+                voltage_phase_1["UnitStr"] == "V"
+                and voltage_phase_1["DescriptionStr"] == "Volts (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for voltage_phase_1 in the JSON response from the "
@@ -221,8 +221,8 @@ class EmuApiClient:
             voltage_phase_2 = next(item for item in parsed if item["Position"] == 7)
             # test if we found the right entry voltage_phase_2
             if not (
-                    voltage_phase_2["UnitStr"] == "V"
-                    and voltage_phase_2["DescriptionStr"] == "Volts (vendor specific)"
+                voltage_phase_2["UnitStr"] == "V"
+                and voltage_phase_2["DescriptionStr"] == "Volts (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for voltage_phase_2 in the JSON response from the "
@@ -232,8 +232,8 @@ class EmuApiClient:
             voltage_phase_3 = next(item for item in parsed if item["Position"] == 8)
             # test if we found the right entry voltage_phase_3
             if not (
-                    voltage_phase_3["UnitStr"] == "V"
-                    and voltage_phase_3["DescriptionStr"] == "Volts (vendor specific)"
+                voltage_phase_3["UnitStr"] == "V"
+                and voltage_phase_3["DescriptionStr"] == "Volts (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for voltage_phase_3 in the JSON response from the "
@@ -243,8 +243,8 @@ class EmuApiClient:
             current_phase_1 = next(item for item in parsed if item["Position"] == 9)
             # test if we found the right entry current_phase_1
             if not (
-                    current_phase_1["UnitStr"] == "A"
-                    and current_phase_1["DescriptionStr"] == "Ampere (vendor specific)"
+                current_phase_1["UnitStr"] == "A"
+                and current_phase_1["DescriptionStr"] == "Ampere (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for current_phase_1 in the JSON response from the "
@@ -254,8 +254,8 @@ class EmuApiClient:
             current_phase_2 = next(item for item in parsed if item["Position"] == 10)
             # test if we found the right entry current_phase_2
             if not (
-                    current_phase_2["UnitStr"] == "A"
-                    and current_phase_2["DescriptionStr"] == "Ampere (vendor specific)"
+                current_phase_2["UnitStr"] == "A"
+                and current_phase_2["DescriptionStr"] == "Ampere (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for current_phase_2 in the JSON response from the "
@@ -265,8 +265,8 @@ class EmuApiClient:
             current_phase_3 = next(item for item in parsed if item["Position"] == 11)
             # test if we found the right entry current_phase_3
             if not (
-                    current_phase_3["UnitStr"] == "A"
-                    and current_phase_3["DescriptionStr"] == "Ampere (vendor specific)"
+                current_phase_3["UnitStr"] == "A"
+                and current_phase_3["DescriptionStr"] == "Ampere (vendor specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for current_phase_3 in the JSON response from the "
@@ -276,8 +276,8 @@ class EmuApiClient:
             current_all_phases = next(item for item in parsed if item["Position"] == 12)
             # test if we found the right entry current_all_phases
             if not (
-                    current_all_phases["UnitStr"] == "A"
-                    and current_all_phases["DescriptionStr"] == "Ampere"
+                current_all_phases["UnitStr"] == "A"
+                and current_all_phases["DescriptionStr"] == "Ampere"
             ):
                 raise ValueError(
                     "Did not find the required Fields for current_all_phases in the JSON response from the "
@@ -287,8 +287,8 @@ class EmuApiClient:
             frequency = next(item for item in parsed if item["Position"] == 13)
             # test if we found the right entry frequency
             if not (
-                    (frequency["UnitStr"] == "None" or frequency["UnitStr"] == "Hz")
-                    and frequency["DescriptionStr"] == "Special supplier information"
+                (frequency["UnitStr"] == "None" or frequency["UnitStr"] == "Hz")
+                and frequency["DescriptionStr"] == "Special supplier information"
             ):
                 raise ValueError(
                     "Did not find the required Fields for frequency in the JSON response from the "
@@ -298,8 +298,8 @@ class EmuApiClient:
             resets = next(item for item in parsed if item["Position"] == 14)
             # test if we found the right entry resets
             if not (
-                    resets["UnitStr"] == "None"
-                    and resets["DescriptionStr"] == "Reset counter"
+                resets["UnitStr"] == "None"
+                and resets["DescriptionStr"] == "Reset counter"
             ):
                 raise ValueError(
                     "Did not find the required Fields for resets in the JSON response from the "
@@ -311,9 +311,9 @@ class EmuApiClient:
             )
             # test if we found the right entry current_transformer_factor
             if not (
-                    current_transformer_factor["UnitStr"] == "None"
-                    and current_transformer_factor["DescriptionStr"]
-                    == "Special supplier information"
+                current_transformer_factor["UnitStr"] == "None"
+                and current_transformer_factor["DescriptionStr"]
+                == "Special supplier information"
             ):
                 raise ValueError(
                     "Did not find the required Fields for current_transformer_factor in the JSON response from the "
@@ -323,9 +323,9 @@ class EmuApiClient:
             error_flags = next(item for item in parsed if item["Position"] == 16)
             # test if we found the right entry error_flags
             if not (
-                    error_flags["UnitStr"] == "Bin"
-                    and error_flags["DescriptionStr"]
-                    == "Error flags (Device type specific)"
+                error_flags["UnitStr"] == "Bin"
+                and error_flags["DescriptionStr"]
+                == "Error flags (Device type specific)"
             ):
                 raise ValueError(
                     "Did not find the required Fields for error_flags in the JSON response from the "
@@ -333,10 +333,8 @@ class EmuApiClient:
                 )
 
             return {
-                ACTIVE_ENERGY_TARIFF_1: active_energy_tariff_1["LoggerLastValue"]
-                                        / 1000,
-                ACTIVE_ENERGY_TARIFF_2: active_energy_tariff_2["LoggerLastValue"]
-                                        / 1000,
+                ACTIVE_ENERGY_TARIFF_1: active_energy_tariff_1["LoggerLastValue"] / 1000,
+                ACTIVE_ENERGY_TARIFF_2: active_energy_tariff_2["LoggerLastValue"] / 1000,
                 ACTIVE_POWER_PHASE_1: active_power_phase_1["LoggerLastValue"] / 1000,
                 ACTIVE_POWER_PHASE_2: active_power_phase_2["LoggerLastValue"] / 1000,
                 ACTIVE_POWER_PHASE_3: active_power_phase_3["LoggerLastValue"] / 1000,

@@ -216,7 +216,7 @@ class EmuCoordinator(DataUpdateCoordinator):
         center_name: str,
         sensor_given_name: str,
         manufacturer_name: str,
-        version: int
+        version: int,
     ) -> None:
         self._config_entry_id = config_entry_id
         self._hass = hass
