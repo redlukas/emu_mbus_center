@@ -278,14 +278,11 @@ class EmuCoordinator(DataUpdateCoordinator):
         This is the place to pre-process the data to lookup tables
         so entities can quickly look up their data.
         """
-        config = dict(
-            self._hass.config_entries.async_get_entry(self._config_entry_id).data
-        )
 
         self.update_interval = timedelta(seconds=60)
 
         async def fetch_all_values() -> dict[str, float]:
-            client = EmuApiClient(config["ip"])
+            client = EmuApiClient(self.ip)
             data = await client.read_sensor_async(
                 hass=self._hass, sensor_id=self._sensor_id
             )
