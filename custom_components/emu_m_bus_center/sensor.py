@@ -9,10 +9,10 @@ from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.components.sensor import SensorStateClass
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ELECTRIC_CURRENT_AMPERE
-from homeassistant.const import ELECTRIC_POTENTIAL_VOLT
-from homeassistant.const import FREQUENCY_HERTZ
+from homeassistant.const import UnitOfElectricCurrent
+from homeassistant.const import UnitOfElectricPotential
 from homeassistant.const import UnitOfEnergy
+from homeassistant.const import UnitOfFrequency
 from homeassistant.const import UnitOfPower
 from homeassistant.core import callback
 from homeassistant.core import HomeAssistant
@@ -158,7 +158,7 @@ class EmuPowerSensor(EmuBaseSensor):
 class EmuVoltageSensor(EmuBaseSensor):
     """Sensor for Voltage in V"""
 
-    _attr_native_unit_of_measurement = ELECTRIC_POTENTIAL_VOLT
+    _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_device_class = SensorDeviceClass.VOLTAGE
     _attr_icon = "mdi:lightning-bolt"
@@ -167,7 +167,7 @@ class EmuVoltageSensor(EmuBaseSensor):
 class EmuCurrentSensor(EmuBaseSensor):
     """Sensor for the Current in A"""
 
-    _attr_native_unit_of_measurement = ELECTRIC_CURRENT_AMPERE
+    _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_device_class = SensorDeviceClass.CURRENT
     _attr_icon = "mdi:flash-triangle"
@@ -176,7 +176,7 @@ class EmuCurrentSensor(EmuBaseSensor):
 class EmuFrequencySensor(EmuBaseSensor):
     """Sensor for the Grid frequency in Hz"""
 
-    _attr_native_unit_of_measurement = FREQUENCY_HERTZ
+    _attr_native_unit_of_measurement = UnitOfFrequency.HERTZ
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_device_class = SensorDeviceClass.FREQUENCY
     _attr_icon = "mdi:sine-wave"
