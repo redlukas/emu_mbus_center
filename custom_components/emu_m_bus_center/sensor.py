@@ -119,7 +119,6 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
             identifiers={(DOMAIN, self._name)},
             name=f"{self._name}",
             manufacturer=self.coordinator.manufacturer_name,
-            model="EMU Allrounder 75/3",
             connections={(self.coordinator.center_name, self.coordinator.sensor_id)},
             sw_version=self.coordinator.version,
             configuration_url=f"http://{self.coordinator.ip}/app/"
