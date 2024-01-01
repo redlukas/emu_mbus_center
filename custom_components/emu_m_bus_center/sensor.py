@@ -53,15 +53,17 @@ async def async_setup_entry(
     sensors_from_config = config_entry.data["sensors"]
     center_name = config_entry.data["name"]
     all_sensors = []
-    for sensor_id, serial_no, given_name in sensors_from_config:
+    for sensor_id, serial_no, given_name, manufacturer, version in sensors_from_config:
         coordinator = EmuCoordinator(
             hass=hass,
             config_entry_id=config_entry.entry_id,
             logger=_LOGGER,
-            sensor_id=int(sensor_id),
+            sensor_id=sensor_id,
             serial_no=serial_no,
             center_name=center_name,
             sensor_given_name=given_name,
+            manufacturer_name=manufacturer,
+            version=version
         )
         sensors = [
             EmuEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_1),
@@ -116,11 +118,11 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         info = DeviceInfo(
             identifiers={(DOMAIN, self._name)},
             name=f"{self._name}",
-            manufacturer="EMU", # TODO: See if we can get that from the API
-            model="EMU Allrounder 75/3", # TODO: See if we can get that from the API
-            connections={(self.coordinator.center_name, self._serial_no)},
-            sw_version="1.0.0", # TODO: get the version from the API
-            configuration_url=f"http://10.100.70.184/app/" # TODO: get the IP of the center from the config
+            manufacturer=self.coordinator.manufacturer_name,
+            model="EMU Allrounder 75/3",
+            connections={(self.coordinator.center_name, self.coordinator.sensor_id)},
+            sw_version=self.coordinator.version,
+            configuration_url=f"http://{self.coordinator.ip}/app/"
         )
         return info
 
@@ -214,6 +216,8 @@ class EmuCoordinator(DataUpdateCoordinator):
             serial_no: str,
             center_name: str,
             sensor_given_name: str,
+            manufacturer_name: str,
+            version: int
     ) -> None:
         self._config_entry_id = config_entry_id
         self._hass = hass
@@ -224,6 +228,11 @@ class EmuCoordinator(DataUpdateCoordinator):
         self._logger = logger
         self._serial_no = serial_no
         self._center_name = center_name
+        self._manufacturer_name = manufacturer_name
+        self._config = dict(
+            self._hass.config_entries.async_get_entry(self._config_entry_id).data
+        )
+        self._version = version
 
         super().__init__(
             hass=hass,
@@ -247,6 +256,22 @@ class EmuCoordinator(DataUpdateCoordinator):
     @property
     def center_name(self):
         return self._center_name
+
+    @property
+    def manufacturer_name(self):
+        return self._manufacturer_name
+
+    @property
+    def ip(self):
+        return self._config["ip"]
+
+    @property
+    def sensor_id(self):
+        return self._sensor_id
+
+    @property
+    def version(self):
+        return self._version
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from API endpoint.
