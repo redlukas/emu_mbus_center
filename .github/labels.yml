@@ -64,3 +64,6 @@
 - name: wontfix
   description: This will not be worked on
   color: ffffff
+- name: HA Core
+  description: HA Core made a change, so this repo has to follow
+  color: 1D76DB

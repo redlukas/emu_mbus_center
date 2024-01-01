@@ -9,6 +9,8 @@ categories:
     label: "bug"
   - title: ":racehorse: Performance"
     label: "performance"
+  - title: ":house: Changes to keep up with the Requirements imposed by Home Assistant Core"
+    label: "HA Core"
   - title: ":rotating_light: Testing"
     label: "testing"
   - title: ":construction_worker: Continuous Integration"
