@@ -333,8 +333,10 @@ class EmuApiClient:
                 )
 
             return {
-                ACTIVE_ENERGY_TARIFF_1: active_energy_tariff_1["LoggerLastValue"] / 1000,
-                ACTIVE_ENERGY_TARIFF_2: active_energy_tariff_2["LoggerLastValue"] / 1000,
+                ACTIVE_ENERGY_TARIFF_1: active_energy_tariff_1["LoggerLastValue"]
+                / 1000,
+                ACTIVE_ENERGY_TARIFF_2: active_energy_tariff_2["LoggerLastValue"]
+                / 1000,
                 ACTIVE_POWER_PHASE_1: active_power_phase_1["LoggerLastValue"] / 1000,
                 ACTIVE_POWER_PHASE_2: active_power_phase_2["LoggerLastValue"] / 1000,
                 ACTIVE_POWER_PHASE_3: active_power_phase_3["LoggerLastValue"] / 1000,
