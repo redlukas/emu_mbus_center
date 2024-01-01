@@ -11,8 +11,8 @@ from homeassistant.components.sensor import SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfElectricCurrent
 from homeassistant.const import UnitOfElectricPotential
-from homeassistant.const import UnitOfFrequency
 from homeassistant.const import UnitOfEnergy
+from homeassistant.const import UnitOfFrequency
 from homeassistant.const import UnitOfPower
 from homeassistant.core import callback
 from homeassistant.core import HomeAssistant
