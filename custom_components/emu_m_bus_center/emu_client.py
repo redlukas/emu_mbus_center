@@ -89,7 +89,8 @@ class EmuApiClient:
                             (
                                 int(sensor_id),
                                 int(parsed["Serial"]),
-                                parsed["Name"] if parsed["Name"] else None,
+                                f"{parsed['Name']} ({parsed['Site']})" if parsed["Site"] and parsed["Name"]
+                                else parsed["Name"] if parsed["Name"] else parsed["Serial"],
                                 parsed["ManufacturerId"],
                                 int(parsed["Version"]),
                             )
