@@ -62,8 +62,8 @@ It will ask you for the IP address and Name of your M-Bus Center.
 Then it will scan your Center for available Sensors and add them to Home Assistant.
 If you do not want the default names for the meters, go to Integrations one more time, look for the Integration you just installed and click on the "x Devices".
 You will find a list of the sensors that were found. If you click on a single sensor, you'll get a dialog with a pencil in the upper right corner.
-Click that pencil and enter the Name you desire in the popup. By default, the name will be in the format `Emu Sensor-$ID/$SERIAL_NO@$CENTER_NAME`.
-Use the Web interface of your M-Bus Center as described below to match ID/Serial Number to the M-Bus Address you set on the meter itself.
+Click that pencil and enter the Name you desire in the popup. By default, the name will be in the format `$SENSOR_NAME ($SITE_NAME)`.
+Use the Web interface of your M-Bus Center as described below to match sensor/site name to the M-Bus Address you set on the meter itself.
 
 ## How to find the ID of your meter
 
@@ -84,9 +84,9 @@ The integration has been tested on the following devices:
 
 ### Meters
 
-| Manufacturer | Product               | Firmware Version |
-| ------------ | --------------------- | ---------------- |
-| Emu          | Allrounder 75/3 M-Bus | 1.4              |
+| Manufacturer | Product               | Firmware Version<br>(as reported on Web UI) | Firmware Version<br>(as reported by API) |
+|--------------|-----------------------|-----------------------------------------|---------------------------------------|
+| Emu          | Allrounder 75/3 M-Bus | 1.4                                     | 16                                    |
 
 ## Contributions are welcome!
 
