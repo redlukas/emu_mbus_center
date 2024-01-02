@@ -14,31 +14,16 @@ from homeassistant.const import UnitOfElectricPotential
 from homeassistant.const import UnitOfEnergy
 from homeassistant.const import UnitOfFrequency
 from homeassistant.const import UnitOfPower
-from homeassistant.core import callback
 from homeassistant.core import HomeAssistant
+from homeassistant.core import callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import ACTIVE_ENERGY_TARIFF_1
-from .const import ACTIVE_ENERGY_TARIFF_2
-from .const import ACTIVE_POWER_ALL_PHASES
-from .const import ACTIVE_POWER_PHASE_1
-from .const import ACTIVE_POWER_PHASE_2
-from .const import ACTIVE_POWER_PHASE_3
-from .const import CURRENT_ALL_PHASES
-from .const import CURRENT_PHASE_1
-from .const import CURRENT_PHASE_2
-from .const import CURRENT_PHASE_3
-from .const import CURRENT_TRANSFORMER_FACTOR
 from .const import DOMAIN
-from .const import ERROR_FLAGS
-from .const import FREQUENCY
-from .const import RESET_COUNTER
-from .const import VOLTAGE_PHASE_1
-from .const import VOLTAGE_PHASE_2
-from .const import VOLTAGE_PHASE_3
+from .device_types.devices import get_class_from_enum
+from .device_types.readable_device import Readable_device
 from .emu_client import EmuApiClient
 
 _LOGGER = logging.getLogger(__name__)
@@ -53,7 +38,13 @@ async def async_setup_entry(
     sensors_from_config = config_entry.data["sensors"]
     center_name = config_entry.data["name"]
     all_sensors = []
-    for sensor_id, serial_no, given_name, manufacturer, version in sensors_from_config:
+    for (
+        sensor_id,
+        serial_no,
+        given_name,
+        device_type,
+    ) in sensors_from_config:
+        device = get_class_from_enum(device_type)
         coordinator = EmuCoordinator(
             hass=hass,
             config_entry_id=config_entry.entry_id,
@@ -62,29 +53,9 @@ async def async_setup_entry(
             serial_no=serial_no,
             center_name=center_name,
             sensor_given_name=given_name,
-            manufacturer_name=manufacturer,
-            version=version,
+            device=device,
         )
-        sensors = [
-            EmuEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_1),
-            EmuEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_2),
-            EmuPowerSensor(coordinator, ACTIVE_POWER_PHASE_1),
-            EmuPowerSensor(coordinator, ACTIVE_POWER_PHASE_2),
-            EmuPowerSensor(coordinator, ACTIVE_POWER_PHASE_3),
-            EmuPowerSensor(coordinator, ACTIVE_POWER_ALL_PHASES),
-            EmuVoltageSensor(coordinator, VOLTAGE_PHASE_1),
-            EmuVoltageSensor(coordinator, VOLTAGE_PHASE_2),
-            EmuVoltageSensor(coordinator, VOLTAGE_PHASE_3),
-            EmuCurrentSensor(coordinator, CURRENT_PHASE_1),
-            EmuCurrentSensor(coordinator, CURRENT_PHASE_2),
-            EmuCurrentSensor(coordinator, CURRENT_PHASE_3),
-            EmuCurrentSensor(coordinator, CURRENT_ALL_PHASES),
-            EmuFrequencySensor(coordinator, FREQUENCY),
-            EmuResetSensor(coordinator, RESET_COUNTER),
-            EmuTransformerFactorSensor(coordinator, CURRENT_TRANSFORMER_FACTOR),
-            EmuErrorSensor(coordinator, ERROR_FLAGS),
-        ]
-
+        sensors = device.sensors(coordinator)
         all_sensors.extend(sensors)
         await coordinator.async_config_entry_first_refresh()
     async_add_entities(all_sensors)
@@ -122,6 +93,7 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
             connections={(self.coordinator.center_name, self.coordinator.sensor_id)},
             sw_version=self.coordinator.version,
             configuration_url=f"http://{self.coordinator.ip}/app/",
+            model=self.coordinator.model_name,
         )
         return info
 
@@ -215,8 +187,7 @@ class EmuCoordinator(DataUpdateCoordinator):
         serial_no: str,
         center_name: str,
         sensor_given_name: str,
-        manufacturer_name: str,
-        version: int,
+        device: Readable_device,
     ) -> None:
         self._config_entry_id = config_entry_id
         self._hass = hass
@@ -227,11 +198,10 @@ class EmuCoordinator(DataUpdateCoordinator):
         self._logger = logger
         self._serial_no = serial_no
         self._center_name = center_name
-        self._manufacturer_name = manufacturer_name
         self._config = dict(
             self._hass.config_entries.async_get_entry(self._config_entry_id).data
         )
-        self._version = version
+        self._device = device
 
         super().__init__(
             hass=hass,
@@ -258,7 +228,11 @@ class EmuCoordinator(DataUpdateCoordinator):
 
     @property
     def manufacturer_name(self):
-        return self._manufacturer_name
+        return self._device.manufacturer_name
+
+    @property
+    def model_name(self):
+        return self._device.model_name
 
     @property
     def ip(self):
@@ -270,7 +244,7 @@ class EmuCoordinator(DataUpdateCoordinator):
 
     @property
     def version(self):
-        return self._version
+        return self._device.version_number
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from API endpoint.
@@ -281,7 +255,7 @@ class EmuCoordinator(DataUpdateCoordinator):
         self.update_interval = timedelta(seconds=60)
 
         async def fetch_all_values() -> dict[str, float]:
-            client = EmuApiClient(self.ip)
+            client = EmuApiClient(self.ip, self._device)
             data = await client.read_sensor_async(
                 hass=self._hass, sensor_id=self._sensor_id
             )
