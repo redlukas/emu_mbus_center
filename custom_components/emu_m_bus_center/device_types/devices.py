@@ -1,8 +1,7 @@
 from enum import Enum
+from typing import Type
 
-from custom_components.emu_m_bus_center.device_types.readable_device import (
-    Readable_device,
-)
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 
 class Device_type(Enum):
@@ -10,7 +9,7 @@ class Device_type(Enum):
     PROFESSIONAL_v16_31val = "EMU Professional | Firmware Version 16 | 31 Values"
 
 
-def get_class_from_enum(enum: Device_type) -> Readable_device | None:
+def get_class_from_enum(enum: Device_type) -> Type[DataUpdateCoordinator] | None:
     """You input a device type enum, you get the corresponding Class object"""
     from custom_components.emu_m_bus_center.device_types.emu_allrounder_v16_17val import (
         EmuAllrounderV16_17val,
@@ -23,7 +22,7 @@ def get_class_from_enum(enum: Device_type) -> Readable_device | None:
         Device_type.ALLROUNDER_v16_17val: EmuAllrounderV16_17val,
         Device_type.PROFESSIONAL_v16_31val: EmuProfessionalV16_31val,
     }
-    return template_mapping.get(enum, None)()
+    return template_mapping.get(enum, None)
 
 
 def get_enum_from_version_and_sensor_count(

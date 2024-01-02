@@ -1,6 +1,7 @@
 """Platform for sensor integration."""
 from __future__ import annotations
 
+import abc
 import logging
 from datetime import timedelta
 from typing import Any
@@ -27,11 +28,9 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import DOMAIN
 from .device_types.devices import get_class_from_enum
-from .device_types.readable_device import Readable_device
 from .emu_client import EmuApiClient
 
 _LOGGER = logging.getLogger(__name__)
-SCAN_INTERVAL = timedelta(seconds=60)
 
 
 async def async_setup_entry(
@@ -48,8 +47,7 @@ async def async_setup_entry(
         given_name,
         device_type,
     ) in sensors_from_config:
-        device = get_class_from_enum(device_type)
-        coordinator = EmuCoordinator(
+        coordinator = get_class_from_enum(device_type)(
             hass=hass,
             config_entry_id=config_entry.entry_id,
             logger=_LOGGER,
@@ -57,9 +55,8 @@ async def async_setup_entry(
             serial_no=serial_no,
             center_name=center_name,
             sensor_given_name=given_name,
-            device=device,
         )
-        sensors = device.sensors(coordinator)
+        sensors = coordinator.sensors()
         all_sensors.extend(sensors)
         await coordinator.async_config_entry_first_refresh()
     async_add_entities(all_sensors)
@@ -95,7 +92,7 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
             name=f"{self._name}",
             manufacturer=self.coordinator.manufacturer_name,
             connections={(self.coordinator.center_name, self.coordinator.sensor_id)},
-            sw_version=self.coordinator.version,
+            sw_version=self.coordinator.version_number,
             configuration_url=f"http://{self.coordinator.ip}/app/",
             model=self.coordinator.model_name,
         )
@@ -195,7 +192,7 @@ class EmuReactiveEnergySensor(EmuBaseSensor):
 
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_device_class = SensorDeviceClass.ENERGY
-    _attr_icon = "mdi:flash-triangle-outline"
+    _attr_icon = "mdi:lightning-bolt-outline"
 
 
 class EmuApparentPowerSensor(EmuBaseSensor):
@@ -223,7 +220,7 @@ class EmuPowerFailureSensor(EmuBaseSensor):
     _attr_icon = "mdi:flash-off"
 
 
-class EmuCoordinator(DataUpdateCoordinator):
+class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
     """Custom M-Bus Center Coordinator"""
 
     def __init__(
@@ -235,7 +232,6 @@ class EmuCoordinator(DataUpdateCoordinator):
         serial_no: str,
         center_name: str,
         sensor_given_name: str,
-        device: Readable_device,
     ) -> None:
         self._config_entry_id = config_entry_id
         self._hass = hass
@@ -249,7 +245,6 @@ class EmuCoordinator(DataUpdateCoordinator):
         self._config = dict(
             self._hass.config_entries.async_get_entry(self._config_entry_id).data
         )
-        self._device = device
 
         super().__init__(
             hass=hass,
@@ -275,14 +270,6 @@ class EmuCoordinator(DataUpdateCoordinator):
         return self._center_name
 
     @property
-    def manufacturer_name(self):
-        return self._device.manufacturer_name
-
-    @property
-    def model_name(self):
-        return self._device.model_name
-
-    @property
     def ip(self):
         return self._config["ip"]
 
@@ -291,8 +278,32 @@ class EmuCoordinator(DataUpdateCoordinator):
         return self._sensor_id
 
     @property
-    def version(self):
-        return self._device.version_number
+    @abc.abstractmethod
+    def version_number(self) -> int:
+        """Get the Version number of this device"""
+
+    @property
+    @abc.abstractmethod
+    def sensor_count(self) -> int:
+        """Get how many sensors this device has"""
+
+    @property
+    @abc.abstractmethod
+    def model_name(self) -> str:
+        """Get the human-readable representation of the Device's model name"""
+
+    @property
+    @abc.abstractmethod
+    def manufacturer_name(self) -> str:
+        """Get the human-readable representation of the Device's manufacturer name"""
+
+    @abc.abstractmethod
+    def sensors(self) -> list[str]:
+        """Get all the Sensors this device Offers"""
+
+    @abc.abstractmethod
+    def parse(self, data: str) -> dict[str, float]:
+        """Parses the Output of the API to a Dict, matching the correct values"""
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from API endpoint.
@@ -303,7 +314,7 @@ class EmuCoordinator(DataUpdateCoordinator):
         self.update_interval = timedelta(seconds=60)
 
         async def fetch_all_values() -> dict[str, float]:
-            client = EmuApiClient(self.ip, self._device)
+            client = EmuApiClient(self.ip, self)
             data = await client.read_sensor_async(
                 hass=self._hass, sensor_id=self._sensor_id
             )
