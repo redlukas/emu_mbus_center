@@ -92,7 +92,7 @@ The integration has been tested on the following devices:
 ### Meters
 
 | Manufacturer | Product               | Firmware Version<br>(as reported on Web UI) | Firmware Version<br>(as reported by API) |
-|--------------|-----------------------|---------------------------------------------|------------------------------------------|
+| ------------ | --------------------- | ------------------------------------------- | ---------------------------------------- |
 | Emu          | Allrounder 75/3 M-Bus | 1.4                                         | 16                                       |
 
 ## Contributions are welcome!
