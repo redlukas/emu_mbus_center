@@ -9,7 +9,11 @@ from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.components.sensor import SensorStateClass
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfElectricCurrent
+from homeassistant.const import (
+    UnitOfElectricCurrent,
+    POWER_VOLT_AMPERE_REACTIVE,
+    UnitOfApparentPower,
+)
 from homeassistant.const import UnitOfElectricPotential
 from homeassistant.const import UnitOfEnergy
 from homeassistant.const import UnitOfFrequency
@@ -109,7 +113,7 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         self.async_write_ha_state()
 
 
-class EmuEnergySensor(EmuBaseSensor):
+class EmuActiveEnergySensor(EmuBaseSensor):
     """Sensor for active energy in kWh"""
 
     _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
@@ -118,7 +122,7 @@ class EmuEnergySensor(EmuBaseSensor):
     _attr_icon = "mdi:lightning-bolt"
 
 
-class EmuPowerSensor(EmuBaseSensor):
+class EmuActivePowerSensor(EmuBaseSensor):
     """Sensor for active power in kW"""
 
     _attr_native_unit_of_measurement = UnitOfPower.KILO_WATT
@@ -173,6 +177,50 @@ class EmuErrorSensor(EmuBaseSensor):
 
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:alert-circle-outline"
+
+
+class EmuReactivePowerSensor(EmuBaseSensor):
+    """Sensor for reactive power in VAr
+    Yes, I would love to do it in kVAr, but that's not a thing in HA"""
+
+    _attr_native_unit_of_measurement = POWER_VOLT_AMPERE_REACTIVE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_icon = "mdi:glass-mug-variant"
+
+
+class EmuReactiveEnergySensor(EmuBaseSensor):
+    """Sensor for reactive energy in kVArh
+    Sadly, varh and kvarh do not exist in HA"""
+
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_icon = "mdi:flash-triangle-outline"
+
+
+class EmuApparentPowerSensor(EmuBaseSensor):
+    """Sensor for apparent power in VA
+    Again, I would love to do it in kVA, but that's not a thing in HA"""
+
+    _attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_icon = "mdi:beer"
+
+
+class EmuFormFactorSensor(EmuBaseSensor):
+    """Sensor for form factor
+    The Unit is Cos Phi, but that's not a thing in HA"""
+
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:sine-wave"
+
+
+class EmuPowerFailureSensor(EmuBaseSensor):
+    """Sensor for number of power failures"""
+
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:flash-off"
 
 
 class EmuCoordinator(DataUpdateCoordinator):

@@ -21,8 +21,8 @@ from custom_components.emu_m_bus_center.device_types.readable_device import (
     Readable_device,
 )
 from custom_components.emu_m_bus_center.sensor import (
-    EmuEnergySensor,
-    EmuPowerSensor,
+    EmuActiveEnergySensor,
+    EmuActivePowerSensor,
     EmuVoltageSensor,
     EmuCurrentSensor,
     EmuFrequencySensor,
@@ -51,12 +51,12 @@ class EmuAllrounderV16_17val(Readable_device):
 
     def sensors(self, coordinator) -> list[str]:
         return [
-            EmuEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_1),
-            EmuEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_2),
-            EmuPowerSensor(coordinator, ACTIVE_POWER_PHASE_1),
-            EmuPowerSensor(coordinator, ACTIVE_POWER_PHASE_2),
-            EmuPowerSensor(coordinator, ACTIVE_POWER_PHASE_3),
-            EmuPowerSensor(coordinator, ACTIVE_POWER_ALL_PHASES),
+            EmuActiveEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_1),
+            EmuActiveEnergySensor(coordinator, ACTIVE_ENERGY_TARIFF_2),
+            EmuActivePowerSensor(coordinator, ACTIVE_POWER_PHASE_1),
+            EmuActivePowerSensor(coordinator, ACTIVE_POWER_PHASE_2),
+            EmuActivePowerSensor(coordinator, ACTIVE_POWER_PHASE_3),
+            EmuActivePowerSensor(coordinator, ACTIVE_POWER_ALL_PHASES),
             EmuVoltageSensor(coordinator, VOLTAGE_PHASE_1),
             EmuVoltageSensor(coordinator, VOLTAGE_PHASE_2),
             EmuVoltageSensor(coordinator, VOLTAGE_PHASE_3),
