@@ -45,10 +45,17 @@ Just click here: [![Open in HACS.][my-hacs-badge]][open-in-hacs]
 Using your HA configuration directory (folder) as a starting point you should now also have this:
 
 ```text
-custom_components/emu_m_bus_center/__init__.py
-custom_components/emu_m_bus_center/config_flow.py
-custom_components/emu_m_bus_center/manifest.json
-custom_components/emu_m_bus_center/sensor.py
+.
+├── __init__.py
+├── config_flow.py
+├── const.py
+├── emu_client.py
+├── manifest.json
+├── sensor.py
+└── translations
+    ├── de.json
+    ├── en.json
+    └── sk.json
 ```
 
 ## Configuration
@@ -85,8 +92,8 @@ The integration has been tested on the following devices:
 ### Meters
 
 | Manufacturer | Product               | Firmware Version<br>(as reported on Web UI) | Firmware Version<br>(as reported by API) |
-|--------------|-----------------------|-----------------------------------------|---------------------------------------|
-| Emu          | Allrounder 75/3 M-Bus | 1.4                                     | 16                                    |
+|--------------|-----------------------|---------------------------------------------|------------------------------------------|
+| Emu          | Allrounder 75/3 M-Bus | 1.4                                         | 16                                       |
 
 ## Contributions are welcome!
 
@@ -98,7 +105,7 @@ This project was generated from [@oncleben31](https://github.com/oncleben31)'s [
 
 Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [integration_blueprint][integration_blueprint] template
 
-For the config flow, the initialisatioon and update of the sensors I looked at many existing repos, chief among them [@CubicPill](https://github.com/CubicPill)'s [China Southern Power Grid Statistics](https://github.com/CubicPill/china_southern_power_grid_stat)
+For the config flow, the initialization and update of the sensors I looked at many existing repos, chief among them [@CubicPill](https://github.com/CubicPill)'s [China Southern Power Grid Statistics](https://github.com/CubicPill/china_southern_power_grid_stat)
 
 ---
 
