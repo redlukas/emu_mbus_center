@@ -34,18 +34,18 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+        hass: HomeAssistant,
+        config_entry: ConfigEntry,
+        async_add_entities: AddEntitiesCallback,
 ):
     sensors_from_config = config_entry.data["sensors"]
     center_name = config_entry.data["name"]
     all_sensors = []
     for (
-        sensor_id,
-        serial_no,
-        given_name,
-        device_type,
+            sensor_id,
+            serial_no,
+            given_name,
+            device_type,
     ) in sensors_from_config:
         coordinator = get_class_from_enum(device_type)(
             hass=hass,
@@ -220,18 +220,25 @@ class EmuPowerFailureSensor(EmuBaseSensor):
     _attr_icon = "mdi:flash-off"
 
 
+class EmuSerialNoSensor(EmuBaseSensor):
+    """Sensor for the serial number of the sensor"""
+
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:barcode"
+
+
 class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
     """Custom M-Bus Center Coordinator"""
 
     def __init__(
-        self,
-        hass: HomeAssistant,
-        config_entry_id: str,
-        logger: logging.Logger,
-        sensor_id: int,
-        serial_no: str,
-        center_name: str,
-        sensor_given_name: str,
+            self,
+            hass: HomeAssistant,
+            config_entry_id: str,
+            logger: logging.Logger,
+            sensor_id: int,
+            serial_no: str,
+            center_name: str,
+            sensor_given_name: str,
     ) -> None:
         self._config_entry_id = config_entry_id
         self._hass = hass
