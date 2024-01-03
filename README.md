@@ -45,10 +45,18 @@ Just click here: [![Open in HACS.][my-hacs-badge]][open-in-hacs]
 Using your HA configuration directory (folder) as a starting point you should now also have this:
 
 ```text
-.
+emu_m_bus_center
 ├── __init__.py
 ├── config_flow.py
 ├── const.py
+├── device_types
+│   ├── devices.py
+│   ├── emu_1_40_v4_15val.py
+│   ├── emu_allrounder_v16_15val.py
+│   ├── emu_allrounder_v16_17val.py
+│   ├── emu_professional_v16_31val.py
+│   ├── emu_professional_v16_32val.py
+│   └── readable_device.py
 ├── emu_client.py
 ├── manifest.json
 ├── sensor.py
