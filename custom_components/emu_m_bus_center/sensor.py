@@ -119,6 +119,15 @@ class EmuActiveEnergySensor(EmuBaseSensor):
     _attr_icon = "mdi:lightning-bolt"
 
 
+class EmuActiveEnergyResettableSensor(EmuBaseSensor):
+    """Sensor for active energy in kWh that may be reset"""
+
+    _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
+    _attr_state_class = SensorStateClass.TOTAL
+    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_icon = "mdi:lightning-bolt"
+
+
 class EmuActivePowerSensor(EmuBaseSensor):
     """Sensor for active power in kW"""
 

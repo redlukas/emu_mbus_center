@@ -70,7 +70,7 @@ class EmuAllrounderV16_15val(EmuCoordinator):
 
     @property
     def sensor_count(self) -> int:
-        return 17
+        return 15
 
     @property
     def model_name(self) -> str:

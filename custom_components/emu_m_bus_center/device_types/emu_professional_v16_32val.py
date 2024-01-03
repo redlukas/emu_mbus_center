@@ -93,7 +93,7 @@ class EmuProfessionalV16_32val(EmuCoordinator):
 
     @property
     def sensor_count(self) -> int:
-        return 31
+        return 32
 
     @property
     def model_name(self) -> str:

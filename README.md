@@ -93,8 +93,9 @@ The integration has been tested on the following devices:
 
 | Manufacturer | Product                  | Firmware Version<br>(as reported on meter's Display) | Firmware Version<br>(as reported by API) | Status       |
 |--------------|--------------------------|------------------------------------------------------|------------------------------------------|--------------|
-| EMU          | Allrounder 75/3 M-Bus    | 1.4                                                  | 16                                       | Fully tested |
-| EMU          | Professional 100/3 M-Bus | 1.4                                                  | 16                                       | Experimental |
+| EMU          | Allrounder 3/75 M-Bus    | 1.4                                                  | 16                                       | Fully tested |
+| EMU          | Professional 3/100 M-Bus | 1.4                                                  | 16                                       | Experimental |
+| EMU          | 1/40                     | ???                                                  | 4                                        | Experimental |
 
 ## Contributions are welcome!
 
