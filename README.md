@@ -105,6 +105,8 @@ The integration has been tested on the following devices:
 | EMU          | Professional 3/100 M-Bus | 1.4                                                  | 16                                       | Experimental |
 | EMU          | 1/40                     | ???                                                  | 4                                        | Experimental |
 
+If you use one of the Meters that are marked as "Experimental", please open an issue and let me know if it works for you.
+
 ## Contributions are welcome!
 
 If you want to contribute to this please read the [Contribution guidelines](CONTRIBUTING.md)
