@@ -33,7 +33,8 @@ from custom_components.emu_m_bus_center.const import (
     FORM_FACTOR_PHASE_1,
     FORM_FACTOR_PHASE_2,
     FORM_FACTOR_PHASE_3,
-    POWER_FAILURES, SERIAL_NO,
+    POWER_FAILURES,
+    SERIAL_NO,
 )
 
 from custom_components.emu_m_bus_center.sensor import (
@@ -49,7 +50,8 @@ from custom_components.emu_m_bus_center.sensor import (
     EmuApparentPowerSensor,
     EmuFormFactorSensor,
     EmuPowerFailureSensor,
-    EmuCoordinator, EmuSerialNoSensor,
+    EmuCoordinator,
+    EmuSerialNoSensor,
 )
 
 
@@ -140,13 +142,9 @@ class EmuProfessionalV16_32val(EmuCoordinator):
         ]
 
     def parse(self, data: str) -> dict[str, float]:
-        serial_no = next(
-            item for item in data if item["Position"] == 0
-        )
+        serial_no = next(item for item in data if item["Position"] == 0)
         # test if we found the right entry for serial_no
-        if not (
-            serial_no["UnitStr"] == "None"
-        ):
+        if not (serial_no["UnitStr"] == "None"):
             raise ValueError(
                 "Did not find the required Fields for serial_no in the JSON response from the "
                 "M-Bus Center"
@@ -292,7 +290,6 @@ class EmuProfessionalV16_32val(EmuCoordinator):
                 "Did not find the required Fields for reactive_power_all_phases in the JSON response from the "
                 "M-Bus Center"
             )
-
 
         voltage_phase_1 = next(item for item in data if item["Position"] == 13)
         # test if we found the right entry voltage_phase_1

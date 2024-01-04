@@ -3,6 +3,7 @@ from typing import Type
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
+
 class Device_type(Enum):
     ALLROUNDER_v16_15val = "EMU Allrounder | Firmware Version 16 | 15 Values"
     ALLROUNDER_v16_17val = "EMU Allrounder | Firmware Version 16 | 17 Values"
@@ -22,9 +23,13 @@ def get_class_from_enum(enum: Device_type) -> Type[DataUpdateCoordinator] | None
     from custom_components.emu_m_bus_center.device_types.emu_professional_v16_31val import (
         EmuProfessionalV16_31val,
     )
-    from custom_components.emu_m_bus_center.device_types.emu_professional_v16_32val import EmuProfessionalV16_32val
+    from custom_components.emu_m_bus_center.device_types.emu_professional_v16_32val import (
+        EmuProfessionalV16_32val,
+    )
 
-    from custom_components.emu_m_bus_center.device_types.emu_1_40_v4_15val import Emu_1_40_V4_15val
+    from custom_components.emu_m_bus_center.device_types.emu_1_40_v4_15val import (
+        Emu_1_40_V4_15val,
+    )
 
     template_mapping = {
         Device_type.ALLROUNDER_v16_15val: EmuAllrounderV16_15val,
