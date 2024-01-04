@@ -17,9 +17,9 @@ from custom_components.emu_m_bus_center.const import (
     CURRENT_PHASE_3,
     CURRENT_ALL_PHASES,
     FREQUENCY,
-    RESET_COUNTER,
     CURRENT_TRANSFORMER_FACTOR,
     ERROR_FLAGS,
+    POWER_FAILURES,
 )
 from custom_components.emu_m_bus_center.sensor import (
     EmuActiveEnergySensor,
@@ -27,10 +27,10 @@ from custom_components.emu_m_bus_center.sensor import (
     EmuVoltageSensor,
     EmuCurrentSensor,
     EmuFrequencySensor,
-    EmuResetSensor,
     EmuTransformerFactorSensor,
     EmuErrorSensor,
     EmuCoordinator,
+    EmuPowerFailureSensor,
 )
 
 
@@ -100,7 +100,7 @@ class EmuAllrounderV16_17val(EmuCoordinator):
             EmuCurrentSensor(self, CURRENT_PHASE_3),
             EmuCurrentSensor(self, CURRENT_ALL_PHASES),
             EmuFrequencySensor(self, FREQUENCY),
-            EmuResetSensor(self, RESET_COUNTER),
+            EmuPowerFailureSensor(self, POWER_FAILURES),
             EmuTransformerFactorSensor(self, CURRENT_TRANSFORMER_FACTOR),
             EmuErrorSensor(self, ERROR_FLAGS),
         ]
@@ -260,10 +260,11 @@ class EmuAllrounderV16_17val(EmuCoordinator):
                 "M-Bus Center"
             )
 
-        resets = next(item for item in data if item["Position"] == 14)
-        # test if we found the right entry resets
+        power_failures = next(item for item in data if item["Position"] == 14)
+        # test if we found the right entry power_failures
         if not (
-            resets["UnitStr"] == "None" and resets["DescriptionStr"] == "Reset counter"
+            power_failures["UnitStr"] == "None"
+            and power_failures["DescriptionStr"] == "Reset counter"
         ):
             raise ValueError(
                 "Did not find the required Fields for resets in the JSON response from the "
@@ -312,7 +313,7 @@ class EmuAllrounderV16_17val(EmuCoordinator):
             CURRENT_PHASE_3: int(current_phase_3["LoggerLastValue"]),
             CURRENT_ALL_PHASES: int(current_all_phases["LoggerLastValue"]),
             FREQUENCY: int(frequency["LoggerLastValue"]) / 10,
-            RESET_COUNTER: int(resets["LoggerLastValue"]),
+            POWER_FAILURES: int(power_failures["LoggerLastValue"]),
             CURRENT_TRANSFORMER_FACTOR: int(
                 current_transformer_factor["LoggerLastValue"]
             ),
