@@ -5,13 +5,13 @@ import requests
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from .device_types.devices import Device_type, get_enum_from_version_and_sensor_count
-from .device_types.readable_device import Readable_device
+from .sensor import EmuCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class EmuApiClient:
-    def __init__(self, ip, device: Readable_device | None = None):
+    def __init__(self, ip, device: EmuCoordinator | None = None):
         self._ip = ip
         self._device = device
 
