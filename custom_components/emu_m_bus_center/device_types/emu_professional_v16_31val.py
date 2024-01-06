@@ -341,7 +341,7 @@ class EmuProfessionalV16_31val(EmuCoordinator):
 
     @property
     def model_name(self) -> str:
-        return "Professional II 3/100"
+        return "Professional 3/75"
 
     @property
     def manufacturer_name(self) -> str:
