@@ -176,15 +176,36 @@ class Emu_1_40_V4_15val(EmuCoordinator):
             )
 
         return {
-            VOLTAGE: int(voltage["LoggerLastValue"]),
-            CURRENT: int(current["LoggerLastValue"]),
-            FORM_FACTOR: int(form_factor["LoggerLastValue"]) / 1000,
-            ACTIVE_POWER: int(active_power["LoggerLastValue"]),
-            ACTIVE_ENERGY_IMPORT: int(active_energy_import["LoggerLastValue"]) / 1000,
+            VOLTAGE: int(voltage["LoggerLastValue"])
+            / (voltage.get("CfgFactor", 1) if voltage.get("CfgFactor", 1) != 0 else 1),
+            CURRENT: int(current["LoggerLastValue"])
+            / (current.get("CfgFactor", 1) if current.get("CfgFactor", 1) != 0 else 1),
+            FORM_FACTOR: int(form_factor["LoggerLastValue"])
+            / (
+                form_factor.get("CfgFactor", 1)
+                if form_factor.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_POWER: int(active_power["LoggerLastValue"])
+            / (
+                active_power.get("CfgFactor", 1)
+                if active_power.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_ENERGY_IMPORT: int(active_energy_import["LoggerLastValue"])
+            / (
+                active_energy_import.get("CfgFactor", 1)
+                if active_energy_import.get("CfgFactor", 1) != 0
+                else 1
+            ),
             ACTIVE_ENERGY_IMPORT_RESETTABLE: int(
                 active_energy_import_resettable["LoggerLastValue"]
             )
-            / 1000,
+            / (
+                active_energy_import_resettable.get("CfgFactor", 1)
+                if active_energy_import_resettable.get("CfgFactor", 1) != 0
+                else 1
+            ),
             SERIAL_NO: int(serial_no["LoggerLastValue"]),
             ERROR_FLAGS: int(error_flags["LoggerLastValue"]),
         }

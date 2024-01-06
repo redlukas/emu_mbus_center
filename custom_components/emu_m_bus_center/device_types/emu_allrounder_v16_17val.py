@@ -298,24 +298,102 @@ class EmuAllrounderV16_17val(EmuCoordinator):
 
         return {
             ACTIVE_ENERGY_TARIFF_1: int(active_energy_tariff_1["LoggerLastValue"])
-            / 1000,
+            / (
+                active_energy_tariff_1.get("CfgFactor", 1)
+                if active_energy_tariff_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
             ACTIVE_ENERGY_TARIFF_2: int(active_energy_tariff_2["LoggerLastValue"])
-            / 1000,
-            ACTIVE_POWER_PHASE_1: int(active_power_phase_1["LoggerLastValue"]) / 1000,
-            ACTIVE_POWER_PHASE_2: int(active_power_phase_2["LoggerLastValue"]) / 1000,
-            ACTIVE_POWER_PHASE_3: int(active_power_phase_3["LoggerLastValue"]) / 1000,
-            ACTIVE_POWER_ALL_PHASES: int(power_all_phases["LoggerLastValue"]) / 1000,
-            VOLTAGE_PHASE_1: int(voltage_phase_1["LoggerLastValue"]),
-            VOLTAGE_PHASE_2: int(voltage_phase_2["LoggerLastValue"]),
-            VOLTAGE_PHASE_3: int(voltage_phase_3["LoggerLastValue"]),
-            CURRENT_PHASE_1: int(current_phase_1["LoggerLastValue"]),
-            CURRENT_PHASE_2: int(current_phase_2["LoggerLastValue"]),
-            CURRENT_PHASE_3: int(current_phase_3["LoggerLastValue"]),
-            CURRENT_ALL_PHASES: int(current_all_phases["LoggerLastValue"]),
-            FREQUENCY: int(frequency["LoggerLastValue"]) / 10,
-            POWER_FAILURES: int(power_failures["LoggerLastValue"]),
+            / (
+                active_energy_tariff_2.get("CfgFactor", 1)
+                if active_energy_tariff_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_POWER_PHASE_1: int(active_power_phase_1["LoggerLastValue"])
+            / (
+                active_power_phase_1.get("CfgFactor", 1)
+                if active_power_phase_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_POWER_PHASE_2: int(active_power_phase_2["LoggerLastValue"])
+            / (
+                active_power_phase_2.get("CfgFactor", 1)
+                if active_power_phase_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_POWER_PHASE_3: int(active_power_phase_3["LoggerLastValue"])
+            / (
+                active_power_phase_3.get("CfgFactor", 1)
+                if active_power_phase_3.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_POWER_ALL_PHASES: int(power_all_phases["LoggerLastValue"])
+            / (
+                power_all_phases.get("CfgFactor", 1)
+                if power_all_phases.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            VOLTAGE_PHASE_1: int(voltage_phase_1["LoggerLastValue"])
+            / (
+                voltage_phase_1.get("CfgFactor", 1)
+                if voltage_phase_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            VOLTAGE_PHASE_2: int(voltage_phase_2["LoggerLastValue"])
+            / (
+                voltage_phase_2.get("CfgFactor", 1)
+                if voltage_phase_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            VOLTAGE_PHASE_3: int(voltage_phase_3["LoggerLastValue"])
+            / (
+                voltage_phase_3.get("CfgFactor", 1)
+                if voltage_phase_3.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            CURRENT_PHASE_1: int(current_phase_1["LoggerLastValue"])
+            / (
+                current_phase_1.get("CfgFactor", 1)
+                if current_phase_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            CURRENT_PHASE_2: int(current_phase_2["LoggerLastValue"])
+            / (
+                current_phase_2.get("CfgFactor", 1)
+                if current_phase_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            CURRENT_PHASE_3: int(current_phase_3["LoggerLastValue"])
+            / (
+                current_phase_3.get("CfgFactor", 1)
+                if current_phase_3.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            CURRENT_ALL_PHASES: int(current_all_phases["LoggerLastValue"])
+            / (
+                current_all_phases.get("CfgFactor", 1)
+                if current_all_phases.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            FREQUENCY: int(frequency["LoggerLastValue"])
+            / (
+                frequency.get("CfgFactor", 1)
+                if frequency.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            POWER_FAILURES: int(power_failures["LoggerLastValue"])
+            / (
+                power_failures.get("CfgFactor", 1)
+                if power_failures.get("CfgFactor", 1) != 0
+                else 1
+            ),
             CURRENT_TRANSFORMER_FACTOR: int(
                 current_transformer_factor["LoggerLastValue"]
+            )
+            / (
+                current_transformer_factor.get("CfgFactor", 1)
+                if current_transformer_factor.get("CfgFactor", 1) != 0
+                else 1
             ),
             ERROR_FLAGS: int(error_flags["LoggerLastValue"]),
         }

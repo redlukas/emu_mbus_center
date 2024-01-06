@@ -507,62 +507,200 @@ class EmuProfessionalV16_31val(EmuCoordinator):
             ACTIVE_ENERGY_IMPORT_TARIFF_1: int(
                 active_energy_import_tariff_1["LoggerLastValue"]
             )
-            / 1000,
+            / (
+                active_energy_import_tariff_1.get("CfgFactor", 1)
+                if active_energy_import_tariff_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
             ACTIVE_ENERGY_IMPORT_TARIFF_2: int(
                 active_energy_import_tariff_2["LoggerLastValue"]
             )
-            / 1000,
+            / (
+                active_energy_import_tariff_2.get("CfgFactor", 1)
+                if active_energy_import_tariff_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
             ACTIVE_ENERGY_EXPORT_TARIFF_1: int(
                 active_energy_export_tariff_1["LoggerLastValue"]
             )
-            / -1000,
+            / (
+                active_energy_export_tariff_1.get("CfgFactor", 1)
+                if active_energy_export_tariff_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
             ACTIVE_ENERGY_EXPORT_TARIFF_2: int(
                 active_energy_export_tariff_2["LoggerLastValue"]
             )
-            / -1000,
+            / (
+                active_energy_export_tariff_2.get("CfgFactor", 1)
+                if active_energy_export_tariff_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
             REACTIVE_ENERGY_INDUCTIVE_TARIFF_1: int(
                 reactive_energy_inductive_tariff_1["LoggerLastValue"]
             )
-            / 1000,
+            / (
+                reactive_energy_inductive_tariff_1.get("CfgFactor", 1)
+                if reactive_energy_inductive_tariff_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
             REACTIVE_ENERGY_INDUCTIVE_TARIFF_2: int(
                 reactive_energy_inductive_tariff_2["LoggerLastValue"]
             )
-            / 1000,
+            / (
+                reactive_energy_inductive_tariff_2.get("CfgFactor", 1)
+                if reactive_energy_inductive_tariff_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
             REACTIVE_ENERGY_CAPACITIVE_TARIFF_1: int(
                 reactive_energy_capacitive_tariff_1["LoggerLastValue"]
             )
-            / -1000,
+            / (
+                reactive_energy_capacitive_tariff_1.get("CfgFactor", 1)
+                if reactive_energy_capacitive_tariff_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
             REACTIVE_ENERGY_CAPACITIVE_TARIFF_2: int(
                 reactive_energy_capacitive_tariff_2["LoggerLastValue"]
             )
-            / -1000,
-            ACTIVE_POWER_PHASE_1: int(active_power_phase_1["LoggerLastValue"]) / 1000,
-            ACTIVE_POWER_PHASE_2: int(active_power_phase_2["LoggerLastValue"]) / 1000,
-            ACTIVE_POWER_PHASE_3: int(active_power_phase_3["LoggerLastValue"]) / 1000,
-            ACTIVE_POWER_ALL_PHASES: int(active_power_all_phases["LoggerLastValue"])
-            / 1000,
-            REACTIVE_POWER_PHASE_1: int(reactive_power_phase_1["LoggerLastValue"]),
-            REACTIVE_POWER_PHASE_2: int(reactive_power_phase_2["LoggerLastValue"]),
-            REACTIVE_POWER_PHASE_3: int(reactive_power_phase_3["LoggerLastValue"]),
-            REACTIVE_POWER_ALL_PHASES: int(reactive_power_all_phases["LoggerLastValue"])
-            / 1000,
-            APPARENT_POWER_ALL_PHASES: int(
-                apparent_power_all_phases["LoggerLastValue"]
+            / (
+                reactive_energy_capacitive_tariff_2.get("CfgFactor", 1)
+                if reactive_energy_capacitive_tariff_2.get("CfgFactor", 1) != 0
+                else 1
             ),
-            VOLTAGE_PHASE_1: int(voltage_phase_1["LoggerLastValue"]),
-            VOLTAGE_PHASE_2: int(voltage_phase_2["LoggerLastValue"]),
-            VOLTAGE_PHASE_3: int(voltage_phase_3["LoggerLastValue"]),
-            CURRENT_PHASE_1: int(current_phase_1["LoggerLastValue"]),
-            CURRENT_PHASE_2: int(current_phase_2["LoggerLastValue"]),
-            CURRENT_PHASE_3: int(current_phase_3["LoggerLastValue"]),
-            CURRENT_ALL_PHASES: int(current_all_phases["LoggerLastValue"]),
-            FORM_FACTOR_PHASE_1: int(form_factor_phase_1["LoggerLastValue"]) / 100,
-            FORM_FACTOR_PHASE_2: int(form_factor_phase_2["LoggerLastValue"]) / 100,
-            FORM_FACTOR_PHASE_3: int(form_factor_phase_3["LoggerLastValue"]) / 100,
-            FREQUENCY: int(frequency["LoggerLastValue"]) / 10,
-            POWER_FAILURES: int(power_failures["LoggerLastValue"]),
+            ACTIVE_POWER_PHASE_1: int(active_power_phase_1["LoggerLastValue"])
+            / (
+                active_power_phase_1.get("CfgFactor", 1)
+                if active_power_phase_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_POWER_PHASE_2: int(active_power_phase_2["LoggerLastValue"])
+            / (
+                active_power_phase_2.get("CfgFactor", 1)
+                if active_power_phase_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_POWER_PHASE_3: int(active_power_phase_3["LoggerLastValue"])
+            / (
+                active_power_phase_3.get("CfgFactor", 1)
+                if active_power_phase_3.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_POWER_ALL_PHASES: int(active_power_all_phases["LoggerLastValue"])
+            / (
+                active_power_all_phases.get("CfgFactor", 1)
+                if active_power_all_phases.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            REACTIVE_POWER_PHASE_1: int(reactive_power_phase_1["LoggerLastValue"])
+            / (
+                reactive_power_phase_1.get("CfgFactor", 1)
+                if reactive_power_phase_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            REACTIVE_POWER_PHASE_2: int(reactive_power_phase_2["LoggerLastValue"])
+            / (
+                reactive_power_phase_2.get("CfgFactor", 1)
+                if reactive_power_phase_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            REACTIVE_POWER_PHASE_3: int(reactive_power_phase_3["LoggerLastValue"])
+            / (
+                reactive_power_phase_3.get("CfgFactor", 1)
+                if reactive_power_phase_3.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            REACTIVE_POWER_ALL_PHASES: int(reactive_power_all_phases["LoggerLastValue"])
+            / (
+                reactive_power_all_phases.get("CfgFactor", 1)
+                if reactive_power_all_phases.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            APPARENT_POWER_ALL_PHASES: int(apparent_power_all_phases["LoggerLastValue"])
+            / (
+                apparent_power_all_phases.get("CfgFactor", 1)
+                if apparent_power_all_phases.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            VOLTAGE_PHASE_1: int(voltage_phase_1["LoggerLastValue"])
+            / (
+                voltage_phase_1.get("CfgFactor", 1)
+                if voltage_phase_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            VOLTAGE_PHASE_2: int(voltage_phase_2["LoggerLastValue"])
+            / (
+                voltage_phase_2.get("CfgFactor", 1)
+                if voltage_phase_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            VOLTAGE_PHASE_3: int(voltage_phase_3["LoggerLastValue"])
+            / (
+                voltage_phase_3.get("CfgFactor", 1)
+                if voltage_phase_3.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            CURRENT_PHASE_1: int(current_phase_1["LoggerLastValue"])
+            / (
+                current_phase_1.get("CfgFactor", 1)
+                if current_phase_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            CURRENT_PHASE_2: int(current_phase_2["LoggerLastValue"])
+            / (
+                current_phase_2.get("CfgFactor", 1)
+                if current_phase_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            CURRENT_PHASE_3: int(current_phase_3["LoggerLastValue"])
+            / (
+                current_phase_3.get("CfgFactor", 1)
+                if current_phase_3.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            CURRENT_ALL_PHASES: int(current_all_phases["LoggerLastValue"])
+            / (
+                current_all_phases.get("CfgFactor", 1)
+                if current_all_phases.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            FORM_FACTOR_PHASE_1: int(form_factor_phase_1["LoggerLastValue"])
+            / (
+                form_factor_phase_1.get("CfgFactor", 1)
+                if form_factor_phase_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            FORM_FACTOR_PHASE_2: int(form_factor_phase_2["LoggerLastValue"])
+            / (
+                form_factor_phase_2.get("CfgFactor", 1)
+                if form_factor_phase_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            FORM_FACTOR_PHASE_3: int(form_factor_phase_3["LoggerLastValue"])
+            / (
+                form_factor_phase_3.get("CfgFactor", 1)
+                if form_factor_phase_3.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            FREQUENCY: int(frequency["LoggerLastValue"])
+            / (
+                frequency.get("CfgFactor", 1)
+                if frequency.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            POWER_FAILURES: int(power_failures["LoggerLastValue"])
+            / (
+                power_failures.get("CfgFactor", 1)
+                if power_failures.get("CfgFactor", 1) != 0
+                else 1
+            ),
             CURRENT_TRANSFORMER_FACTOR: int(
                 current_transformer_factor["LoggerLastValue"]
+            )
+            / (
+                current_transformer_factor.get("CfgFactor", 1)
+                if current_transformer_factor.get("CfgFactor", 1) != 0
+                else 1
             ),
             ERROR_FLAGS: int(error_flags["LoggerLastValue"]),
         }
