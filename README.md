@@ -18,14 +18,14 @@
 
 | Platform | Description                          |
 | -------- | ------------------------------------ |
-| `sensor` | Show info from Emu M-Bus Center API. |
+| `sensor` | Show info from EMU M-Bus Center API. |
 
 ## Overview
 
 This Integration will help you pull data from an [Emu M-Bus Center](https://www.emuag.ch/en/products/m-bus-data-logger/) into Home Assistant.
-This Work is done independently and is in no way affiliated, endorsed or funded by Emu.
-I bought all my own hardware. Due to that, the Integration is currently only tested with the Emu M-Bus Center 250 with Emu Allrounder 3/75 Meters.
-If someone from Emu wants to get in touch with me, open an issue on this Repo with your info.
+This Work is done independently and is in no way affiliated, endorsed or funded by EMU.
+I bought all my own hardware. Due to that, the Integration is currently only tested with the EMU M-Bus Center 250 with EMU Allrounder 3/75 Meters.
+If someone from EMU wants to get in touch with me, open an issue on this Repo with your info.
 
 ## Installation
 
@@ -45,10 +45,18 @@ Just click here: [![Open in HACS.][my-hacs-badge]][open-in-hacs]
 Using your HA configuration directory (folder) as a starting point you should now also have this:
 
 ```text
-.
+emu_m_bus_center
 ├── __init__.py
 ├── config_flow.py
 ├── const.py
+├── device_types
+│   ├── devices.py
+│   ├── emu_1_40_v4_15val.py
+│   ├── emu_allrounder_v16_15val.py
+│   ├── emu_allrounder_v16_17val.py
+│   ├── emu_professional_v16_31val.py
+│   ├── emu_professional_v16_32val.py
+│   └── readable_device.py
 ├── emu_client.py
 ├── manifest.json
 ├── sensor.py
@@ -87,13 +95,17 @@ The integration has been tested on the following devices:
 
 | Manufacturer | Product          | Firmware Version |
 | ------------ | ---------------- | ---------------- |
-| Emu          | M-Bus Center 250 | 1.10.1.0.r0      |
+| EMU          | M-Bus Center 250 | 1.10.1.0.r0      |
 
 ### Meters
 
-| Manufacturer | Product               | Firmware Version<br>(as reported on Web UI) | Firmware Version<br>(as reported by API) |
-| ------------ | --------------------- | ------------------------------------------- | ---------------------------------------- |
-| Emu          | Allrounder 75/3 M-Bus | 1.4                                         | 16                                       |
+| Manufacturer | Product                  | Firmware Version<br>(as reported on meter's Display) | Firmware Version<br>(as reported by API) | Status       |
+| ------------ | ------------------------ | ---------------------------------------------------- | ---------------------------------------- | ------------ |
+| EMU          | Allrounder 3/75 M-Bus    | 1.4                                                  | 16                                       | Fully tested |
+| EMU          | Professional 3/100 M-Bus | 1.4                                                  | 16                                       | Experimental |
+| EMU          | 1/40                     | ???                                                  | 4                                        | Experimental |
+
+If you use one of the Meters that are marked as "Experimental", please open an issue and let me know if it works for you.
 
 ## Contributions are welcome!
 
