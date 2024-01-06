@@ -31,6 +31,7 @@ from custom_components.emu_m_bus_center.sensor import (
     EmuErrorSensor,
     EmuCoordinator,
     EmuPowerFailureSensor,
+    EmuBaseSensor,
 )
 
 
@@ -84,7 +85,7 @@ class EmuAllrounderV16_17val(EmuCoordinator):
     def manufacturer_name(self) -> str:
         return "EMU"
 
-    def sensors(self) -> list[str]:
+    def sensors(self) -> list[EmuBaseSensor]:
         return [
             EmuActiveEnergySensor(self, ACTIVE_ENERGY_TARIFF_1),
             EmuActiveEnergySensor(self, ACTIVE_ENERGY_TARIFF_2),
@@ -105,7 +106,7 @@ class EmuAllrounderV16_17val(EmuCoordinator):
             EmuErrorSensor(self, ERROR_FLAGS),
         ]
 
-    def parse(self, data: str) -> dict[str, float]:
+    def parse(self, data: list[dict]) -> dict[str, float]:
         active_energy_tariff_1 = next(item for item in data if item["Position"] == 0)
         # test if we found the right entry for active_energy_tariff_1
         if not (

@@ -307,12 +307,12 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
         """Get the human-readable representation of the Device's manufacturer name"""
 
     @abc.abstractmethod
-    def sensors(self) -> list[str]:
+    def sensors(self) -> list[EmuBaseSensor]:
         """Get all the Sensors this device Offers"""
 
     @abc.abstractmethod
-    def parse(self, data: str) -> dict[str, float]:
-        """Parses the Output of the API to a Dict, matching the correct values"""
+    def parse(self, data: list[dict]) -> dict[str, float]:
+        """Parses the "ValueDescs" part of the Output of the API to a Dict, matching the correct values"""
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from API endpoint.

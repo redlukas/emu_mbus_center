@@ -24,6 +24,7 @@ from custom_components.emu_m_bus_center.sensor import (
     EmuFrequencySensor,
     EmuActiveEnergyResettableSensor,
     EmuSerialNoSensor,
+    EmuBaseSensor,
 )
 
 
@@ -77,7 +78,7 @@ class Emu_1_40_V4_15val(EmuCoordinator):
     def manufacturer_name(self) -> str:
         return "EMU"
 
-    def sensors(self) -> list[str]:
+    def sensors(self) -> list[EmuBaseSensor]:
         return [
             EmuVoltageSensor(self, VOLTAGE),
             EmuCurrentSensor(self, CURRENT),
@@ -90,7 +91,7 @@ class Emu_1_40_V4_15val(EmuCoordinator):
             EmuErrorSensor(self, ERROR_FLAGS),
         ]
 
-    def parse(self, data: str) -> dict[str, float]:
+    def parse(self, data: list[dict]) -> dict[str, float]:
         voltage = next(item for item in data if item["Position"] == 0)
         # test if we found the right entry voltage
         if not (

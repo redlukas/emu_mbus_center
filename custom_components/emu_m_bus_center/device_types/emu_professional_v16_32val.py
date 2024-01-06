@@ -52,6 +52,7 @@ from custom_components.emu_m_bus_center.sensor import (
     EmuPowerFailureSensor,
     EmuCoordinator,
     EmuSerialNoSensor,
+    EmuBaseSensor,
 )
 
 
@@ -105,7 +106,7 @@ class EmuProfessionalV16_32val(EmuCoordinator):
     def manufacturer_name(self) -> str:
         return "EMU"
 
-    def sensors(self) -> list[str]:
+    def sensors(self) -> list[EmuBaseSensor]:
         return [
             EmuSerialNoSensor(self, SERIAL_NO),
             EmuActiveEnergySensor(self, ACTIVE_ENERGY_IMPORT_TARIFF_1),
@@ -141,7 +142,7 @@ class EmuProfessionalV16_32val(EmuCoordinator):
             EmuErrorSensor(self, ERROR_FLAGS),
         ]
 
-    def parse(self, data: str) -> dict[str, float]:
+    def parse(self, data: list[dict]) -> dict[str, float]:
         serial_no = next(item for item in data if item["Position"] == 0)
         # test if we found the right entry for serial_no
         if not (serial_no["UnitStr"] == "None"):
