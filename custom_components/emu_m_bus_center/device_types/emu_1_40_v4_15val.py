@@ -1,30 +1,26 @@
 import logging
 
+from custom_components.emu_m_bus_center.const import ACTIVE_ENERGY_IMPORT
+from custom_components.emu_m_bus_center.const import ACTIVE_ENERGY_IMPORT_RESETTABLE
+from custom_components.emu_m_bus_center.const import ACTIVE_POWER
+from custom_components.emu_m_bus_center.const import CURRENT
+from custom_components.emu_m_bus_center.const import ERROR_FLAGS
+from custom_components.emu_m_bus_center.const import FORM_FACTOR
+from custom_components.emu_m_bus_center.const import FREQUENCY
+from custom_components.emu_m_bus_center.const import SERIAL_NO
+from custom_components.emu_m_bus_center.const import VOLTAGE
+from custom_components.emu_m_bus_center.sensor import EmuActiveEnergyResettableSensor
+from custom_components.emu_m_bus_center.sensor import EmuActiveEnergySensor
+from custom_components.emu_m_bus_center.sensor import EmuActivePowerSensor
+from custom_components.emu_m_bus_center.sensor import EmuBaseSensor
+from custom_components.emu_m_bus_center.sensor import EmuCoordinator
+from custom_components.emu_m_bus_center.sensor import EmuCurrentSensor
+from custom_components.emu_m_bus_center.sensor import EmuErrorSensor
+from custom_components.emu_m_bus_center.sensor import EmuFormFactorSensor
+from custom_components.emu_m_bus_center.sensor import EmuFrequencySensor
+from custom_components.emu_m_bus_center.sensor import EmuSerialNoSensor
+from custom_components.emu_m_bus_center.sensor import EmuVoltageSensor
 from homeassistant.core import HomeAssistant
-
-from custom_components.emu_m_bus_center.const import (
-    ERROR_FLAGS,
-    VOLTAGE,
-    CURRENT,
-    FORM_FACTOR,
-    ACTIVE_POWER,
-    FREQUENCY,
-    ACTIVE_ENERGY_IMPORT,
-    ACTIVE_ENERGY_IMPORT_RESETTABLE,
-    SERIAL_NO,
-)
-from custom_components.emu_m_bus_center.sensor import (
-    EmuActiveEnergySensor,
-    EmuActivePowerSensor,
-    EmuVoltageSensor,
-    EmuCurrentSensor,
-    EmuErrorSensor,
-    EmuCoordinator,
-    EmuFormFactorSensor,
-    EmuFrequencySensor,
-    EmuActiveEnergyResettableSensor,
-    EmuSerialNoSensor,
-)
 
 
 class Emu_1_40_V4_15val(EmuCoordinator):
@@ -77,7 +73,7 @@ class Emu_1_40_V4_15val(EmuCoordinator):
     def manufacturer_name(self) -> str:
         return "EMU"
 
-    def sensors(self) -> list[str]:
+    def sensors(self) -> list[EmuBaseSensor]:
         return [
             EmuVoltageSensor(self, VOLTAGE),
             EmuCurrentSensor(self, CURRENT),
@@ -90,7 +86,7 @@ class Emu_1_40_V4_15val(EmuCoordinator):
             EmuErrorSensor(self, ERROR_FLAGS),
         ]
 
-    def parse(self, data: str) -> dict[str, float]:
+    def parse(self, data: list[dict]) -> dict[str, float]:
         voltage = next(item for item in data if item["Position"] == 0)
         # test if we found the right entry voltage
         if not (
@@ -176,15 +172,36 @@ class Emu_1_40_V4_15val(EmuCoordinator):
             )
 
         return {
-            VOLTAGE: int(voltage["LoggerLastValue"]),
-            CURRENT: int(current["LoggerLastValue"]),
-            FORM_FACTOR: int(form_factor["LoggerLastValue"]) / 1000,
-            ACTIVE_POWER: int(active_power["LoggerLastValue"]),
-            ACTIVE_ENERGY_IMPORT: int(active_energy_import["LoggerLastValue"]) / 1000,
+            VOLTAGE: int(voltage["LoggerLastValue"])
+            / (voltage.get("CfgFactor", 1) if voltage.get("CfgFactor", 1) != 0 else 1),
+            CURRENT: int(current["LoggerLastValue"])
+            / (current.get("CfgFactor", 1) if current.get("CfgFactor", 1) != 0 else 1),
+            FORM_FACTOR: int(form_factor["LoggerLastValue"])
+            / (
+                form_factor.get("CfgFactor", 1)
+                if form_factor.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_POWER: int(active_power["LoggerLastValue"])
+            / (
+                active_power.get("CfgFactor", 1)
+                if active_power.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_ENERGY_IMPORT: int(active_energy_import["LoggerLastValue"])
+            / (
+                active_energy_import.get("CfgFactor", 1)
+                if active_energy_import.get("CfgFactor", 1) != 0
+                else 1
+            ),
             ACTIVE_ENERGY_IMPORT_RESETTABLE: int(
                 active_energy_import_resettable["LoggerLastValue"]
             )
-            / 1000,
+            / (
+                active_energy_import_resettable.get("CfgFactor", 1)
+                if active_energy_import_resettable.get("CfgFactor", 1) != 0
+                else 1
+            ),
             SERIAL_NO: int(serial_no["LoggerLastValue"]),
             ERROR_FLAGS: int(error_flags["LoggerLastValue"]),
         }

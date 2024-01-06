@@ -1,33 +1,29 @@
 import logging
 
+from custom_components.emu_m_bus_center.const import ACTIVE_ENERGY_TARIFF_1
+from custom_components.emu_m_bus_center.const import ACTIVE_ENERGY_TARIFF_2
+from custom_components.emu_m_bus_center.const import ACTIVE_POWER_ALL_PHASES
+from custom_components.emu_m_bus_center.const import ACTIVE_POWER_PHASE_1
+from custom_components.emu_m_bus_center.const import ACTIVE_POWER_PHASE_2
+from custom_components.emu_m_bus_center.const import ACTIVE_POWER_PHASE_3
+from custom_components.emu_m_bus_center.const import CURRENT_ALL_PHASES
+from custom_components.emu_m_bus_center.const import CURRENT_PHASE_1
+from custom_components.emu_m_bus_center.const import CURRENT_PHASE_2
+from custom_components.emu_m_bus_center.const import CURRENT_PHASE_3
+from custom_components.emu_m_bus_center.const import ERROR_FLAGS
+from custom_components.emu_m_bus_center.const import POWER_FAILURES
+from custom_components.emu_m_bus_center.const import VOLTAGE_PHASE_1
+from custom_components.emu_m_bus_center.const import VOLTAGE_PHASE_2
+from custom_components.emu_m_bus_center.const import VOLTAGE_PHASE_3
+from custom_components.emu_m_bus_center.sensor import EmuActiveEnergySensor
+from custom_components.emu_m_bus_center.sensor import EmuActivePowerSensor
+from custom_components.emu_m_bus_center.sensor import EmuBaseSensor
+from custom_components.emu_m_bus_center.sensor import EmuCoordinator
+from custom_components.emu_m_bus_center.sensor import EmuCurrentSensor
+from custom_components.emu_m_bus_center.sensor import EmuErrorSensor
+from custom_components.emu_m_bus_center.sensor import EmuPowerFailureSensor
+from custom_components.emu_m_bus_center.sensor import EmuVoltageSensor
 from homeassistant.core import HomeAssistant
-
-from custom_components.emu_m_bus_center.const import (
-    ACTIVE_ENERGY_TARIFF_1,
-    ACTIVE_ENERGY_TARIFF_2,
-    ACTIVE_POWER_PHASE_1,
-    ACTIVE_POWER_PHASE_2,
-    ACTIVE_POWER_PHASE_3,
-    ACTIVE_POWER_ALL_PHASES,
-    VOLTAGE_PHASE_1,
-    VOLTAGE_PHASE_2,
-    VOLTAGE_PHASE_3,
-    CURRENT_PHASE_1,
-    CURRENT_PHASE_2,
-    CURRENT_PHASE_3,
-    CURRENT_ALL_PHASES,
-    ERROR_FLAGS,
-    POWER_FAILURES,
-)
-from custom_components.emu_m_bus_center.sensor import (
-    EmuActiveEnergySensor,
-    EmuActivePowerSensor,
-    EmuVoltageSensor,
-    EmuCurrentSensor,
-    EmuErrorSensor,
-    EmuCoordinator,
-    EmuPowerFailureSensor,
-)
 
 
 class EmuAllrounderV16_15val(EmuCoordinator):
@@ -80,7 +76,7 @@ class EmuAllrounderV16_15val(EmuCoordinator):
     def manufacturer_name(self) -> str:
         return "EMU"
 
-    def sensors(self) -> list[str]:
+    def sensors(self) -> list[EmuBaseSensor]:
         return [
             EmuActiveEnergySensor(self, ACTIVE_ENERGY_TARIFF_1),
             EmuActiveEnergySensor(self, ACTIVE_ENERGY_TARIFF_2),
@@ -99,7 +95,7 @@ class EmuAllrounderV16_15val(EmuCoordinator):
             EmuErrorSensor(self, ERROR_FLAGS),
         ]
 
-    def parse(self, data: str) -> dict[str, float]:
+    def parse(self, data: list[dict]) -> dict[str, float]:
         active_energy_tariff_1 = next(item for item in data if item["Position"] == 0)
         # test if we found the right entry for active_energy_tariff_1
         if not (
@@ -267,20 +263,88 @@ class EmuAllrounderV16_15val(EmuCoordinator):
 
         return {
             ACTIVE_ENERGY_TARIFF_1: int(active_energy_tariff_1["LoggerLastValue"])
-            / 1000,
+            / (
+                active_energy_tariff_1.get("CfgFactor", 1)
+                if active_energy_tariff_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
             ACTIVE_ENERGY_TARIFF_2: int(active_energy_tariff_2["LoggerLastValue"])
-            / 1000,
-            ACTIVE_POWER_PHASE_1: int(active_power_phase_1["LoggerLastValue"]) / 1000,
-            ACTIVE_POWER_PHASE_2: int(active_power_phase_2["LoggerLastValue"]) / 1000,
-            ACTIVE_POWER_PHASE_3: int(active_power_phase_3["LoggerLastValue"]) / 1000,
-            ACTIVE_POWER_ALL_PHASES: int(power_all_phases["LoggerLastValue"]) / 1000,
-            VOLTAGE_PHASE_1: int(voltage_phase_1["LoggerLastValue"]),
-            VOLTAGE_PHASE_2: int(voltage_phase_2["LoggerLastValue"]),
-            VOLTAGE_PHASE_3: int(voltage_phase_3["LoggerLastValue"]),
-            CURRENT_PHASE_1: int(current_phase_1["LoggerLastValue"]),
-            CURRENT_PHASE_2: int(current_phase_2["LoggerLastValue"]),
-            CURRENT_PHASE_3: int(current_phase_3["LoggerLastValue"]),
-            CURRENT_ALL_PHASES: int(current_all_phases["LoggerLastValue"]),
-            POWER_FAILURES: int(power_failures["LoggerLastValue"]),
+            / (
+                active_energy_tariff_2.get("CfgFactor", 1)
+                if active_energy_tariff_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_POWER_PHASE_1: int(active_power_phase_1["LoggerLastValue"])
+            / (
+                active_power_phase_1.get("CfgFactor", 1)
+                if active_power_phase_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_POWER_PHASE_2: int(active_power_phase_2["LoggerLastValue"])
+            / (
+                active_power_phase_2.get("CfgFactor", 1)
+                if active_power_phase_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_POWER_PHASE_3: int(active_power_phase_3["LoggerLastValue"])
+            / (
+                active_power_phase_3.get("CfgFactor", 1)
+                if active_power_phase_3.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            ACTIVE_POWER_ALL_PHASES: int(power_all_phases["LoggerLastValue"])
+            / (
+                power_all_phases.get("CfgFactor", 1)
+                if power_all_phases.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            VOLTAGE_PHASE_1: int(voltage_phase_1["LoggerLastValue"])
+            / (
+                voltage_phase_1.get("CfgFactor", 1)
+                if voltage_phase_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            VOLTAGE_PHASE_2: int(voltage_phase_2["LoggerLastValue"])
+            / (
+                voltage_phase_2.get("CfgFactor", 1)
+                if voltage_phase_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            VOLTAGE_PHASE_3: int(voltage_phase_3["LoggerLastValue"])
+            / (
+                voltage_phase_3.get("CfgFactor", 1)
+                if voltage_phase_3.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            CURRENT_PHASE_1: int(current_phase_1["LoggerLastValue"])
+            / (
+                current_phase_1.get("CfgFactor", 1)
+                if current_phase_1.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            CURRENT_PHASE_2: int(current_phase_2["LoggerLastValue"])
+            / (
+                current_phase_2.get("CfgFactor", 1)
+                if current_phase_2.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            CURRENT_PHASE_3: int(current_phase_3["LoggerLastValue"])
+            / (
+                current_phase_3.get("CfgFactor", 1)
+                if current_phase_3.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            CURRENT_ALL_PHASES: int(current_all_phases["LoggerLastValue"])
+            / (
+                current_all_phases.get("CfgFactor", 1)
+                if current_all_phases.get("CfgFactor", 1) != 0
+                else 1
+            ),
+            POWER_FAILURES: int(power_failures["LoggerLastValue"])
+            / (
+                power_failures.get("CfgFactor", 1)
+                if power_failures.get("CfgFactor", 1) != 0
+                else 1
+            ),
             ERROR_FLAGS: int(error_flags["LoggerLastValue"]),
         }

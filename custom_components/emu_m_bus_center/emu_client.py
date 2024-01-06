@@ -6,7 +6,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .device_types.devices import Device_type, get_enum_from_version_and_sensor_count
+from .device_types.devices import Device_type
+from .device_types.devices import get_enum_from_version_and_sensor_count
 
 _LOGGER = logging.getLogger(__name__)
 

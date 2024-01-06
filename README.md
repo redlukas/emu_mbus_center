@@ -17,7 +17,7 @@
 **This component will set up the following platforms.**
 
 | Platform | Description                          |
-| -------- |--------------------------------------|
+| -------- | ------------------------------------ |
 | `sensor` | Show info from EMU M-Bus Center API. |
 
 ## Overview
@@ -94,13 +94,13 @@ The integration has been tested on the following devices:
 ### Centers
 
 | Manufacturer | Product          | Firmware Version |
-|--------------| ---------------- | ---------------- |
+| ------------ | ---------------- | ---------------- |
 | EMU          | M-Bus Center 250 | 1.10.1.0.r0      |
 
 ### Meters
 
 | Manufacturer | Product                  | Firmware Version<br>(as reported on meter's Display) | Firmware Version<br>(as reported by API) | Status       |
-|--------------|--------------------------|------------------------------------------------------|------------------------------------------|--------------|
+| ------------ | ------------------------ | ---------------------------------------------------- | ---------------------------------------- | ------------ |
 | EMU          | Allrounder 3/75 M-Bus    | 1.4                                                  | 16                                       | Fully tested |
 | EMU          | Professional 3/100 M-Bus | 1.4                                                  | 16                                       | Experimental |
 | EMU          | 1/40                     | ???                                                  | 4                                        | Experimental |
