@@ -12,7 +12,6 @@ from custom_components.emu_m_bus_center.const import VOLTAGE
 from custom_components.emu_m_bus_center.sensor import EmuActiveEnergyResettableSensor
 from custom_components.emu_m_bus_center.sensor import EmuActiveEnergySensor
 from custom_components.emu_m_bus_center.sensor import EmuActivePowerSensor
-from custom_components.emu_m_bus_center.sensor import EmuBaseSensor
 from custom_components.emu_m_bus_center.sensor import EmuCoordinator
 from custom_components.emu_m_bus_center.sensor import EmuCurrentSensor
 from custom_components.emu_m_bus_center.sensor import EmuErrorSensor
@@ -56,6 +55,80 @@ class Emu_1_40_V4_15val(EmuCoordinator):
             center_name=center_name,
             sensor_given_name=sensor_given_name,
         )
+        self._sensors = [
+            {
+                "name": VOLTAGE,
+                "position": 0,
+                "has_scaling_factor": True,
+                "unit_str": "V",
+                "description_str": "Volts (vendor specific)",
+                "sensor_class": EmuVoltageSensor,
+            },
+            {
+                "name": CURRENT,
+                "position": 1,
+                "has_scaling_factor": True,
+                "unit_str": "A",
+                "description_str": "Ampere (vendor specific)",
+                "sensor_class": EmuCurrentSensor,
+            },
+            {
+                "name": FORM_FACTOR,
+                "position": 2,
+                "has_scaling_factor": True,
+                "unit_str": "None",
+                "description_str": "Special supplier information",
+                "sensor_class": EmuFormFactorSensor,
+            },
+            {
+                "name": ACTIVE_POWER,
+                "position": 3,
+                "has_scaling_factor": True,
+                "unit_str": "W",
+                "description_str": "Power",
+                "sensor_class": EmuActivePowerSensor,
+            },
+            {
+                "name": FREQUENCY,
+                "position": 4,
+                "has_scaling_factor": True,
+                "unit_str": "Hz",
+                "description_str": "Frequency",
+                "sensor_class": EmuFrequencySensor,
+            },
+            {
+                "name": ACTIVE_ENERGY_IMPORT,
+                "position": 5,
+                "has_scaling_factor": True,
+                "unit_str": "Wh",
+                "description_str": "Energy",
+                "sensor_class": EmuActiveEnergySensor,
+            },
+            {
+                "name": ACTIVE_ENERGY_IMPORT_RESETTABLE,
+                "position": 6,
+                "has_scaling_factor": True,
+                "unit_str": "Wh",
+                "description_str": "Energy",
+                "sensor_class": EmuActiveEnergyResettableSensor,
+            },
+            {
+                "name": SERIAL_NO,
+                "position": 7,
+                "has_scaling_factor": False,
+                "unit_str": "None",
+                "description_str": None,
+                "sensor_class": EmuSerialNoSensor,
+            },
+            {
+                "name": ERROR_FLAGS,
+                "position": 12,
+                "has_scaling_factor": False,
+                "unit_str": "Bin",
+                "description_str": "Error flags (Device type specific)",
+                "sensor_class": EmuErrorSensor,
+            },
+        ]
 
     @property
     def version_number(self) -> int:
@@ -72,136 +145,3 @@ class Emu_1_40_V4_15val(EmuCoordinator):
     @property
     def manufacturer_name(self) -> str:
         return "EMU"
-
-    def sensors(self) -> list[EmuBaseSensor]:
-        return [
-            EmuVoltageSensor(self, VOLTAGE),
-            EmuCurrentSensor(self, CURRENT),
-            EmuFormFactorSensor(self, FORM_FACTOR),
-            EmuActivePowerSensor(self, ACTIVE_POWER),
-            EmuFrequencySensor(self, FREQUENCY),
-            EmuActiveEnergySensor(self, ACTIVE_ENERGY_IMPORT),
-            EmuActiveEnergyResettableSensor(self, ACTIVE_ENERGY_IMPORT_RESETTABLE),
-            EmuSerialNoSensor(self, SERIAL_NO),
-            EmuErrorSensor(self, ERROR_FLAGS),
-        ]
-
-    def parse(self, data: list[dict]) -> dict[str, float]:
-        voltage = next(item for item in data if item["Position"] == 0)
-        # test if we found the right entry voltage
-        if not (
-            voltage["UnitStr"] == "V"
-            and voltage["DescriptionStr"] == "Volts (vendor specific)"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for voltage in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        current = next(item for item in data if item["Position"] == 1)
-        # test if we found the right entry current
-        if not (
-            current["UnitStr"] == "A"
-            and current["DescriptionStr"] == "Ampere (vendor specific)"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for current in the JSON response from the "
-                "M-Bus Center"
-            )
-        form_factor = next(item for item in data if item["Position"] == 2)
-        # test if we found the right entry for form_factor
-        if not (
-            form_factor["UnitStr"] == "None"
-            and form_factor["DescriptionStr"] == "Special supplier information"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for form_factor in the JSON response from the "
-                "M-Bus Center"
-            )
-        active_power = next(item for item in data if item["Position"] == 3)
-        # test if we found the right entry for active_power
-        if not (
-            active_power["UnitStr"] == "W" and active_power["DescriptionStr"] == "Power"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for active_power in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        active_energy_import = next(item for item in data if item["Position"] == 5)
-        # test if we found the right entry for active_energy_import
-        if not (
-            active_energy_import["UnitStr"] == "Wh"
-            and active_energy_import["DescriptionStr"] == "Energy"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for active_energy_import in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        active_energy_import_resettable = next(
-            item for item in data if item["Position"] == 5
-        )
-        # test if we found the right entry for active_energy_import_resettable
-        if not (
-            active_energy_import_resettable["UnitStr"] == "Wh"
-            and active_energy_import_resettable["DescriptionStr"] == "Energy"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for active_energy_import_resettable in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        serial_no = next(item for item in data if item["Position"] == 7)
-        # test if we found the right entry for serial_no
-        if not (serial_no["UnitStr"] == "None"):
-            raise ValueError(
-                "Did not find the required Fields for serial_no in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        error_flags = next(item for item in data if item["Position"] == 12)
-        # test if we found the right entry error_flags
-        if not (
-            error_flags["UnitStr"] == "Bin"
-            and error_flags["DescriptionStr"] == "Error flags (Device type specific)"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for error_flags in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        return {
-            VOLTAGE: int(voltage["LoggerLastValue"])
-            / (voltage.get("CfgFactor", 1) if voltage.get("CfgFactor", 1) != 0 else 1),
-            CURRENT: int(current["LoggerLastValue"])
-            / (current.get("CfgFactor", 1) if current.get("CfgFactor", 1) != 0 else 1),
-            FORM_FACTOR: int(form_factor["LoggerLastValue"])
-            / (
-                form_factor.get("CfgFactor", 1)
-                if form_factor.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            ACTIVE_POWER: int(active_power["LoggerLastValue"])
-            / (
-                active_power.get("CfgFactor", 1)
-                if active_power.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            ACTIVE_ENERGY_IMPORT: int(active_energy_import["LoggerLastValue"])
-            / (
-                active_energy_import.get("CfgFactor", 1)
-                if active_energy_import.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            ACTIVE_ENERGY_IMPORT_RESETTABLE: int(
-                active_energy_import_resettable["LoggerLastValue"]
-            )
-            / (
-                active_energy_import_resettable.get("CfgFactor", 1)
-                if active_energy_import_resettable.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            SERIAL_NO: int(serial_no["LoggerLastValue"]),
-            ERROR_FLAGS: int(error_flags["LoggerLastValue"]),
-        }

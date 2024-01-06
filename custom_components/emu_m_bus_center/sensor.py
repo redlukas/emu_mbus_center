@@ -103,8 +103,14 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        value = self.coordinator.data[self._suffix]
-        self._attr_native_value = value
+        _LOGGER.error(f"updating {self._suffix}")
+        _LOGGER.error(f"data: {self.coordinator.data}")
+        item = next(
+            item for item in self.coordinator.data if item.get("name") == self._suffix
+        )
+        self._attr_native_value = item.pop("value")
+        del item["name"]
+        self._attr_extra_state_attributes = item
         self.async_write_ha_state()
 
 
@@ -304,13 +310,62 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
     def manufacturer_name(self) -> str:
         """Get the human-readable representation of the Device's manufacturer name"""
 
-    @abc.abstractmethod
     def sensors(self) -> list[EmuBaseSensor]:
         """Get all the Sensors this device Offers"""
+        return [
+            sensor["sensor_class"](self, sensor["name"]) for sensor in self._sensors
+        ]
 
-    @abc.abstractmethod
-    def parse(self, data: list[dict]) -> dict[str, float]:
+    def parse(self, data: list[dict]) -> list[dict]:
         """Parses the "ValueDescs" part of the Output of the API to a Dict, matching the correct values"""
+        return [
+            self._extract_values(
+                data=data,
+                position=sensor["position"],
+                name=sensor["name"],
+                has_scaling_factor=sensor["has_scaling_factor"],
+                unit_str=sensor["unit_str"],
+                description_str=sensor["description_str"],
+            )
+            for sensor in self._sensors
+        ]
+
+    def _extract_values(
+        self,
+        data: list[dict],
+        position: int,
+        name: str,
+        has_scaling_factor: bool,
+        unit_str: str,
+        description_str: str | None,
+    ) -> dict:
+        """Extracts the values from the dict in the API response"""
+        item = next(item for item in data if item["Position"] == position)
+        # test if we found the right entry for active_energy_tariff_1
+        if not (
+            item["UnitStr"] == unit_str
+            and (description_str is None or item["DescriptionStr"] == description_str)
+        ):
+            raise ValueError(
+                f"Did not find the required Fields for {name} in the JSON response from the "
+                "M-Bus Center"
+            )
+        result = {
+            "name": name,
+            "value": float(item["LoggerLastValue"]),
+            "scale_power": float(item.get("ScalePower")),
+            "scale_mantissa": int(item.get("ScaleMantissa")),
+            "tariff": int(item.get("Tariff")),
+            "cfg_phase": int(item.get("CfgPhase")),
+            "cfg_factor": float(item.get("CfgFactor")),
+            "cfg_tariff": int(item.get("CfgTariff")),
+            "timestamp": int(item.get("Values")[0].get("Timestamp")),
+        }
+        if has_scaling_factor:
+            result["value"] = result["value"] / (
+                float(item.get("CfgFactor", 1)) if item.get("CfgFactor", 1) != 0 else 1
+            )
+        return result
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from API endpoint.

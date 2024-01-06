@@ -19,7 +19,6 @@ from custom_components.emu_m_bus_center.const import VOLTAGE_PHASE_2
 from custom_components.emu_m_bus_center.const import VOLTAGE_PHASE_3
 from custom_components.emu_m_bus_center.sensor import EmuActiveEnergySensor
 from custom_components.emu_m_bus_center.sensor import EmuActivePowerSensor
-from custom_components.emu_m_bus_center.sensor import EmuBaseSensor
 from custom_components.emu_m_bus_center.sensor import EmuCoordinator
 from custom_components.emu_m_bus_center.sensor import EmuCurrentSensor
 from custom_components.emu_m_bus_center.sensor import EmuErrorSensor
@@ -63,6 +62,144 @@ class EmuAllrounderV16_17val(EmuCoordinator):
             center_name=center_name,
             sensor_given_name=sensor_given_name,
         )
+        self._sensors = [
+            {
+                "name": ACTIVE_ENERGY_TARIFF_1,
+                "position": 0,
+                "has_scaling_factor": True,
+                "unit_str": "Wh",
+                "description_str": "Energy",
+                "sensor_class": EmuActiveEnergySensor,
+            },
+            {
+                "name": ACTIVE_ENERGY_TARIFF_2,
+                "position": 1,
+                "has_scaling_factor": True,
+                "unit_str": "Wh",
+                "description_str": "Energy",
+                "sensor_class": EmuActiveEnergySensor,
+            },
+            {
+                "name": ACTIVE_POWER_PHASE_1,
+                "position": 2,
+                "has_scaling_factor": True,
+                "unit_str": "W",
+                "description_str": "Power (vendor specific)",
+                "sensor_class": EmuActivePowerSensor,
+            },
+            {
+                "name": ACTIVE_POWER_PHASE_2,
+                "position": 3,
+                "has_scaling_factor": True,
+                "unit_str": "W",
+                "description_str": "Power (vendor specific)",
+                "sensor_class": EmuActivePowerSensor,
+            },
+            {
+                "name": ACTIVE_POWER_PHASE_3,
+                "position": 4,
+                "has_scaling_factor": True,
+                "unit_str": "W",
+                "description_str": "Power (vendor specific)",
+                "sensor_class": EmuActivePowerSensor,
+            },
+            {
+                "name": ACTIVE_POWER_ALL_PHASES,
+                "position": 5,
+                "has_scaling_factor": True,
+                "unit_str": "W",
+                "description_str": "Power",
+                "sensor_class": EmuActivePowerSensor,
+            },
+            {
+                "name": VOLTAGE_PHASE_1,
+                "position": 6,
+                "has_scaling_factor": True,
+                "unit_str": "V",
+                "description_str": "Volts (vendor specific)",
+                "sensor_class": EmuVoltageSensor,
+            },
+            {
+                "name": VOLTAGE_PHASE_2,
+                "position": 7,
+                "has_scaling_factor": True,
+                "unit_str": "V",
+                "description_str": "Volts (vendor specific)",
+                "sensor_class": EmuVoltageSensor,
+            },
+            {
+                "name": VOLTAGE_PHASE_3,
+                "position": 8,
+                "has_scaling_factor": True,
+                "unit_str": "V",
+                "description_str": "Volts (vendor specific)",
+                "sensor_class": EmuVoltageSensor,
+            },
+            {
+                "name": CURRENT_PHASE_1,
+                "position": 9,
+                "has_scaling_factor": True,
+                "unit_str": "A",
+                "description_str": "Ampere (vendor specific)",
+                "sensor_class": EmuCurrentSensor,
+            },
+            {
+                "name": CURRENT_PHASE_2,
+                "position": 10,
+                "has_scaling_factor": True,
+                "unit_str": "A",
+                "description_str": "Ampere (vendor specific)",
+                "sensor_class": EmuCurrentSensor,
+            },
+            {
+                "name": CURRENT_PHASE_3,
+                "position": 11,
+                "has_scaling_factor": True,
+                "unit_str": "A",
+                "description_str": "Ampere (vendor specific)",
+                "sensor_class": EmuCurrentSensor,
+            },
+            {
+                "name": CURRENT_ALL_PHASES,
+                "position": 12,
+                "has_scaling_factor": True,
+                "unit_str": "A",
+                "description_str": "Ampere",
+                "sensor_class": EmuCurrentSensor,
+            },
+            {
+                "name": FREQUENCY,
+                "position": 13,
+                "has_scaling_factor": True,
+                "unit_str": "None",
+                "description_str": "Special supplier information",
+                "sensor_class": EmuFrequencySensor,
+            },
+            {
+                "name": POWER_FAILURES,
+                "position": 14,
+                "has_scaling_factor": True,
+                "unit_str": "None",
+                "description_str": "Reset counter",
+                "sensor_class": EmuPowerFailureSensor,
+            },
+            {
+                "name": CURRENT_TRANSFORMER_FACTOR,
+                "position": 15,
+                "has_scaling_factor": True,
+                "unit_str": "None",
+                "description_str": "Special supplier information",
+                "sensor_class": EmuTransformerFactorSensor,
+            },
+            {
+                "name": ERROR_FLAGS,
+                "position": 16,
+                "has_scaling_factor": False,
+                "unit_str": "Bin",
+                "description_str": "Error flags (Device type specific)",
+                "sensor_class": EmuErrorSensor,
+            },
+        ]
 
     @property
     def version_number(self) -> int:
@@ -79,317 +216,3 @@ class EmuAllrounderV16_17val(EmuCoordinator):
     @property
     def manufacturer_name(self) -> str:
         return "EMU"
-
-    def sensors(self) -> list[EmuBaseSensor]:
-        return [
-            EmuActiveEnergySensor(self, ACTIVE_ENERGY_TARIFF_1),
-            EmuActiveEnergySensor(self, ACTIVE_ENERGY_TARIFF_2),
-            EmuActivePowerSensor(self, ACTIVE_POWER_PHASE_1),
-            EmuActivePowerSensor(self, ACTIVE_POWER_PHASE_2),
-            EmuActivePowerSensor(self, ACTIVE_POWER_PHASE_3),
-            EmuActivePowerSensor(self, ACTIVE_POWER_ALL_PHASES),
-            EmuVoltageSensor(self, VOLTAGE_PHASE_1),
-            EmuVoltageSensor(self, VOLTAGE_PHASE_2),
-            EmuVoltageSensor(self, VOLTAGE_PHASE_3),
-            EmuCurrentSensor(self, CURRENT_PHASE_1),
-            EmuCurrentSensor(self, CURRENT_PHASE_2),
-            EmuCurrentSensor(self, CURRENT_PHASE_3),
-            EmuCurrentSensor(self, CURRENT_ALL_PHASES),
-            EmuFrequencySensor(self, FREQUENCY),
-            EmuPowerFailureSensor(self, POWER_FAILURES),
-            EmuTransformerFactorSensor(self, CURRENT_TRANSFORMER_FACTOR),
-            EmuErrorSensor(self, ERROR_FLAGS),
-        ]
-
-    def parse(self, data: list[dict]) -> dict[str, float]:
-        active_energy_tariff_1 = next(item for item in data if item["Position"] == 0)
-        # test if we found the right entry for active_energy_tariff_1
-        if not (
-            active_energy_tariff_1["UnitStr"] == "Wh"
-            and active_energy_tariff_1["DescriptionStr"] == "Energy"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for active_energy_tariff_1 in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        active_energy_tariff_2 = next(item for item in data if item["Position"] == 1)
-        # test if we found the right entry for active_energy_tariff_2
-        if not (
-            active_energy_tariff_2["UnitStr"] == "Wh"
-            and active_energy_tariff_2["DescriptionStr"] == "Energy"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for active_energy_tariff_2 in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        active_power_phase_1 = next(item for item in data if item["Position"] == 2)
-        # test if we found the right entry for active_power_phase_1
-        if not (
-            active_power_phase_1["UnitStr"] == "W"
-            and active_power_phase_1["DescriptionStr"] == "Power (vendor specific)"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for active_power_phase_1 in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        active_power_phase_2 = next(item for item in data if item["Position"] == 3)
-        # test if we found the right entry for active_power_phase_2
-        if not (
-            active_power_phase_2["UnitStr"] == "W"
-            and active_power_phase_2["DescriptionStr"] == "Power (vendor specific)"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for active_power_phase_2 in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        active_power_phase_3 = next(item for item in data if item["Position"] == 4)
-        # test if we found the right entry for power_phase_3
-        if not (
-            active_power_phase_3["UnitStr"] == "W"
-            and active_power_phase_3["DescriptionStr"] == "Power (vendor specific)"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for active_power_phase_3 in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        power_all_phases = next(item for item in data if item["Position"] == 5)
-        # test if we found the right entry for power_phase_3
-        if not (
-            power_all_phases["UnitStr"] == "W"
-            and power_all_phases["DescriptionStr"] == "Power"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for power_all_phases in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        voltage_phase_1 = next(item for item in data if item["Position"] == 6)
-        # test if we found the right entry voltage_phase_1
-        if not (
-            voltage_phase_1["UnitStr"] == "V"
-            and voltage_phase_1["DescriptionStr"] == "Volts (vendor specific)"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for voltage_phase_1 in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        voltage_phase_2 = next(item for item in data if item["Position"] == 7)
-        # test if we found the right entry voltage_phase_2
-        if not (
-            voltage_phase_2["UnitStr"] == "V"
-            and voltage_phase_2["DescriptionStr"] == "Volts (vendor specific)"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for voltage_phase_2 in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        voltage_phase_3 = next(item for item in data if item["Position"] == 8)
-        # test if we found the right entry voltage_phase_3
-        if not (
-            voltage_phase_3["UnitStr"] == "V"
-            and voltage_phase_3["DescriptionStr"] == "Volts (vendor specific)"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for voltage_phase_3 in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        current_phase_1 = next(item for item in data if item["Position"] == 9)
-        # test if we found the right entry current_phase_1
-        if not (
-            current_phase_1["UnitStr"] == "A"
-            and current_phase_1["DescriptionStr"] == "Ampere (vendor specific)"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for current_phase_1 in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        current_phase_2 = next(item for item in data if item["Position"] == 10)
-        # test if we found the right entry current_phase_2
-        if not (
-            current_phase_2["UnitStr"] == "A"
-            and current_phase_2["DescriptionStr"] == "Ampere (vendor specific)"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for current_phase_2 in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        current_phase_3 = next(item for item in data if item["Position"] == 11)
-        # test if we found the right entry current_phase_3
-        if not (
-            current_phase_3["UnitStr"] == "A"
-            and current_phase_3["DescriptionStr"] == "Ampere (vendor specific)"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for current_phase_3 in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        current_all_phases = next(item for item in data if item["Position"] == 12)
-        # test if we found the right entry current_all_phases
-        if not (
-            current_all_phases["UnitStr"] == "A"
-            and current_all_phases["DescriptionStr"] == "Ampere"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for current_all_phases in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        frequency = next(item for item in data if item["Position"] == 13)
-        # test if we found the right entry frequency
-        if not (
-            (frequency["UnitStr"] == "None" or frequency["UnitStr"] == "Hz")
-            and frequency["DescriptionStr"] == "Special supplier information"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for frequency in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        power_failures = next(item for item in data if item["Position"] == 14)
-        # test if we found the right entry power_failures
-        if not (
-            power_failures["UnitStr"] == "None"
-            and power_failures["DescriptionStr"] == "Reset counter"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for resets in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        current_transformer_factor = next(
-            item for item in data if item["Position"] == 15
-        )
-        # test if we found the right entry current_transformer_factor
-        if not (
-            current_transformer_factor["UnitStr"] == "None"
-            and current_transformer_factor["DescriptionStr"]
-            == "Special supplier information"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for current_transformer_factor in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        error_flags = next(item for item in data if item["Position"] == 16)
-        # test if we found the right entry error_flags
-        if not (
-            error_flags["UnitStr"] == "Bin"
-            and error_flags["DescriptionStr"] == "Error flags (Device type specific)"
-        ):
-            raise ValueError(
-                "Did not find the required Fields for error_flags in the JSON response from the "
-                "M-Bus Center"
-            )
-
-        return {
-            ACTIVE_ENERGY_TARIFF_1: int(active_energy_tariff_1["LoggerLastValue"])
-            / (
-                active_energy_tariff_1.get("CfgFactor", 1)
-                if active_energy_tariff_1.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            ACTIVE_ENERGY_TARIFF_2: int(active_energy_tariff_2["LoggerLastValue"])
-            / (
-                active_energy_tariff_2.get("CfgFactor", 1)
-                if active_energy_tariff_2.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            ACTIVE_POWER_PHASE_1: int(active_power_phase_1["LoggerLastValue"])
-            / (
-                active_power_phase_1.get("CfgFactor", 1)
-                if active_power_phase_1.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            ACTIVE_POWER_PHASE_2: int(active_power_phase_2["LoggerLastValue"])
-            / (
-                active_power_phase_2.get("CfgFactor", 1)
-                if active_power_phase_2.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            ACTIVE_POWER_PHASE_3: int(active_power_phase_3["LoggerLastValue"])
-            / (
-                active_power_phase_3.get("CfgFactor", 1)
-                if active_power_phase_3.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            ACTIVE_POWER_ALL_PHASES: int(power_all_phases["LoggerLastValue"])
-            / (
-                power_all_phases.get("CfgFactor", 1)
-                if power_all_phases.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            VOLTAGE_PHASE_1: int(voltage_phase_1["LoggerLastValue"])
-            / (
-                voltage_phase_1.get("CfgFactor", 1)
-                if voltage_phase_1.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            VOLTAGE_PHASE_2: int(voltage_phase_2["LoggerLastValue"])
-            / (
-                voltage_phase_2.get("CfgFactor", 1)
-                if voltage_phase_2.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            VOLTAGE_PHASE_3: int(voltage_phase_3["LoggerLastValue"])
-            / (
-                voltage_phase_3.get("CfgFactor", 1)
-                if voltage_phase_3.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            CURRENT_PHASE_1: int(current_phase_1["LoggerLastValue"])
-            / (
-                current_phase_1.get("CfgFactor", 1)
-                if current_phase_1.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            CURRENT_PHASE_2: int(current_phase_2["LoggerLastValue"])
-            / (
-                current_phase_2.get("CfgFactor", 1)
-                if current_phase_2.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            CURRENT_PHASE_3: int(current_phase_3["LoggerLastValue"])
-            / (
-                current_phase_3.get("CfgFactor", 1)
-                if current_phase_3.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            CURRENT_ALL_PHASES: int(current_all_phases["LoggerLastValue"])
-            / (
-                current_all_phases.get("CfgFactor", 1)
-                if current_all_phases.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            FREQUENCY: int(frequency["LoggerLastValue"])
-            / (
-                frequency.get("CfgFactor", 1)
-                if frequency.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            POWER_FAILURES: int(power_failures["LoggerLastValue"])
-            / (
-                power_failures.get("CfgFactor", 1)
-                if power_failures.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            CURRENT_TRANSFORMER_FACTOR: int(
-                current_transformer_factor["LoggerLastValue"]
-            )
-            / (
-                current_transformer_factor.get("CfgFactor", 1)
-                if current_transformer_factor.get("CfgFactor", 1) != 0
-                else 1
-            ),
-            ERROR_FLAGS: int(error_flags["LoggerLastValue"]),
-        }
