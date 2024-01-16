@@ -16,9 +16,9 @@
 
 **This component will set up the following platforms.**
 
-| Platform | Description                          |
-| -------- | ------------------------------------ |
-| `sensor` | Show info from EMU M-Bus Center API. |
+| Platform | Description                                                                                                                                                                                                                                                                                                        |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `hub`    | Each M-Bus Center is represented in HA as a Hub.<br>Each Hub will have zero or more Devices (each corresponding to one Meter you have connected to the M-Bus Center).<br>Each Device has some amount of Entities depending on the type of meter the Device represents. All of those entities are of type 'sensor'. |
 
 ## Overview
 
