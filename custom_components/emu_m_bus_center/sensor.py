@@ -103,8 +103,8 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        _LOGGER.error(f"updating {self._suffix}")
-        _LOGGER.error(f"data: {self.coordinator.data}")
+        # _LOGGER.error(f"updating {self._suffix}")
+        # _LOGGER.error(f"data: {self.coordinator.data}")
         item = next(
             item for item in self.coordinator.data if item.get("name") == self._suffix
         )
