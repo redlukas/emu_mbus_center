@@ -1,5 +1,6 @@
 from enum import Enum
-from typing import Type, Union
+from typing import Type
+from typing import Union
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
@@ -12,10 +13,12 @@ class Device_type(Enum):
     EMU_1_40_v4_15val = "EMU 1/40 | Firmware Version 4 | 15 Values"
 
 
-def get_class_from_enum(enum_or_str: Union[Device_type, str]) -> Type[DataUpdateCoordinator] | None:
+def get_class_from_enum(
+    enum_or_str: Union[Device_type, str]
+) -> Type[DataUpdateCoordinator] | None:
     """You input a device type enum, you get the corresponding Class object
     Sice we have to expect a whole host of different python versions, you may even input a string
-    and it will be converted to the corresponding enum value """
+    and it will be converted to the corresponding enum value"""
     from custom_components.emu_m_bus_center.device_types.emu_allrounder_v16_17val import (
         EmuAllrounderV16_17val,
     )
