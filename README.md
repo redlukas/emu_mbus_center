@@ -96,6 +96,8 @@ The integration has been tested on the following devices:
 | ------------ | ---------------- | ---------------- |
 | EMU          | M-Bus Center 250 | 1.10.1.0.r0      |
 
+EMU say that the EMU M-Center employs the same REST API as the M-Bus Center. I am therefore optimistic that this integration will work with the M-Center, but cannot confirm it.
+
 ### Meters
 
 | Manufacturer | Product                     | Firmware Version<br>(as reported on meter's Display) | Firmware Version<br>(as reported by API) | Status          |
