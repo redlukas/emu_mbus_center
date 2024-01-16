@@ -24,7 +24,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import DOMAIN
+from .const import DOMAIN, SCALE_POWER, SCALE_MANTISSA, TARIFF, CFG_PHASE, CFG_FACTOR, CFG_TARIFF, TIMESTAMP
 from .device_types.devices import get_class_from_enum
 from .emu_client import EmuApiClient
 
@@ -353,13 +353,13 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
         result = {
             "name": name,
             "value": float(item["LoggerLastValue"]),
-            "scale_power": float(item.get("ScalePower")),
-            "scale_mantissa": int(item.get("ScaleMantissa")),
-            "tariff": int(item.get("Tariff")),
-            "cfg_phase": int(item.get("CfgPhase")),
-            "cfg_factor": float(item.get("CfgFactor")),
-            "cfg_tariff": int(item.get("CfgTariff")),
-            "timestamp": int(item.get("Values")[0].get("Timestamp")),
+            SCALE_POWER: float(item.get("ScalePower")),
+            SCALE_MANTISSA: int(item.get("ScaleMantissa")),
+            TARIFF: int(item.get("Tariff")),
+            CFG_PHASE: int(item.get("CfgPhase")),
+            CFG_FACTOR: float(item.get("CfgFactor")),
+            CFG_TARIFF: int(item.get("CfgTariff")),
+            TIMESTAMP: int(item.get("Values")[0].get("Timestamp")),
         }
         if has_scaling_factor:
             result["value"] = result["value"] / (
