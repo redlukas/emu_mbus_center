@@ -145,7 +145,7 @@ class EmuActivePowerSensor(EmuBaseSensor):
     _attr_native_unit_of_measurement = UnitOfPower.KILO_WATT
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_device_class = SensorDeviceClass.POWER
-    _attr_icon = "mdi:lightning-bolt-circle"
+    _attr_icon = "mdi:meter-electric-outline"
 
 
 class EmuVoltageSensor(EmuBaseSensor):
@@ -230,7 +230,7 @@ class EmuPowerFailureSensor(EmuBaseSensor):
     """Sensor for number of power failures"""
 
     _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_icon = "mdi:flash-off"
+    _attr_icon = "mdi:power-plug-off"
 
 
 class EmuSerialNoSensor(EmuBaseSensor):
