@@ -10,13 +10,13 @@ from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.components.sensor import SensorStateClass
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import POWER_VOLT_AMPERE_REACTIVE
 from homeassistant.const import UnitOfApparentPower
 from homeassistant.const import UnitOfElectricCurrent
 from homeassistant.const import UnitOfElectricPotential
 from homeassistant.const import UnitOfEnergy
 from homeassistant.const import UnitOfFrequency
 from homeassistant.const import UnitOfPower
+from homeassistant.const import UnitOfReactivePower
 from homeassistant.const import UnitOfVolume
 from homeassistant.core import callback
 from homeassistant.core import HomeAssistant
@@ -200,7 +200,7 @@ class EmuReactivePowerSensor(EmuBaseSensor):
     """Sensor for reactive power in VAr
     Yes, I would love to do it in kVAr, but that's not a thing in HA"""
 
-    _attr_native_unit_of_measurement = POWER_VOLT_AMPERE_REACTIVE
+    _attr_native_unit_of_measurement = UnitOfReactivePower.VOLT_AMPERE_REACTIVE
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_device_class = SensorDeviceClass.POWER
     _attr_icon = "mdi:glass-mug-variant"
