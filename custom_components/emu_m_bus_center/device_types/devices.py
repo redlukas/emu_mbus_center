@@ -11,6 +11,7 @@ class Device_type(Enum):
     PROFESSIONAL_v16_31val = "EMU Professional | Firmware Version 16 | 31 Values"
     PROFESSIONAL_v16_32val = "EMU Professional | Firmware Version 16 | 32 Values"
     EMU_1_40_v4_15val = "EMU 1/40 | Firmware Version 4 | 15 Values"
+    GWF_WATER_2val = "GWF Water Meter | 2 Values"
 
 
 def get_class_from_enum(
@@ -35,6 +36,10 @@ def get_class_from_enum(
     from custom_components.emu_m_bus_center.device_types.emu_1_40_v4_15val import (
         Emu_1_40_V4_15val,
     )
+
+    from custom_components.emu_m_bus_center.device_types.gwf_water_2val import (
+        Gwf_water_2val,
+    )
     from custom_components.emu_m_bus_center.emu_client import EmuApiError
 
     template_mapping = {
@@ -43,6 +48,7 @@ def get_class_from_enum(
         Device_type.PROFESSIONAL_v16_31val: EmuProfessionalV16_31val,
         Device_type.PROFESSIONAL_v16_32val: EmuProfessionalV16_32val,
         Device_type.EMU_1_40_v4_15val: Emu_1_40_V4_15val,
+        Device_type.GWF_WATER_2val: Gwf_water_2val,
     }
 
     value_to_name = {e.value: e.name for e in Device_type}
@@ -72,5 +78,10 @@ def get_enum_from_version_and_sensor_count(
         (16, 17): Device_type.ALLROUNDER_v16_17val,
         (16, 31): Device_type.PROFESSIONAL_v16_31val,
         (16, 32): Device_type.PROFESSIONAL_v16_32val,
+        (60, 2): Device_type.GWF_WATER_2val,
     }
     return device_type_matrix.get((version, sensor_count), None)
+
+
+def get_supported_measurement_types() -> list[str]:
+    return ["Electricity", "Water"]

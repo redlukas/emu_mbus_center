@@ -17,6 +17,7 @@ from homeassistant.const import UnitOfElectricPotential
 from homeassistant.const import UnitOfEnergy
 from homeassistant.const import UnitOfFrequency
 from homeassistant.const import UnitOfPower
+from homeassistant.const import UnitOfVolume
 from homeassistant.core import callback
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
@@ -76,7 +77,7 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         self._name = coordinator.name
         self._suffix = suffix
         self._serial_no = coordinator.serial_no
-        _LOGGER.debug(f"created Sensor of class {__class__} with uid {self.unique_id}")
+        # _LOGGER.error(f"created Sensor of class {__class__} with uid {self.unique_id}")
 
     _attr_has_entity_name: True
     _attr_should_poll: True
@@ -110,15 +111,20 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        # _LOGGER.error(f"updating {self._suffix}")
-        # _LOGGER.error(f"data: {self.coordinator.data}")
-        item = next(
-            item for item in self.coordinator.data if item.get("name") == self._suffix
-        )
-        self._attr_native_value = item.pop("value")
-        del item["name"]
-        self._attr_extra_state_attributes = item
-        self.async_write_ha_state()
+        if self.coordinator.data is None:
+            _LOGGER.error(
+                f"{self._name} {self._suffix} got None data during coordinator update"
+            )
+        else:
+            item = next(
+                item
+                for item in self.coordinator.data
+                if item.get("name") == self._suffix
+            )
+            self._attr_native_value = item.pop("value")
+            del item["name"]
+            self._attr_extra_state_attributes = item
+            self.async_write_ha_state()
 
 
 class EmuActiveEnergySensor(EmuBaseSensor):
@@ -238,6 +244,16 @@ class EmuSerialNoSensor(EmuBaseSensor):
 
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:barcode"
+    _attr_suggested_display_precision = 0
+
+
+class EmuVolumeSensor(EmuBaseSensor):
+    """Sensor for volume in m^3"""
+
+    _attr_native_unit_of_measurement = UnitOfVolume.CUBIC_METERS
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
+    _attr_device_class = SensorDeviceClass.WATER
+    _attr_icon = "mdi:counter"
 
 
 class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
@@ -348,9 +364,14 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
     ) -> dict:
         """Extracts the values from the dict in the API response"""
         item = next(item for item in data if item["Position"] == position)
-        # test if we found the right entry for active_energy_tariff_1
+        # test if we found the right entry.
+        # Water must be for Home assistant, but will most likely come in as 'm^3', so we are a bit more lenient there
         if not (
-            item["UnitStr"] == unit_str
+            (
+                item.get("UnitStr") == unit_str
+                or item.get("UnitStr") == "m^3"
+                and description_str == "Volume"
+            )
             and (description_str is None or item["DescriptionStr"] == description_str)
         ):
             raise ValueError(
