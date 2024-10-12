@@ -54,7 +54,8 @@ custom_components/emu_m_bus_center/
 │   ├── emu_allrounder_v16_15val.py
 │   ├── emu_allrounder_v16_17val.py
 │   ├── emu_professional_v16_31val.py
-│   └── emu_professional_v16_32val.py
+│   ├── emu_professional_v16_32val.py
+│   ├── gwf_water_2val.py
 ├── emu_client.py
 ├── __init__.py
 ├── manifest.json
@@ -63,6 +64,7 @@ custom_components/emu_m_bus_center/
     ├── de.json
     ├── en.json
     └── sk.json
+
 ```
 
 ## Configuration
@@ -106,6 +108,7 @@ EMU say that the EMU M-Center employs the same REST API as the M-Bus Center. I a
 | EMU          | Professional 3/75 M-Bus     | 1.4                                                  | 16                                       | Somewhat tested |
 | EMU          | Professional II 3/100 M-Bus | 1.4                                                  | 16                                       | Experimental    |
 | EMU          | 1/40                        | ???                                                  | 4                                        | Experimental    |
+| GWF          | MTK3coder MP                | ???                                                  | 60                                       | Somewhat tested |
 
 If you use one of the Meters that are marked as "Experimental", please open an issue and let me know if it works for you.
 
