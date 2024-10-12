@@ -193,6 +193,7 @@ class EmuErrorSensor(EmuBaseSensor):
 
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:alert-circle-outline"
+    _attr_suggested_display_precision = 0
 
 
 class EmuReactivePowerSensor(EmuBaseSensor):
@@ -237,6 +238,7 @@ class EmuPowerFailureSensor(EmuBaseSensor):
 
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:power-plug-off"
+    _attr_suggested_display_precision = 0
 
 
 class EmuSerialNoSensor(EmuBaseSensor):
