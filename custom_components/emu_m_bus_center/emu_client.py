@@ -99,8 +99,10 @@ class EmuApiClient:
                             sensor_count=len(parsed.get("ValueDescs")),
                         )
                         if device_type is None:
-                            raise EmuApiError(
-                                f"No device template found for sensor id {sensor_id} with serial {parsed.get('Serial')}"
+                            _LOGGER.warning(
+                                f"No device template found for sensor id {sensor_id} with serial {parsed.get('Serial')}."
+                                f"Reported Version is {int(parsed.get('Version'))} and sensor count is {len(parsed.get('ValueDescs'))}."
+                                f"Manufacturer is {parsed.get('ManufacturerId')}, medium is {parsed.get('Medium')}"
                             )
                         list_of_ids.append(
                             (
