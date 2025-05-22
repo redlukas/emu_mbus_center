@@ -3,12 +3,14 @@ from __future__ import annotations
 import logging
 
 import voluptuous as vol
+
 from homeassistant import config_entries
-from homeassistant.helpers.selector import TextSelector
-from homeassistant.helpers.selector import TextSelectorConfig
-from homeassistant.helpers.selector import TextSelectorType
-from homeassistant.util.network import is_ipv4_address
-from homeassistant.util.network import is_ipv6_address
+from homeassistant.helpers.selector import (
+    TextSelector,
+    TextSelectorConfig,
+    TextSelectorType,
+)
+from homeassistant.util.network import is_ipv4_address, is_ipv6_address
 
 from . import EmuApiClient
 from .const import DOMAIN
@@ -41,9 +43,8 @@ class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             "name": user_input.get("name", "Emu M-Bus Center"),
                         },
                     )
-                else:
-                    _LOGGER.error("async step_user determined invalid connection")
-                    errors["base"] = "invalid_connection"
+                _LOGGER.error("async step_user determined invalid connection")
+                errors["base"] = "invalid_connection"
             else:
                 _LOGGER.error("user input is invalid IP")
                 errors["invalid_ip"] = "invalid_ip"
