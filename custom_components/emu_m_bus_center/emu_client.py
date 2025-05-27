@@ -107,7 +107,8 @@ class EmuApiClient:
                             _LOGGER.warning(
                                 "No device template found for sensor id %i with serial %s."
                                 "Reported Version is %i and sensor count is %i."
-                                "Manufacturer is %s, medium is %s", sensor_id, parsed.get('Serial'), int(parsed.get('Version')), len(parsed.get('ValueDescs')), parsed.get('ManufacturerId'), parsed.get('Medium')
+                                "Manufacturer is %s, medium is %s",
+                                sensor_id, parsed.get('Serial'), int(parsed.get('Version')), len(parsed.get('ValueDescs')), parsed.get('ManufacturerId'), parsed.get('Medium')
                             )
                         list_of_ids.append(
                             (
@@ -126,19 +127,13 @@ class EmuApiClient:
                             )
                         )
                     else:
-                        _LOGGER.error(
-                            "Sensor %i did not supply a proper serial number", sensor_id
-                        )
+                        _LOGGER.error("Sensor %i did not supply a proper serial number", sensor_id)
             except requests.exceptions.ConnectionError:
                 _LOGGER.error("No Sensor on ID %s", sensor_id)
             except json.decoder.JSONDecodeError:
-                _LOGGER.error(
-                    "Center on %s did not return a valid JSON for Sensor %i", self._ip, sensor_id
-                )
+                _LOGGER.error("Center on %s did not return a valid JSON for Sensor %i", self._ip, sensor_id)
             except (ValueError, KeyError) as e:
-                _LOGGER.error(
-                    "Response from M-Bus Center did not satisfy expectations: %s", e
-                )
+                _LOGGER.error("Response from M-Bus Center did not satisfy expectations: %s", e)
         return list_of_ids
 
     async def scan_for_sensors_async(self, hass: HomeAssistant):

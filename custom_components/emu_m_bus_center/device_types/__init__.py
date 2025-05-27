@@ -1,1 +1,1 @@
-"""Initialize the device_types folder as a package"""
+"""Initialize the device_types folder as a package."""
