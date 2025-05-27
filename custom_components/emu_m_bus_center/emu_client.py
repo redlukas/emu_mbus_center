@@ -145,44 +145,44 @@ class EmuApiClient:
         if self._device is None:
             raise ValueError("device must be set before calling read_sensor_sync")
 
+        def raise_error(message: str, exception_type: type[Exception]):
+            _LOGGER.error(message)
+            raise exception_type(message)
+
         try:
             res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
             parsed = json.loads(res.text).get("Device")
 
             # test if we got the Info for the right device
             if parsed.get("Id") != int(sensor_id):
-                _LOGGER.error("wrong ID")
-                raise ValueError("Got Info for the wrong Sensor!")
+                raise_error("wrong ID", ValueError)
             # test if the sensor we read out does in fact provide electricity measurements
             if parsed.get("Medium") not in get_supported_measurement_types():
-                raise ValueError(
-                    "The M-Bus Center sent a valid response, but the sensor does not provide Electricity "
-                    "measurements"
+                raise_error(
+                    "The M-Bus Center sent a valid response, but the sensor does not provide Electricity measurements",
+                    ValueError
                 )
 
             if self._device.version_number != int(parsed.get("Version")) and self._device.sensor_count == len(parsed.get("ValueDescs")):
-                _LOGGER.error("Wrong template")
-                raise EmuApiError(
-                    "The M-Bus Center sent a valid response, but the sensor does not match the device template"
+                raise_error(
+                    "The M-Bus Center sent a valid response, but the sensor does not match the device template",
+                    EmuApiError
                 )
             return self._device.parse(parsed.get("ValueDescs"))
 
         except requests.exceptions.ConnectionError as ce:
             if "Max retries exceeded" in ce.__str__():
-                _LOGGER.error("Could not reach M-Bus Center on %s", self._ip)
+                raise_error(f"Could not reach M-Bus Center on {self._ip}", CannotConnect)
             elif "Remote end closed connection without response" in ce.__str__():
-                _LOGGER.error(
-                    "Could not find sensor with ID %i on M-Bus Center %s", sensor_id, self._ip
+                raise_error(
+                    f"Could not find sensor with ID {sensor_id} on M-Bus Center {self._ip}", CannotConnect
                 )
             else:
-                _LOGGER.error("generic connection error: %s", ce)
-            raise CannotConnect from ce
+                raise_error(f"generic connection error: {ce}", CannotConnect)
         except json.decoder.JSONDecodeError:
-            _LOGGER.error(
-                "Center on %s did not return a valid JSON for Sensor %i", self._ip, sensor_id
-            )
+            raise_error(f"Center on {self._ip} did not return a valid JSON for Sensor {sensor_id}", CannotConnect)
         except (ValueError, KeyError) as e:
-            _LOGGER.error("Response from M-Bus Center did not satisfy expectations: %s", e)
+            raise_error(f"Response from M-Bus Center did not satisfy expectations: {e}", CannotConnect)
 
     async def read_sensor_async(self, sensor_id: int, hass: HomeAssistant):
         """Enqueue the sync call in Home Assistant's executor."""
