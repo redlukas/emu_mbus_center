@@ -69,7 +69,8 @@ class EmuApiClient:
                     _LOGGER.error("Found no Sensors with valid return Format")
                     return False
 
-            return True
+            else:
+                return True
 
         except requests.exceptions.ConnectionError as ce:
             if "Max retries exceeded" in ce.__str__():

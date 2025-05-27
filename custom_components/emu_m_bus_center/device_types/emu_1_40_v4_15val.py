@@ -1,3 +1,4 @@
+"""Sensor implementation for a 15 Value Emu sensor."""
 import logging
 
 from custom_components.emu_m_bus_center.const import (
@@ -27,6 +28,8 @@ from homeassistant.core import HomeAssistant
 
 
 class Emu_1_40_V4_15val(EmuCoordinator):
+    """Coordinator for a 15 Value Emu sensor."""
+
     def __init__(
         self,
         hass: HomeAssistant,
@@ -37,6 +40,7 @@ class Emu_1_40_V4_15val(EmuCoordinator):
         center_name: str,
         sensor_given_name: str,
     ) -> None:
+        """Create a new Coordinator object for a 15 Value Emu sensor."""
         self._config_entry_id = config_entry_id
         self._hass = hass
         self._name = (
@@ -136,16 +140,20 @@ class Emu_1_40_V4_15val(EmuCoordinator):
 
     @property
     def version_number(self) -> int:
+        """Get the Version number of this device."""
         return 4
 
     @property
     def sensor_count(self) -> int:
+        """Get the sensor count."""
         return 15
 
     @property
     def model_name(self) -> str:
+        """Get the model name."""
         return "1/40"
 
     @property
     def manufacturer_name(self) -> str:
+        """Get the manufacturer name."""
         return "EMU"

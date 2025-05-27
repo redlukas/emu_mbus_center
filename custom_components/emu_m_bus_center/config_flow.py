@@ -1,3 +1,4 @@
+"""Config flow for Emu M-Bus Center."""
 from __future__ import annotations
 
 import logging
@@ -19,12 +20,15 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Implement the config flow."""
+
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
     _sensor_tuples = {}
     _ip = ""
 
     async def async_step_user(self, user_input=None):
+        """Get the config details from the user."""
         errors = {}
         if user_input is not None:
             ip = user_input.get("ip", "")

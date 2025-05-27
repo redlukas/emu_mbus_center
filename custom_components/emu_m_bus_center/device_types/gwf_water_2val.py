@@ -1,4 +1,4 @@
-"""Coordinator for a 2 Value Water sensor."""
+"""Sensor implementation for a 2 Value Water sensor."""
 import inspect
 import logging
 
@@ -13,6 +13,7 @@ from homeassistant.core import HomeAssistant
 
 class Gwf_water_2val(EmuCoordinator):
     """Coordinator for a 2 Value Water sensor."""
+
     def __init__(
         self,
         hass: HomeAssistant,
@@ -38,8 +39,8 @@ class Gwf_water_2val(EmuCoordinator):
         )
 
         _LOGGER = logging.getLogger(__name__)
-        _LOGGER.error(f"Initializing with given name {sensor_given_name}")
-        _LOGGER.error("caller name:", inspect.stack()[1][3])
+        _LOGGER.error("Initializing with given name %s", sensor_given_name)
+        _LOGGER.error("caller name: %s", inspect.stack()[1][3])
 
         super().__init__(
             hass=hass,
@@ -76,7 +77,7 @@ class Gwf_water_2val(EmuCoordinator):
 
     @property
     def sensor_count(self) -> int:
-        """Get the sensor count name."""
+        """Get the sensor count."""
         return 2
 
     @property
