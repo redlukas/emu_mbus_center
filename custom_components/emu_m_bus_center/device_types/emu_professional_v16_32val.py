@@ -1,4 +1,5 @@
 """Sensor implementation for a 32 Value Emu Professional sensor."""
+
 import logging
 
 from custom_components.emu_m_bus_center.const import (

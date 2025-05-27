@@ -1,4 +1,5 @@
 """Config flow for Emu M-Bus Center."""
+
 from __future__ import annotations
 
 import logging

@@ -1,4 +1,5 @@
 """The Emu M-Bus Center integration."""
+
 from __future__ import annotations
 
 import logging

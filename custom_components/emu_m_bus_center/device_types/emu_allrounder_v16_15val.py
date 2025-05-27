@@ -1,4 +1,5 @@
 """Sensor implementation for a 15 Value Emu Allrounder sensor."""
+
 import logging
 
 from custom_components.emu_m_bus_center.const import (

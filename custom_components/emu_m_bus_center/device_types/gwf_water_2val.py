@@ -1,4 +1,5 @@
 """Sensor implementation for a 2 Value Water sensor."""
+
 import inspect
 import logging
 

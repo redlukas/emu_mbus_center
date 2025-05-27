@@ -1,4 +1,5 @@
 """Interact with the M-Bus Center over HTTP REST calls."""
+
 import json
 import logging
 
@@ -35,10 +36,10 @@ class EmuApiClient:
             if sensors is not None:
                 found_valid_sensor = False
                 for (
-                        sensor_id,
-                        _,
-                        _,
-                        _,
+                    sensor_id,
+                    _,
+                    _,
+                    _,
                 ) in sensors:
                     res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
                     try:
@@ -47,22 +48,28 @@ class EmuApiClient:
                         # test if we got the Info for the right device
                         if parsed.get("Id") != int(sensor_id):
                             _LOGGER.warning(
-                                "Got Info for the wrong Sensor! Expected %i, got %s", sensor_id, parsed.get('Id')
+                                "Got Info for the wrong Sensor! Expected %i, got %s",
+                                sensor_id,
+                                parsed.get("Id"),
                             )
                             continue
                         # test if the sensor we read out does in fact provide measurements we know how to handle
                         if (
-                                parsed.get("Medium") not in get_supported_measurement_types()
+                            parsed.get("Medium")
+                            not in get_supported_measurement_types()
                         ):
                             _LOGGER.warning(
-                                "Sensor %i does not provide a measurement type we know how to handle", sensor_id
+                                "Sensor %i does not provide a measurement type we know how to handle",
+                                sensor_id,
                             )
                             continue
                         # if we find no objections, we can go on and set the flag
                         found_valid_sensor = True
                     except json.decoder.JSONDecodeError:
                         _LOGGER.warning(
-                            "Center on %d did not return a valid JSON for Sensor %i", self._ip, sensor_id
+                            "Center on %d did not return a valid JSON for Sensor %i",
+                            self._ip,
+                            sensor_id,
                         )
                         continue
                 if not found_valid_sensor:
@@ -78,7 +85,7 @@ class EmuApiClient:
             raise CannotConnect from ce
 
     async def validate_connection_async(
-            self, hass: HomeAssistant, sensors: list | None
+        self, hass: HomeAssistant, sensors: list | None
     ):
         """Enqueue the sync call in Home Assistant's executor."""
         return await hass.async_add_executor_job(self.validate_connection_sync, sensors)
@@ -92,12 +99,12 @@ class EmuApiClient:
                 parsed = json.loads(res.text).get("Device")
                 if parsed.get("Medium") in get_supported_measurement_types():
                     if (
-                            parsed.get("Serial")
-                            and int(parsed.get("Serial"))
-                            and parsed.get("Version")
-                            and int(parsed.get("Version"))
-                            and parsed.get("ValueDescs")
-                            and len(parsed.get("ValueDescs")) > 0
+                        parsed.get("Serial")
+                        and int(parsed.get("Serial"))
+                        and parsed.get("Version")
+                        and int(parsed.get("Version"))
+                        and parsed.get("ValueDescs")
+                        and len(parsed.get("ValueDescs")) > 0
                     ):
                         device_type = get_enum_from_version_and_sensor_count(
                             version=int(parsed.get("Version")),
@@ -108,8 +115,12 @@ class EmuApiClient:
                                 "No device template found for sensor id %i with serial %s."
                                 "Reported Version is %i and sensor count is %i."
                                 "Manufacturer is %s, medium is %s",
-                                sensor_id, parsed.get('Serial'), int(parsed.get('Version')),
-                                len(parsed.get('ValueDescs')), parsed.get('ManufacturerId'), parsed.get('Medium')
+                                sensor_id,
+                                parsed.get("Serial"),
+                                int(parsed.get("Version")),
+                                len(parsed.get("ValueDescs")),
+                                parsed.get("ManufacturerId"),
+                                parsed.get("Medium"),
                             )
                         list_of_ids.append(
                             (
@@ -128,13 +139,21 @@ class EmuApiClient:
                             )
                         )
                     else:
-                        _LOGGER.error("Sensor %i did not supply a proper serial number", sensor_id)
+                        _LOGGER.error(
+                            "Sensor %i did not supply a proper serial number", sensor_id
+                        )
             except requests.exceptions.ConnectionError:  # noqa: PERF203
                 _LOGGER.error("No Sensor on ID %s", sensor_id)
             except json.decoder.JSONDecodeError:
-                _LOGGER.error("Center on %s did not return a valid JSON for Sensor %i", self._ip, sensor_id)
+                _LOGGER.error(
+                    "Center on %s did not return a valid JSON for Sensor %i",
+                    self._ip,
+                    sensor_id,
+                )
             except (ValueError, KeyError) as e:
-                _LOGGER.error("Response from M-Bus Center did not satisfy expectations: %s", e)
+                _LOGGER.error(
+                    "Response from M-Bus Center did not satisfy expectations: %s", e
+                )
         return list_of_ids
 
     async def scan_for_sensors_async(self, hass: HomeAssistant):
@@ -161,30 +180,40 @@ class EmuApiClient:
             if parsed.get("Medium") not in get_supported_measurement_types():
                 raise_error(
                     "The M-Bus Center sent a valid response, but the sensor does not provide Electricity measurements",
-                    ValueError
+                    ValueError,
                 )
 
-            if self._device.version_number != int(parsed.get("Version")) and self._device.sensor_count == len(
-                    parsed.get("ValueDescs")):
+            if self._device.version_number != int(
+                parsed.get("Version")
+            ) and self._device.sensor_count == len(parsed.get("ValueDescs")):
                 raise_error(
                     "The M-Bus Center sent a valid response, but the sensor does not match the device template",
-                    EmuApiError
+                    EmuApiError,
                 )
             return self._device.parse(parsed.get("ValueDescs"))
 
         except requests.exceptions.ConnectionError as ce:
             if "Max retries exceeded" in ce.__str__():
-                raise_error(f"Could not reach M-Bus Center on {self._ip}", CannotConnect)
+                raise_error(
+                    f"Could not reach M-Bus Center on {self._ip}", CannotConnect
+                )
             elif "Remote end closed connection without response" in ce.__str__():
                 raise_error(
-                    f"Could not find sensor with ID {sensor_id} on M-Bus Center {self._ip}", CannotConnect
+                    f"Could not find sensor with ID {sensor_id} on M-Bus Center {self._ip}",
+                    CannotConnect,
                 )
             else:
                 raise_error(f"generic connection error: {ce}", CannotConnect)
         except json.decoder.JSONDecodeError:
-            raise_error(f"Center on {self._ip} did not return a valid JSON for Sensor {sensor_id}", CannotConnect)
+            raise_error(
+                f"Center on {self._ip} did not return a valid JSON for Sensor {sensor_id}",
+                CannotConnect,
+            )
         except (ValueError, KeyError) as e:
-            raise_error(f"Response from M-Bus Center did not satisfy expectations: {e}", CannotConnect)
+            raise_error(
+                f"Response from M-Bus Center did not satisfy expectations: {e}",
+                CannotConnect,
+            )
 
     async def read_sensor_async(self, sensor_id: int, hass: HomeAssistant):
         """Enqueue the sync call in Home Assistant's executor."""

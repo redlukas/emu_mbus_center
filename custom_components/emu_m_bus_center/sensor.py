@@ -1,4 +1,5 @@
 """Platform for sensor integration."""
+
 from __future__ import annotations
 
 import abc
@@ -124,7 +125,9 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         """Handle updated data from the coordinator."""
         if self.coordinator.data is None:
             _LOGGER.error(
-                "%s %s got None data during coordinator update", self._name, self._suffix
+                "%s %s got None data during coordinator update",
+                self._name,
+                self._suffix,
             )
         else:
             item = next(
@@ -397,8 +400,7 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
         if not (
             (
                 item.get("UnitStr") == unit_str
-                or (item.get("UnitStr") == "m^3"
-                and description_str == "Volume")
+                or (item.get("UnitStr") == "m^3" and description_str == "Volume")
             )
             and (description_str is None or item["DescriptionStr"] == description_str)
         ):
