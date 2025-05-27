@@ -35,10 +35,10 @@ class EmuApiClient:
             if sensors is not None:
                 found_valid_sensor = False
                 for (
-                    sensor_id,
-                    _,
-                    _,
-                    _,
+                        sensor_id,
+                        _,
+                        _,
+                        _,
                 ) in sensors:
                     res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
                     try:
@@ -52,7 +52,7 @@ class EmuApiClient:
                             continue
                         # test if the sensor we read out does in fact provide measurements we know how to handle
                         if (
-                            parsed.get("Medium") not in get_supported_measurement_types()
+                                parsed.get("Medium") not in get_supported_measurement_types()
                         ):
                             _LOGGER.warning(
                                 "Sensor %i does not provide a measurement type we know how to handle", sensor_id
@@ -78,7 +78,7 @@ class EmuApiClient:
             raise CannotConnect from ce
 
     async def validate_connection_async(
-        self, hass: HomeAssistant, sensors: list | None
+            self, hass: HomeAssistant, sensors: list | None
     ):
         """Enqueue the sync call in Home Assistant's executor."""
         return await hass.async_add_executor_job(self.validate_connection_sync, sensors)
@@ -92,12 +92,12 @@ class EmuApiClient:
                 parsed = json.loads(res.text).get("Device")
                 if parsed.get("Medium") in get_supported_measurement_types():
                     if (
-                        parsed.get("Serial")
-                        and int(parsed.get("Serial"))
-                        and parsed.get("Version")
-                        and int(parsed.get("Version"))
-                        and parsed.get("ValueDescs")
-                        and len(parsed.get("ValueDescs")) > 0
+                            parsed.get("Serial")
+                            and int(parsed.get("Serial"))
+                            and parsed.get("Version")
+                            and int(parsed.get("Version"))
+                            and parsed.get("ValueDescs")
+                            and len(parsed.get("ValueDescs")) > 0
                     ):
                         device_type = get_enum_from_version_and_sensor_count(
                             version=int(parsed.get("Version")),
@@ -108,7 +108,8 @@ class EmuApiClient:
                                 "No device template found for sensor id %i with serial %s."
                                 "Reported Version is %i and sensor count is %i."
                                 "Manufacturer is %s, medium is %s",
-                                sensor_id, parsed.get('Serial'), int(parsed.get('Version')), len(parsed.get('ValueDescs')), parsed.get('ManufacturerId'), parsed.get('Medium')
+                                sensor_id, parsed.get('Serial'), int(parsed.get('Version')),
+                                len(parsed.get('ValueDescs')), parsed.get('ManufacturerId'), parsed.get('Medium')
                             )
                         list_of_ids.append(
                             (
@@ -128,7 +129,7 @@ class EmuApiClient:
                         )
                     else:
                         _LOGGER.error("Sensor %i did not supply a proper serial number", sensor_id)
-            except requests.exceptions.ConnectionError:
+            except requests.exceptions.ConnectionError:  # noqa: PERF203
                 _LOGGER.error("No Sensor on ID %s", sensor_id)
             except json.decoder.JSONDecodeError:
                 _LOGGER.error("Center on %s did not return a valid JSON for Sensor %i", self._ip, sensor_id)
@@ -163,7 +164,8 @@ class EmuApiClient:
                     ValueError
                 )
 
-            if self._device.version_number != int(parsed.get("Version")) and self._device.sensor_count == len(parsed.get("ValueDescs")):
+            if self._device.version_number != int(parsed.get("Version")) and self._device.sensor_count == len(
+                    parsed.get("ValueDescs")):
                 raise_error(
                     "The M-Bus Center sent a valid response, but the sensor does not match the device template",
                     EmuApiError
