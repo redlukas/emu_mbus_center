@@ -1,6 +1,6 @@
 name: Validate with Hassfest
 
-on:
+on: # yamllint disable-line rule:truthy
   push:
   pull_request:
   schedule:
