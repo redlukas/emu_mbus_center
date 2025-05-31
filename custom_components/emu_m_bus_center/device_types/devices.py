@@ -1,11 +1,14 @@
+"""Help keep track of all the different device types we know about."""
+
 from enum import Enum
-from typing import Type
 from typing import Union
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 
 class Device_type(Enum):
+    """Hold all the different device types we know about."""
+
     ALLROUNDER_v16_15val = "EMU Allrounder | Firmware Version 16 | 15 Values"
     ALLROUNDER_v16_17val = "EMU Allrounder | Firmware Version 16 | 17 Values"
     PROFESSIONAL_v16_31val = "EMU Professional | Firmware Version 16 | 31 Values"
@@ -15,16 +18,23 @@ class Device_type(Enum):
 
 
 def get_class_from_enum(
-    enum_or_str: Union[Device_type, str]
-) -> Type[DataUpdateCoordinator] | None:
-    """You input a device type enum, you get the corresponding Class object
-    Sice we have to expect a whole host of different python versions, you may even input a string
-    and it will be converted to the corresponding enum value"""
-    from custom_components.emu_m_bus_center.device_types.emu_allrounder_v16_17val import (
-        EmuAllrounderV16_17val,
+    enum_or_str: Union[Device_type, str],
+) -> type[DataUpdateCoordinator] | None:
+    """Get class from enum.
+
+    You input a device type enum, you get the corresponding Class object
+    Sice we have to expect a whole host of different python versions,
+    you may even input a string
+    and it will be converted to the corresponding enum value
+    """
+    from custom_components.emu_m_bus_center.device_types.emu_1_40_v4_15val import (
+        Emu_1_40_V4_15val,
     )
     from custom_components.emu_m_bus_center.device_types.emu_allrounder_v16_15val import (
         EmuAllrounderV16_15val,
+    )
+    from custom_components.emu_m_bus_center.device_types.emu_allrounder_v16_17val import (
+        EmuAllrounderV16_17val,
     )
     from custom_components.emu_m_bus_center.device_types.emu_professional_v16_31val import (
         EmuProfessionalV16_31val,
@@ -32,11 +42,6 @@ def get_class_from_enum(
     from custom_components.emu_m_bus_center.device_types.emu_professional_v16_32val import (
         EmuProfessionalV16_32val,
     )
-
-    from custom_components.emu_m_bus_center.device_types.emu_1_40_v4_15val import (
-        Emu_1_40_V4_15val,
-    )
-
     from custom_components.emu_m_bus_center.device_types.gwf_water_2val import (
         Gwf_water_2val,
     )
@@ -70,8 +75,11 @@ def get_class_from_enum(
 def get_enum_from_version_and_sensor_count(
     version: int, sensor_count: int
 ) -> Device_type | None:
-    """You have a version number and you know how many sensor values you get from the API, but you don't know what
-    device this is? Boy, do I have the right method for you!"""
+    """Map version number and sensor count to device type.
+
+    You have a version number, and you know how many sensor values you get from the API, but you don't know what
+    device this is? Boy, do I have the right method for you!
+    """
     device_type_matrix = {
         (4, 15): Device_type.EMU_1_40_v4_15val,
         (16, 15): Device_type.ALLROUNDER_v16_15val,
@@ -84,4 +92,5 @@ def get_enum_from_version_and_sensor_count(
 
 
 def get_supported_measurement_types() -> list[str]:
+    """Get a list of all supported measurement types."""
     return ["Electricity", "Water"]

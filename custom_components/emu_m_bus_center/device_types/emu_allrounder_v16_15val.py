@@ -1,31 +1,39 @@
+"""Sensor implementation for a 15 Value Emu Allrounder sensor."""
+
 import logging
 
-from custom_components.emu_m_bus_center.const import ACTIVE_ENERGY_TARIFF_1
-from custom_components.emu_m_bus_center.const import ACTIVE_ENERGY_TARIFF_2
-from custom_components.emu_m_bus_center.const import ACTIVE_POWER_ALL_PHASES
-from custom_components.emu_m_bus_center.const import ACTIVE_POWER_PHASE_1
-from custom_components.emu_m_bus_center.const import ACTIVE_POWER_PHASE_2
-from custom_components.emu_m_bus_center.const import ACTIVE_POWER_PHASE_3
-from custom_components.emu_m_bus_center.const import CURRENT_ALL_PHASES
-from custom_components.emu_m_bus_center.const import CURRENT_PHASE_1
-from custom_components.emu_m_bus_center.const import CURRENT_PHASE_2
-from custom_components.emu_m_bus_center.const import CURRENT_PHASE_3
-from custom_components.emu_m_bus_center.const import ERROR_FLAGS
-from custom_components.emu_m_bus_center.const import POWER_FAILURES
-from custom_components.emu_m_bus_center.const import VOLTAGE_PHASE_1
-from custom_components.emu_m_bus_center.const import VOLTAGE_PHASE_2
-from custom_components.emu_m_bus_center.const import VOLTAGE_PHASE_3
-from custom_components.emu_m_bus_center.sensor import EmuActiveEnergySensor
-from custom_components.emu_m_bus_center.sensor import EmuActivePowerSensor
-from custom_components.emu_m_bus_center.sensor import EmuCoordinator
-from custom_components.emu_m_bus_center.sensor import EmuCurrentSensor
-from custom_components.emu_m_bus_center.sensor import EmuErrorSensor
-from custom_components.emu_m_bus_center.sensor import EmuPowerFailureSensor
-from custom_components.emu_m_bus_center.sensor import EmuVoltageSensor
+from custom_components.emu_m_bus_center.const import (
+    ACTIVE_ENERGY_TARIFF_1,
+    ACTIVE_ENERGY_TARIFF_2,
+    ACTIVE_POWER_ALL_PHASES,
+    ACTIVE_POWER_PHASE_1,
+    ACTIVE_POWER_PHASE_2,
+    ACTIVE_POWER_PHASE_3,
+    CURRENT_ALL_PHASES,
+    CURRENT_PHASE_1,
+    CURRENT_PHASE_2,
+    CURRENT_PHASE_3,
+    ERROR_FLAGS,
+    POWER_FAILURES,
+    VOLTAGE_PHASE_1,
+    VOLTAGE_PHASE_2,
+    VOLTAGE_PHASE_3,
+)
+from custom_components.emu_m_bus_center.sensor import (
+    EmuActiveEnergySensor,
+    EmuActivePowerSensor,
+    EmuCoordinator,
+    EmuCurrentSensor,
+    EmuErrorSensor,
+    EmuPowerFailureSensor,
+    EmuVoltageSensor,
+)
 from homeassistant.core import HomeAssistant
 
 
 class EmuAllrounderV16_15val(EmuCoordinator):
+    """Coordinator for a 15 Value Emu Allrounder sensor."""
+
     def __init__(
         self,
         hass: HomeAssistant,
@@ -36,6 +44,7 @@ class EmuAllrounderV16_15val(EmuCoordinator):
         center_name: str,
         sensor_given_name: str,
     ) -> None:
+        """Create a new Coordinator object for a 15 Value Emu Allrounder sensor."""
         self._config_entry_id = config_entry_id
         self._hass = hass
         self._name = (
@@ -183,16 +192,20 @@ class EmuAllrounderV16_15val(EmuCoordinator):
 
     @property
     def version_number(self) -> int:
+        """Get the Version number of this device."""
         return 16
 
     @property
     def sensor_count(self) -> int:
+        """Get the sensor count."""
         return 15
 
     @property
     def model_name(self) -> str:
+        """Get the model name."""
         return "Allrounder 3/75"
 
     @property
     def manufacturer_name(self) -> str:
+        """Get the manufacturer name."""
         return "EMU"

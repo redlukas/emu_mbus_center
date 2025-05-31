@@ -1,15 +1,20 @@
+"""Sensor implementation for a 2 Value Water sensor."""
+
 import inspect
 import logging
 
-from custom_components.emu_m_bus_center.const import SERIAL_NO
-from custom_components.emu_m_bus_center.const import VOLUME
-from custom_components.emu_m_bus_center.sensor import EmuCoordinator
-from custom_components.emu_m_bus_center.sensor import EmuSerialNoSensor
-from custom_components.emu_m_bus_center.sensor import EmuVolumeSensor
+from custom_components.emu_m_bus_center.const import SERIAL_NO, VOLUME
+from custom_components.emu_m_bus_center.sensor import (
+    EmuCoordinator,
+    EmuSerialNoSensor,
+    EmuVolumeSensor,
+)
 from homeassistant.core import HomeAssistant
 
 
 class Gwf_water_2val(EmuCoordinator):
+    """Coordinator for a 2 Value Water sensor."""
+
     def __init__(
         self,
         hass: HomeAssistant,
@@ -20,6 +25,7 @@ class Gwf_water_2val(EmuCoordinator):
         center_name: str,
         sensor_given_name: str,
     ) -> None:
+        """Create a new Coordinator object for a 2 Value Water sensor."""
         self._config_entry_id = config_entry_id
         self._hass = hass
         self._name = (
@@ -34,8 +40,8 @@ class Gwf_water_2val(EmuCoordinator):
         )
 
         _LOGGER = logging.getLogger(__name__)
-        _LOGGER.error(f"Initializing with given name {sensor_given_name}")
-        _LOGGER.error("caller name:", inspect.stack()[1][3])
+        _LOGGER.error("Initializing with given name %s", sensor_given_name)
+        _LOGGER.error("caller name: %s", inspect.stack()[1][3])
 
         super().__init__(
             hass=hass,
@@ -67,16 +73,20 @@ class Gwf_water_2val(EmuCoordinator):
 
     @property
     def version_number(self) -> int:
+        """Get the Version number of this device."""
         return 60
 
     @property
     def sensor_count(self) -> int:
+        """Get the sensor count."""
         return 2
 
     @property
     def model_name(self) -> str:
+        """Get the model name."""
         return "Water"
 
     @property
     def manufacturer_name(self) -> str:
+        """Get the manufacturer name."""
         return "GWF"

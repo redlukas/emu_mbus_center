@@ -1,28 +1,36 @@
+"""Sensor implementation for a 15 Value Emu sensor."""
+
 import logging
 
-from custom_components.emu_m_bus_center.const import ACTIVE_ENERGY_IMPORT
-from custom_components.emu_m_bus_center.const import ACTIVE_ENERGY_IMPORT_RESETTABLE
-from custom_components.emu_m_bus_center.const import ACTIVE_POWER
-from custom_components.emu_m_bus_center.const import CURRENT
-from custom_components.emu_m_bus_center.const import ERROR_FLAGS
-from custom_components.emu_m_bus_center.const import FORM_FACTOR
-from custom_components.emu_m_bus_center.const import FREQUENCY
-from custom_components.emu_m_bus_center.const import SERIAL_NO
-from custom_components.emu_m_bus_center.const import VOLTAGE
-from custom_components.emu_m_bus_center.sensor import EmuActiveEnergyResettableSensor
-from custom_components.emu_m_bus_center.sensor import EmuActiveEnergySensor
-from custom_components.emu_m_bus_center.sensor import EmuActivePowerSensor
-from custom_components.emu_m_bus_center.sensor import EmuCoordinator
-from custom_components.emu_m_bus_center.sensor import EmuCurrentSensor
-from custom_components.emu_m_bus_center.sensor import EmuErrorSensor
-from custom_components.emu_m_bus_center.sensor import EmuFormFactorSensor
-from custom_components.emu_m_bus_center.sensor import EmuFrequencySensor
-from custom_components.emu_m_bus_center.sensor import EmuSerialNoSensor
-from custom_components.emu_m_bus_center.sensor import EmuVoltageSensor
+from custom_components.emu_m_bus_center.const import (
+    ACTIVE_ENERGY_IMPORT,
+    ACTIVE_ENERGY_IMPORT_RESETTABLE,
+    ACTIVE_POWER,
+    CURRENT,
+    ERROR_FLAGS,
+    FORM_FACTOR,
+    FREQUENCY,
+    SERIAL_NO,
+    VOLTAGE,
+)
+from custom_components.emu_m_bus_center.sensor import (
+    EmuActiveEnergyResettableSensor,
+    EmuActiveEnergySensor,
+    EmuActivePowerSensor,
+    EmuCoordinator,
+    EmuCurrentSensor,
+    EmuErrorSensor,
+    EmuFormFactorSensor,
+    EmuFrequencySensor,
+    EmuSerialNoSensor,
+    EmuVoltageSensor,
+)
 from homeassistant.core import HomeAssistant
 
 
 class Emu_1_40_V4_15val(EmuCoordinator):
+    """Coordinator for a 15 Value Emu sensor."""
+
     def __init__(
         self,
         hass: HomeAssistant,
@@ -33,6 +41,7 @@ class Emu_1_40_V4_15val(EmuCoordinator):
         center_name: str,
         sensor_given_name: str,
     ) -> None:
+        """Create a new Coordinator object for a 15 Value Emu sensor."""
         self._config_entry_id = config_entry_id
         self._hass = hass
         self._name = (
@@ -132,16 +141,20 @@ class Emu_1_40_V4_15val(EmuCoordinator):
 
     @property
     def version_number(self) -> int:
+        """Get the Version number of this device."""
         return 4
 
     @property
     def sensor_count(self) -> int:
+        """Get the sensor count."""
         return 15
 
     @property
     def model_name(self) -> str:
+        """Get the model name."""
         return "1/40"
 
     @property
     def manufacturer_name(self) -> str:
+        """Get the manufacturer name."""
         return "EMU"
