@@ -1,38 +1,46 @@
 """Platform for sensor integration."""
+
 from __future__ import annotations
 
 import abc
-import logging
 from datetime import timedelta
+import logging
 from typing import Any
 
-from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.components.sensor import SensorEntity
-from homeassistant.components.sensor import SensorStateClass
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfApparentPower
-from homeassistant.const import UnitOfElectricCurrent
-from homeassistant.const import UnitOfElectricPotential
-from homeassistant.const import UnitOfEnergy
-from homeassistant.const import UnitOfFrequency
-from homeassistant.const import UnitOfPower
-from homeassistant.const import UnitOfReactivePower
-from homeassistant.const import UnitOfVolume
-from homeassistant.core import callback
-from homeassistant.core import HomeAssistant
+from homeassistant.const import (
+    UnitOfApparentPower,
+    UnitOfElectricCurrent,
+    UnitOfElectricPotential,
+    UnitOfEnergy,
+    UnitOfFrequency,
+    UnitOfPower,
+    UnitOfReactivePower,
+    UnitOfVolume,
+)
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+    DataUpdateCoordinator,
+)
 
-from .const import CFG_FACTOR
-from .const import CFG_PHASE
-from .const import CFG_TARIFF
-from .const import DOMAIN
-from .const import SCALE_MANTISSA
-from .const import SCALE_POWER
-from .const import TARIFF
-from .const import TIMESTAMP
+from .const import (
+    CFG_FACTOR,
+    CFG_PHASE,
+    CFG_TARIFF,
+    DOMAIN,
+    SCALE_MANTISSA,
+    SCALE_POWER,
+    TARIFF,
+    TIMESTAMP,
+)
 from .device_types.devices import get_class_from_enum
 from .emu_client import EmuApiClient
 
@@ -44,6 +52,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ):
+    """Implement the Method to setup the sensor platform."""
     sensors_from_config = config_entry.data["sensors"]
     center_name = config_entry.data["name"]
     all_sensors = []
@@ -69,9 +78,10 @@ async def async_setup_entry(
 
 
 class EmuBaseSensor(CoordinatorEntity, SensorEntity):
-    """base Emu Sensor, all sensors inherit from it"""
+    """Base Emu Sensor, all sensors inherit from it."""
 
     def __init__(self, coordinator: EmuCoordinator, suffix: str):
+        """Create a new base Sensor object."""
         SensorEntity.__init__(self)
         CoordinatorEntity.__init__(self, coordinator)
         self._name = coordinator.name
@@ -84,16 +94,18 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def name(self) -> str | None:
+        """Return the name of the sensor."""
         return f"{self._name} {self._suffix}"
 
     @property
     def friendly_name(self) -> str | None:
+        """Return the friendly name of the sensor."""
         return f"{self._name} {self._suffix.replace('_', ' ').capitalize()}"
 
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
-        info = DeviceInfo(
+        return DeviceInfo(
             identifiers={(DOMAIN, self._name)},
             name=f"{self._name}",
             manufacturer=self.coordinator.manufacturer_name,
@@ -102,10 +114,10 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
             configuration_url=f"http://{self.coordinator.ip}/app/",
             model=self.coordinator.model_name,
         )
-        return info
 
     @property
     def unique_id(self) -> str | None:
+        """Return the unique ID."""
         return f"Emu Sensor - {self._name} - {self._suffix}"
 
     @callback
@@ -113,7 +125,9 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         """Handle updated data from the coordinator."""
         if self.coordinator.data is None:
             _LOGGER.error(
-                f"{self._name} {self._suffix} got None data during coordinator update"
+                "%s %s got None data during coordinator update",
+                self._name,
+                self._suffix,
             )
         else:
             item = next(
@@ -128,7 +142,7 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
 
 
 class EmuActiveEnergySensor(EmuBaseSensor):
-    """Sensor for active energy in kWh"""
+    """Sensor for active energy in kWh."""
 
     _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
     _attr_state_class = SensorStateClass.TOTAL_INCREASING
@@ -137,7 +151,7 @@ class EmuActiveEnergySensor(EmuBaseSensor):
 
 
 class EmuActiveEnergyResettableSensor(EmuBaseSensor):
-    """Sensor for active energy in kWh that may be reset"""
+    """Sensor for active energy in kWh that may be reset."""
 
     _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
     _attr_state_class = SensorStateClass.TOTAL
@@ -146,7 +160,7 @@ class EmuActiveEnergyResettableSensor(EmuBaseSensor):
 
 
 class EmuActivePowerSensor(EmuBaseSensor):
-    """Sensor for active power in kW"""
+    """Sensor for active power in kW."""
 
     _attr_native_unit_of_measurement = UnitOfPower.KILO_WATT
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -155,7 +169,7 @@ class EmuActivePowerSensor(EmuBaseSensor):
 
 
 class EmuVoltageSensor(EmuBaseSensor):
-    """Sensor for Voltage in V"""
+    """Sensor for Voltage in V."""
 
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -164,7 +178,7 @@ class EmuVoltageSensor(EmuBaseSensor):
 
 
 class EmuCurrentSensor(EmuBaseSensor):
-    """Sensor for the Current in A"""
+    """Sensor for the Current in A."""
 
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -173,7 +187,7 @@ class EmuCurrentSensor(EmuBaseSensor):
 
 
 class EmuFrequencySensor(EmuBaseSensor):
-    """Sensor for the Grid frequency in Hz"""
+    """Sensor for the Grid frequency in Hz."""
 
     _attr_native_unit_of_measurement = UnitOfFrequency.HERTZ
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -182,14 +196,14 @@ class EmuFrequencySensor(EmuBaseSensor):
 
 
 class EmuTransformerFactorSensor(EmuBaseSensor):
-    """Sensor for factor of the current transformer"""
+    """Sensor for factor of the current transformer."""
 
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:close-outline"
 
 
 class EmuErrorSensor(EmuBaseSensor):
-    """sensor for the Error on the physical emu appliance"""
+    """Sensor for the Error on the physical emu appliance."""
 
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:alert-circle-outline"
@@ -197,8 +211,10 @@ class EmuErrorSensor(EmuBaseSensor):
 
 
 class EmuReactivePowerSensor(EmuBaseSensor):
-    """Sensor for reactive power in VAr
-    Yes, I would love to do it in kVAr, but that's not a thing in HA"""
+    """Sensor for reactive power in VAr.
+
+    Yes, I would love to do it in kVAr, but that's not a thing in HA.
+    """
 
     _attr_native_unit_of_measurement = UnitOfReactivePower.VOLT_AMPERE_REACTIVE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -207,8 +223,10 @@ class EmuReactivePowerSensor(EmuBaseSensor):
 
 
 class EmuReactiveEnergySensor(EmuBaseSensor):
-    """Sensor for reactive energy in kVArh
-    Sadly, varh and kvarh do not exist in HA"""
+    """Sensor for reactive energy in kVArh.
+
+    Sadly, varh and kvarh do not exist in HA.
+    """
 
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_device_class = SensorDeviceClass.ENERGY
@@ -216,8 +234,10 @@ class EmuReactiveEnergySensor(EmuBaseSensor):
 
 
 class EmuApparentPowerSensor(EmuBaseSensor):
-    """Sensor for apparent power in VA
-    Again, I would love to do it in kVA, but that's not a thing in HA"""
+    """Sensor for apparent power in VA.
+
+    Again, I would love to do it in kVA, but that's not a thing in HA.
+    """
 
     _attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -226,15 +246,17 @@ class EmuApparentPowerSensor(EmuBaseSensor):
 
 
 class EmuFormFactorSensor(EmuBaseSensor):
-    """Sensor for form factor
-    The Unit is Cos Phi, but that's not a thing in HA"""
+    """Sensor for form factor.
+
+    The Unit is Cos Phi, but that's not a thing in HA.
+    """
 
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:sine-wave"
 
 
 class EmuPowerFailureSensor(EmuBaseSensor):
-    """Sensor for number of power failures"""
+    """Sensor for number of power failures."""
 
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:power-plug-off"
@@ -242,7 +264,7 @@ class EmuPowerFailureSensor(EmuBaseSensor):
 
 
 class EmuSerialNoSensor(EmuBaseSensor):
-    """Sensor for the serial number of the sensor"""
+    """Sensor for the serial number of the sensor."""
 
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:barcode"
@@ -250,7 +272,7 @@ class EmuSerialNoSensor(EmuBaseSensor):
 
 
 class EmuVolumeSensor(EmuBaseSensor):
-    """Sensor for volume in m^3"""
+    """Sensor for volume in m^3."""
 
     _attr_native_unit_of_measurement = UnitOfVolume.CUBIC_METERS
     _attr_state_class = SensorStateClass.TOTAL_INCREASING
@@ -259,7 +281,7 @@ class EmuVolumeSensor(EmuBaseSensor):
 
 
 class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
-    """Custom M-Bus Center Coordinator"""
+    """Custom M-Bus Center Coordinator."""
 
     def __init__(
         self,
@@ -271,6 +293,7 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
         center_name: str,
         sensor_given_name: str,
     ) -> None:
+        """Create a new custom Coordinator object."""
         self._config_entry_id = config_entry_id
         self._hass = hass
         self._name = (
@@ -293,56 +316,62 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
 
     @property
     def get_hass(self):
+        """Get the hass object this device is associated with."""
         return self._hass
 
     @property
     def config_entry_id(self):
+        """Get the config entry ID of this device."""
         return self._config_entry_id
 
     @property
     def serial_no(self):
+        """Get the serial number of this device."""
         return self._serial_no
 
     @property
     def center_name(self):
+        """Get the name of the Center this device is assigned to."""
         return self._center_name
 
     @property
     def ip(self):
+        """Get the IP of this device."""
         return self._config["ip"]
 
     @property
     def sensor_id(self):
+        """Get the Sensor ID of this device."""
         return self._sensor_id
 
     @property
     @abc.abstractmethod
     def version_number(self) -> int:
-        """Get the Version number of this device"""
+        """Get the Version number of this device."""
 
     @property
     @abc.abstractmethod
     def sensor_count(self) -> int:
-        """Get how many sensors this device has"""
+        """Get how many sensors this device has."""
 
     @property
     @abc.abstractmethod
     def model_name(self) -> str:
-        """Get the human-readable representation of the Device's model name"""
+        """Get the human-readable representation of the Device's model name."""
 
     @property
     @abc.abstractmethod
     def manufacturer_name(self) -> str:
-        """Get the human-readable representation of the Device's manufacturer name"""
+        """Get the human-readable representation of the Device's manufacturer name."""
 
     def sensors(self) -> list[EmuBaseSensor]:
-        """Get all the Sensors this device Offers"""
+        """Get all the Sensors this device Offers."""
         return [
             sensor["sensor_class"](self, sensor["name"]) for sensor in self._sensors
         ]
 
     def parse(self, data: list[dict]) -> list[dict]:
-        """Parses the "ValueDescs" part of the Output of the API to a Dict, matching the correct values"""
+        """Parse the "ValueDescs" part of the Output of the API to a Dict, matching the correct values."""
         return [
             self._extract_values(
                 data=data,
@@ -364,15 +393,14 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
         unit_str: str,
         description_str: str | None,
     ) -> dict:
-        """Extracts the values from the dict in the API response"""
+        """Extract the values from the dict in the API response."""
         item = next(item for item in data if item["Position"] == position)
         # test if we found the right entry.
         # Water must be for Home assistant, but will most likely come in as 'm^3', so we are a bit more lenient there
         if not (
             (
                 item.get("UnitStr") == unit_str
-                or item.get("UnitStr") == "m^3"
-                and description_str == "Volume"
+                or (item.get("UnitStr") == "m^3" and description_str == "Volume")
             )
             and (description_str is None or item["DescriptionStr"] == description_str)
         ):
@@ -399,6 +427,7 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from API endpoint.
+
         This is the place to pre-process the data to lookup tables
         so entities can quickly look up their data.
         """
@@ -407,9 +436,8 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
 
         async def fetch_all_values() -> dict[str, float]:
             client = EmuApiClient(self.ip, self)
-            data = await client.read_sensor_async(
+            return await client.read_sensor_async(
                 hass=self._hass, sensor_id=self._sensor_id
             )
-            return data
 
         return await fetch_all_values()
