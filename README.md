@@ -104,7 +104,7 @@ EMU say that the EMU M-Center employs the same REST API as the M-Bus Center. I a
 ### Meters
 
 | Manufacturer | Product                     | Firmware Version<br>(as reported on meter's Display) | Firmware Version<br>(as reported by API) | Status          |
-|--------------|-----------------------------|------------------------------------------------------|------------------------------------------|-----------------|
+| ------------ | --------------------------- | ---------------------------------------------------- | ---------------------------------------- | --------------- |
 | EMU          | Allrounder 3/75 M-Bus       | 1.4                                                  | 16                                       | Fully tested    |
 | EMU          | Professional 3/75 M-Bus     | 1.4                                                  | 16                                       | Somewhat tested |
 | EMU          | Professional II 3/100 M-Bus | 1.4                                                  | 16                                       | Experimental    |

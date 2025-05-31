@@ -43,15 +43,9 @@ def get_class_from_enum(
     from custom_components.emu_m_bus_center.device_types.emu_professional_v16_32val import (
         EmuProfessionalV16_32val,
     )
-
     from custom_components.emu_m_bus_center.device_types.emu_professional_v25_24val import (
         EmuProfessionalV25_24val,
     )
-
-    from custom_components.emu_m_bus_center.device_types.emu_1_40_v4_15val import (
-        Emu_1_40_V4_15val,
-    )
-
     from custom_components.emu_m_bus_center.device_types.gwf_water_2val import (
         Gwf_water_2val,
     )
