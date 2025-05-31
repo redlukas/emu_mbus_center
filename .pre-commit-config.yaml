@@ -16,7 +16,6 @@ repos:
           - --branch=dev
           - --branch=master
           - --branch=rc
-          - --branch=main
   - repo: https://github.com/adrienverge/yamllint.git
     rev: v1.35.1
     hooks:
