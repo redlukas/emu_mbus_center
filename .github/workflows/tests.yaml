@@ -1,6 +1,6 @@
 name: Linting
 
-on:
+on: # yamllint disable-line rule:truthy
   push:
     branches:
       - main
@@ -31,8 +31,10 @@ jobs:
           pip --version
 
       - name: Install Python modules
-        run: |
-          pip install --constraint=.github/workflows/constraints.txt pre-commit ruff reorder-python-imports
+        run: >
+          pip install
+          --constraint=.github/workflows/constraints.txt
+          pre-commit ruff reorder-python-imports
 
       - name: Run pre-commit on all files
         run: |
