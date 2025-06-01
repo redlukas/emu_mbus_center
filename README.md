@@ -5,7 +5,7 @@
 [![License][license-shield]](LICENSE)
 
 [![pre-commit][pre-commit-shield]][pre-commit]
-[![Black][black-shield]][black]
+[![Ruff][ruff-shield]][ruff]
 [![Validate with Hassfest][hassfest-badge]][hassfest]
 
 [![hacs][hacsbadge]][hacs]
@@ -127,8 +127,8 @@ For the config flow, the initialization and update of the sensors I looked at ma
 ---
 
 [integration_blueprint]: https://github.com/custom-components/integration_blueprint
-[black]: https://github.com/psf/black
-[black-shield]: https://img.shields.io/badge/code%20style-black-000000.svg
+[ruff]: https://docs.astral.sh/ruff/
+[ruff-shield]: https://img.shields.io/badge/code_style-ruff-purple?style=flat&logo=ruff
 [commits-shield]: https://img.shields.io/github/commit-activity/y/redlukas/emu_mbus_center.svg
 [commits]: https://github.com/redlukas/emu_mbus_center/commits/main
 [hacs]: https://hacs.xyz
