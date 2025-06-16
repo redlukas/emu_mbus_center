@@ -1,6 +1,5 @@
 """Sensor implementation for a 2 Value Water sensor."""
 
-import inspect
 import logging
 
 from custom_components.emu_m_bus_center.const import SERIAL_NO, VOLUME
