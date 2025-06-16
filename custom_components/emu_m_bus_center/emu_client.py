@@ -26,7 +26,7 @@ class EmuApiClient:
         self._ip = ip
         self._device = device
 
-    def validate_connection_sync(self, sensors: list | None):
+    def validate_connection_sync(self, sensors: list | None) -> bool:
         """See if we have a good connection to the M-Bus Center."""
         try:
             res = requests.get(f"http://{self._ip}")
@@ -77,6 +77,7 @@ class EmuApiClient:
                     return False
 
             else:
+                _LOGGER.debug("Sensors was len 0")
                 return True
 
         except requests.exceptions.ConnectionError as ce:
@@ -84,9 +85,11 @@ class EmuApiClient:
                 _LOGGER.error("Could not reach M-Bus Center on %s", self._ip)
             raise CannotConnect from ce
 
+        return True
+
     async def validate_connection_async(
         self, hass: HomeAssistant, sensors: list | None
-    ):
+    ) -> bool:
         """Enqueue the sync call in Home Assistant's executor."""
         return await hass.async_add_executor_job(self.validate_connection_sync, sensors)
 
