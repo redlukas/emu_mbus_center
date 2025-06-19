@@ -148,7 +148,7 @@ class EmuProfessionalV25_24val(EmuCoordinator):
                 "position": 8,
                 "has_scaling_factor": True,
                 "unit_str": "W",
-                "description_str": "Power (vendor specific)",
+                "description_str": "Power",
                 "sensor_class": EmuActivePowerSensor,
             },
             {
