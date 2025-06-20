@@ -218,7 +218,7 @@ class EmuReactivePowerSensor(EmuBaseSensor):
 
     _attr_native_unit_of_measurement = UnitOfReactivePower.VOLT_AMPERE_REACTIVE
     _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_device_class = SensorDeviceClass.POWER
+    _attr_device_class = SensorDeviceClass.REACTIVE_POWER
     _attr_icon = "mdi:glass-mug-variant"
 
 
