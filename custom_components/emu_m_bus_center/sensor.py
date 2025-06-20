@@ -20,6 +20,7 @@ from homeassistant.const import (
     UnitOfEnergy,
     UnitOfFrequency,
     UnitOfPower,
+    UnitOfReactiveEnergy,
     UnitOfReactivePower,
     UnitOfVolume,
 )
@@ -218,18 +219,18 @@ class EmuReactivePowerSensor(EmuBaseSensor):
 
     _attr_native_unit_of_measurement = UnitOfReactivePower.VOLT_AMPERE_REACTIVE
     _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_device_class = SensorDeviceClass.POWER
+    _attr_device_class = SensorDeviceClass.REACTIVE_POWER
     _attr_icon = "mdi:glass-mug-variant"
 
 
 class EmuReactiveEnergySensor(EmuBaseSensor):
-    """Sensor for reactive energy in kVArh.
+    """Sensor for reactive energy in kVArh."""
 
-    Sadly, varh and kvarh do not exist in HA.
-    """
-
-    _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_native_unit_of_measurement = (
+        UnitOfReactiveEnergy.KILO_VOLT_AMPERE_REACTIVE_HOUR
+    )
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
+    _attr_device_class = SensorDeviceClass.REACTIVE_ENERGY
     _attr_icon = "mdi:lightning-bolt-outline"
 
 
@@ -241,7 +242,7 @@ class EmuApparentPowerSensor(EmuBaseSensor):
 
     _attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
     _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_device_class = SensorDeviceClass.POWER
+    _attr_device_class = SensorDeviceClass.APPARENT_POWER
     _attr_icon = "mdi:beer"
 
 
