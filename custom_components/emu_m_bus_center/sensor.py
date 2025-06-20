@@ -241,7 +241,7 @@ class EmuApparentPowerSensor(EmuBaseSensor):
 
     _attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
     _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_device_class = SensorDeviceClass.POWER
+    _attr_device_class = SensorDeviceClass.APPARENT_POWER
     _attr_icon = "mdi:beer"
 
 
