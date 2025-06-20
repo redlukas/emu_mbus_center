@@ -20,6 +20,7 @@ from homeassistant.const import (
     UnitOfEnergy,
     UnitOfFrequency,
     UnitOfPower,
+    UnitOfReactiveEnergy,
     UnitOfReactivePower,
     UnitOfVolume,
 )
@@ -223,13 +224,13 @@ class EmuReactivePowerSensor(EmuBaseSensor):
 
 
 class EmuReactiveEnergySensor(EmuBaseSensor):
-    """Sensor for reactive energy in kVArh.
+    """Sensor for reactive energy in kVArh."""
 
-    Sadly, varh and kvarh do not exist in HA.
-    """
-
-    _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_native_unit_of_measurement = (
+        UnitOfReactiveEnergy.KILO_VOLT_AMPERE_REACTIVE_HOUR
+    )
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
+    _attr_device_class = SensorDeviceClass.REACTIVE_ENERGY
     _attr_icon = "mdi:lightning-bolt-outline"
 
 
