@@ -226,7 +226,9 @@ class EmuReactivePowerSensor(EmuBaseSensor):
 class EmuReactiveEnergySensor(EmuBaseSensor):
     """Sensor for reactive energy in kVArh."""
 
-    _attr_native_unit_of_measurement = UnitOfReactiveEnergy.KILO_VOLT_AMPERE_REACTIVE_HOUR
+    _attr_native_unit_of_measurement = (
+        UnitOfReactiveEnergy.KILO_VOLT_AMPERE_REACTIVE_HOUR
+    )
     _attr_state_class = SensorStateClass.TOTAL_INCREASING
     _attr_device_class = SensorDeviceClass.REACTIVE_ENERGY
     _attr_icon = "mdi:lightning-bolt-outline"
