@@ -228,7 +228,7 @@ class EmuReactiveEnergySensor(EmuBaseSensor):
     Sadly, varh and kvarh do not exist in HA.
     """
 
-    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
     _attr_device_class = SensorDeviceClass.ENERGY
     _attr_icon = "mdi:lightning-bolt-outline"
 
