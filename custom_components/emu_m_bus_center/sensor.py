@@ -194,6 +194,7 @@ class EmuFrequencySensor(EmuBaseSensor):
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_device_class = SensorDeviceClass.FREQUENCY
     _attr_icon = "mdi:sine-wave"
+    _attr_suggested_display_precision = 1
 
 
 class EmuTransformerFactorSensor(EmuBaseSensor):
