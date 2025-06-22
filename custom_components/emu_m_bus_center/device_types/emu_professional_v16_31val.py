@@ -309,7 +309,7 @@ class EmuProfessionalV16_31val(EmuCoordinator):
             {
                 "name": FREQUENCY,
                 "position": 27,
-                "has_scaling_factor": False,
+                "has_scaling_factor": True,
                 "unit_str": "None",
                 "description_str": "Special supplier information",
                 "sensor_class": EmuFrequencySensor,
