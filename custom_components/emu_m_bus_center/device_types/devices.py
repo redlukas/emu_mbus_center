@@ -1,7 +1,6 @@
 """Help keep track of all the different device types we know about."""
 
 from enum import Enum
-from typing import Union
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
@@ -19,7 +18,7 @@ class Device_type(Enum):
 
 
 def get_class_from_enum(
-    enum_or_str: Union[Device_type, str],
+    enum_or_str: Device_type | str,
 ) -> type[DataUpdateCoordinator] | None:
     """Get class from enum.
 
@@ -28,6 +27,7 @@ def get_class_from_enum(
     you may even input a string
     and it will be converted to the corresponding enum value
     """
+    # ruff: noqa: PLC0415
     from custom_components.emu_m_bus_center.device_types.emu_1_40_v4_15val import (
         Emu_1_40_V4_15val,
     )

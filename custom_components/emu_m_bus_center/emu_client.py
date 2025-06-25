@@ -145,7 +145,7 @@ class EmuApiClient:
                         _LOGGER.error(
                             "Sensor %i did not supply a proper serial number", sensor_id
                         )
-            except requests.exceptions.ConnectionError:  # noqa: PERF203
+            except requests.exceptions.ConnectionError:
                 _LOGGER.debug("No Sensor on ID %s", sensor_id)
             except json.decoder.JSONDecodeError:
                 _LOGGER.error(
