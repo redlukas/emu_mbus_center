@@ -130,7 +130,6 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         """Handle updated data from the coordinator."""
         if self.coordinator.data is None:
             self._attr_available = False
-            # self._attr_native_value = None
         else:
             item = next(
                 item
