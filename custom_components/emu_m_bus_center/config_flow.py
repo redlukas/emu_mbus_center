@@ -35,10 +35,11 @@ class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ip = user_input.get("ip", "")
             if is_ipv4_address(ip) or is_ipv6_address(ip):
                 client = EmuApiClient(ip)
-                valid_connection = await client.validate_connection_async(
+                connection_info = await client.validate_connection_async(
                     hass=self.hass, sensors=None
                 )
-                if valid_connection:
+                _LOGGER.debug("async_step_user got connectionInfo %s",connection_info)
+                if connection_info and connection_info.get("found_center"):
                     sensor_ids = await client.scan_for_sensors_async(hass=self.hass)
                     return self.async_create_entry(
                         title=user_input.get("name", "Emu M-Bus Center"),

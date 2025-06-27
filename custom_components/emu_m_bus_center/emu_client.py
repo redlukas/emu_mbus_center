@@ -26,24 +26,32 @@ class EmuApiClient:
         self._ip = ip
         self._device = device
 
-    def validate_connection_sync(self, sensors: list | None) -> bool:
+    def validate_connection_sync(self, sensors: list | None) -> dict[str, bool | list]:
         """See if we have a good connection to the M-Bus Center."""
+        result = {
+            "found_center": False,
+            "found_all_sensors": False,
+            "good_sensors": [],
+            "bad_sensors": []
+        }
         try:
-            res = requests.get(f"http://{self._ip}")
-            if "emu_logo_128px" not in res.text:
-                return False
+            main_page_response = requests.get(f"http://{self._ip}")
+            if "emu_logo_128px" in main_page_response.text:
+                result["found_center"] = True
 
-            if sensors is not None:
-                found_valid_sensor = False
+            if sensors is None or len(sensors) == 0:
+                _LOGGER.debug("Sensors was none or len 0")
+                return {**result, "found_all_sensors": True}
+            else:
                 for (
                     sensor_id,
                     _,
                     _,
                     _,
                 ) in sensors:
-                    res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
+                    api_response = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
                     try:
-                        parsed = json.loads(res.text).get("Device")
+                        parsed = json.loads(api_response.text).get("Device")
 
                         # test if we got the Info for the right device
                         if parsed.get("Id") != int(sensor_id):
@@ -52,6 +60,7 @@ class EmuApiClient:
                                 sensor_id,
                                 parsed.get("Id"),
                             )
+                            result["bad_sensors"].append(sensor_id)
                             continue
                         # test if the sensor we read out does in fact provide measurements we know how to handle
                         if (
@@ -62,34 +71,29 @@ class EmuApiClient:
                                 "Sensor %i does not provide a measurement type we know how to handle",
                                 sensor_id,
                             )
+                            result["bad_sensors"].append(sensor_id)
                             continue
                         # if we find no objections, we can go on and set the flag
-                        found_valid_sensor = True
+                        result["good_sensors"].append(sensor_id)
                     except json.decoder.JSONDecodeError:
                         _LOGGER.warning(
                             "Center on %d did not return a valid JSON for Sensor %i",
                             self._ip,
                             sensor_id,
                         )
+                        result["bad_sensors"].append(sensor_id)
                         continue
-                if not found_valid_sensor:
-                    _LOGGER.error("Found no Sensors with valid return Format")
-                    return False
-
-            else:
-                _LOGGER.debug("Sensors was len 0")
-                return True
 
         except requests.exceptions.ConnectionError as ce:
             if "Max retries exceeded" in ce.__str__():
-                _LOGGER.error("Could not reach M-Bus Center on %s", self._ip)
-            raise CannotConnect from ce
+                _LOGGER.error("Validate Connection could not reach M-Bus Center on %s", self._ip)
+            return result
 
-        return True
+        return {**result, "found_all_sensors": len(result["good_sensors"]) == len(sensors)}
 
     async def validate_connection_async(
         self, hass: HomeAssistant, sensors: list | None
-    ) -> bool:
+    ) -> dict[str, bool | list]:
         """Enqueue the sync call in Home Assistant's executor."""
         return await hass.async_add_executor_job(self.validate_connection_sync, sensors)
 
@@ -170,7 +174,7 @@ class EmuApiClient:
 
         def raise_error(message: str, exception_type: type[Exception]):
             _LOGGER.error(message)
-            raise exception_type(message)
+            # raise exception_type(message)
 
         try:
             res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")

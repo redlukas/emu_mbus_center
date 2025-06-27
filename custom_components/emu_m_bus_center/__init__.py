@@ -24,12 +24,21 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     client = EmuApiClient(config_entry.data["ip"])
     sensors = config_entry.data["sensors"]
 
-    valid_connection = await client.validate_connection_async(
+    connection_info = await client.validate_connection_async(
         hass=hass, sensors=sensors
     )
 
-    if not valid_connection:
+    _LOGGER.debug("async_setup_entry got connectionInfo %s", connection_info)
+
+    if not connection_info:
+        _LOGGER.error("__init__ did not get the correct return dict")
         return False
+
+    if not connection_info.get("found_center"):
+        _LOGGER.error("__init__ did not find a center")
+
+    if not connection_info.get("found_all_sensors"):
+        _LOGGER.error("__init__ did not find all sensors")
 
     hass.data[DOMAIN][config_entry.entry_id] = client
 
