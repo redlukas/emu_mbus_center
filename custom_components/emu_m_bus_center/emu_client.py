@@ -1,11 +1,9 @@
 """Interact with the M-Bus Center over HTTP REST calls."""
 
-import json
 import logging
 
-import requests
+import aiohttp
 
-from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
@@ -26,28 +24,44 @@ class EmuApiClient:
         self._ip = ip
         self._update_coordinator = update_coordinator
 
-    def validate_connection_sync(self, sensors: list | None) -> dict[str, bool | list]:
-        """See if we have a good connection to the M-Bus Center."""
+    async def validate_connection_async(
+        self, sensors: list | None
+    ) -> dict[str, bool | list]:
+        """See if we have a good connection to the M-Bus Center asynchronously."""
         result = {
             "found_center": False,
             "found_all_sensors": False,
             "good_sensors": [],
             "bad_sensors": [],
         }
-        try:
-            main_page_response = requests.get(f"http://{self._ip}")
-            if "emu_logo_128px" in main_page_response.text:
-                result["found_center"] = True
+
+        async with aiohttp.ClientSession() as session:
+            # Check if main page contains the logo
+            try:
+                async with session.get(
+                    f"http://{self._ip}", timeout=10
+                ) as main_page_response:
+                    text = await main_page_response.text()
+                    if "emu_logo_128px" in text:
+                        result["found_center"] = True
+            except aiohttp.ClientError as ce:
+                _LOGGER.error(
+                    "Validate Connection could not reach M-Bus Center on %s: %s",
+                    self._ip,
+                    ce,
+                )
+                return result
 
             if sensors is None or len(sensors) == 0:
-                _LOGGER.debug("Sensors was none or len 0")
+                _LOGGER.debug("Sensors was None or length 0")
                 return {**result, "found_all_sensors": True}
+
+            # Sequentially validate each sensor
             for sensor in sensors:
-                api_response = requests.get(
-                    f"http://{self._ip}/app/api/id/{sensor.sensor_id}.json"
-                )
+                url = f"http://{self._ip}/app/api/id/{sensor.sensor_id}.json"
                 try:
-                    parsed = json.loads(api_response.text).get("Device")
+                    async with session.get(url, timeout=10) as api_response:
+                        parsed = (await api_response.json()).get("Device")
 
                     # test if we got the Info for the right device
                     if parsed.get("Id") != int(sensor.sensor_id):
@@ -58,7 +72,8 @@ class EmuApiClient:
                         )
                         result["bad_sensors"].append(sensor.sensor_id)
                         continue
-                    # test if the sensor we read out does in fact provide measurements we know how to handle
+
+                    # Validate supported measurement type
                     if parsed.get("Medium") not in get_supported_measurement_types():
                         _LOGGER.warning(
                             "Sensor %i does not provide a measurement type we know how to handle",
@@ -66,126 +81,138 @@ class EmuApiClient:
                         )
                         result["bad_sensors"].append(sensor.sensor_id)
                         continue
-                    # if we find no objections, we can go on and set the flag
+
                     result["good_sensors"].append(sensor.sensor_id)
-                except json.decoder.JSONDecodeError:
+
+                except aiohttp.ContentTypeError:
                     _LOGGER.warning(
-                        "Center on %d did not return a valid JSON for Sensor %i",
+                        "Center on %s did not return a valid JSON for Sensor %i",
                         self._ip,
                         sensor.sensor_id,
                     )
                     result["bad_sensors"].append(sensor.sensor_id)
-                    continue
-
-        except requests.exceptions.ConnectionError as ce:
-            if "Max retries exceeded" in ce.__str__():
-                _LOGGER.error(
-                    "Validate Connection could not reach M-Bus Center on %s", self._ip
-                )
-            return result
+                except (ValueError, KeyError, aiohttp.ClientError) as e:
+                    _LOGGER.error(
+                        "Unexpected error when parsing response for Sensor %i: %s",
+                        sensor.sensor_id,
+                        e,
+                    )
+                    result["bad_sensors"].append(sensor.sensor_id)
 
         return {
             **result,
             "found_all_sensors": len(result["good_sensors"]) == len(sensors),
         }
 
-    async def validate_connection_async(
-        self, hass: HomeAssistant, sensors: list | None
-    ) -> dict[str, bool | list]:
-        """Enqueue the sync call in Home Assistant's executor."""
-        return await hass.async_add_executor_job(self.validate_connection_sync, sensors)
-
-    def scan_for_sensors_sync(self) -> list[Generic_sensor]:
-        """Scan for available sensors on the M-Bus Center."""
+    async def scan_for_sensors_async(self) -> list[Generic_sensor]:
+        """Scan for available sensors on the M-Bus Center asynchronously."""
         list_of_ids = []
-        for sensor_id in range(250):
-            try:
-                res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
-                parsed = json.loads(res.text).get("Device")
-                if parsed.get("Medium") in get_supported_measurement_types():
-                    if (
-                        parsed.get("Serial")
-                        and int(parsed.get("Serial"))
-                        and parsed.get("Version")
-                        and int(parsed.get("Version"))
-                        and parsed.get("ValueDescs")
-                        and len(parsed.get("ValueDescs")) > 0
-                    ):
-                        device_type = get_enum_from_version_and_sensor_count(
-                            version=int(parsed.get("Version")),
-                            sensor_count=len(parsed.get("ValueDescs")),
-                        )
-                        if device_type is None:
-                            _LOGGER.warning(
-                                "No device template found for sensor id %i with serial %s."
-                                "Reported Version is %i and sensor count is %i."
-                                "Manufacturer is %s, medium is %s",
+
+        async with aiohttp.ClientSession() as session:
+            for sensor_id in range(250):
+                try:
+                    url = f"http://{self._ip}/app/api/id/{sensor_id}.json"
+                    async with session.get(url, timeout=10) as response:
+                        if response.status != 200:
+                            _LOGGER.debug(
+                                "No Sensor on ID %s (status %d)",
                                 sensor_id,
-                                parsed.get("Serial"),
-                                int(parsed.get("Version")),
-                                len(parsed.get("ValueDescs")),
-                                parsed.get("ManufacturerId"),
-                                parsed.get("Medium"),
+                                response.status,
                             )
-                        list_of_ids.append(
-                            Generic_sensor(
-                                sensor_id=int(sensor_id),
-                                serial_number=int(parsed.get("Serial")),
-                                name=(
-                                    f"{parsed.get('Name')} ({parsed.get('Site')})"
-                                    if parsed.get("Site") and parsed.get("Name")
-                                    else (
-                                        parsed.get("Name")
-                                        if parsed.get("Name")
-                                        else parsed.get("Serial")
-                                    )
-                                ),
-                                device_type=device_type,
+                            continue
+
+                        parsed = (await response.json()).get("Device")
+
+                    if parsed.get("Medium") in get_supported_measurement_types():
+                        if (
+                            parsed.get("Serial")
+                            and int(parsed.get("Serial"))
+                            and parsed.get("Version")
+                            and int(parsed.get("Version"))
+                            and parsed.get("ValueDescs")
+                            and len(parsed.get("ValueDescs")) > 0
+                        ):
+                            device_type = get_enum_from_version_and_sensor_count(
+                                version=int(parsed.get("Version")),
+                                sensor_count=len(parsed.get("ValueDescs")),
                             )
-                        )
-                    else:
-                        _LOGGER.error(
-                            "Sensor %i did not supply a proper serial number", sensor_id
-                        )
-            # ruff: noqa: PERF203
-            except requests.exceptions.ConnectionError:
-                _LOGGER.debug("No Sensor on ID %s", sensor_id)
-            except json.decoder.JSONDecodeError:
-                _LOGGER.error(
-                    "Center on %s did not return a valid JSON for Sensor %i",
-                    self._ip,
-                    sensor_id,
-                )
-            except (ValueError, KeyError) as e:
-                _LOGGER.error(
-                    "Response from M-Bus Center did not satisfy expectations: %s", e
-                )
+                            if device_type is None:
+                                _LOGGER.warning(
+                                    "No device template found for sensor id %i with serial %s. "
+                                    "Reported Version is %i and sensor count is %i. "
+                                    "Manufacturer is %s, medium is %s",
+                                    sensor_id,
+                                    parsed.get("Serial"),
+                                    int(parsed.get("Version")),
+                                    len(parsed.get("ValueDescs")),
+                                    parsed.get("ManufacturerId"),
+                                    parsed.get("Medium"),
+                                )
+
+                            list_of_ids.append(
+                                Generic_sensor(
+                                    sensor_id=int(sensor_id),
+                                    serial_number=int(parsed.get("Serial")),
+                                    name=(
+                                        f"{parsed.get('Name')} ({parsed.get('Site')})"
+                                        if parsed.get("Site") and parsed.get("Name")
+                                        else parsed.get("Name") or parsed.get("Serial")
+                                    ),
+                                    device_type=device_type,
+                                )
+                            )
+                            _LOGGER.debug("%s on ID %i", device_type, sensor_id)
+                        else:
+                            _LOGGER.error(
+                                "Sensor %i did not supply a proper serial number",
+                                sensor_id,
+                            )
+
+                except aiohttp.ClientConnectionError:
+                    _LOGGER.debug("No Sensor on ID %s (connection error)", sensor_id)
+                except aiohttp.ContentTypeError:
+                    _LOGGER.error(
+                        "Center on %s did not return valid JSON for Sensor %i",
+                        self._ip,
+                        sensor_id,
+                    )
+                except (ValueError, KeyError) as e:
+                    _LOGGER.error(
+                        "Response from M-Bus Center did not satisfy expectations: %s", e
+                    )
+
         return list_of_ids
 
-    async def scan_for_sensors_async(self, hass: HomeAssistant) -> list[Generic_sensor]:
-        """Enqueue the sync call in Home Assistant's executor."""
-        return await hass.async_add_executor_job(self.scan_for_sensors_sync)
-
-    def read_sensor_sync(self, sensor_id: int) -> dict[str, float]:
-        """Fetch new state data for the sensor."""
+    async def read_sensor_async(self, sensor_id: int):
+        """Fetch new state data for the sensor asynchronously."""
         if self._update_coordinator is None:
             raise ValueError(
-                "update_coordinator must be set before calling read_sensor_sync"
+                "update_coordinator must be set before calling read_sensor_async"
             )
+
+        url = f"http://{self._ip}/app/api/id/{sensor_id}.json"
 
         def raise_error(message: str, exception_type: type[Exception]):
             _LOGGER.error(
-                "%s during read_sensor_sync: %s", exception_type.__name__, message
+                "%s during read_sensor_async: %s", exception_type.__name__, message
             )
 
         try:
-            res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
-            parsed = json.loads(res.text).get("Device")
+            async with (
+                aiohttp.ClientSession() as session,
+                session.get(url, timeout=10) as response,
+            ):
+                if response.status != 200:
+                    raise_error(
+                        f"Unexpected status code: {response.status}", CannotConnect
+                    )
+                    return None
 
-            # test if we got the Info for the right device
+                parsed = (await response.json()).get("Device")
+
             if parsed.get("Id") != int(sensor_id):
                 raise_error("wrong ID", ValueError)
-            # test if the sensor we read out does in fact provide electricity measurements
+
             if parsed.get("Medium") not in get_supported_measurement_types():
                 raise_error(
                     "The M-Bus Center sent a valid response, but the sensor does not provide Electricity measurements",
@@ -203,21 +230,19 @@ class EmuApiClient:
                 )
             return self._update_coordinator.parse(parsed.get("ValueDescs"))
 
-        except requests.exceptions.ConnectionError as ce:
-            if "Max retries exceeded" in ce.__str__():
+        except aiohttp.ClientConnectionError as ce:
+            msg = str(ce)
+            if "Max retries exceeded" in msg:
                 raise_error(
                     f"Could not reach M-Bus Center on {self._ip}", CannotConnect
                 )
-            elif "Remote end closed connection without response" in ce.__str__():
-                raise_error(
-                    f"Could not find sensor with ID {sensor_id} on M-Bus Center {self._ip}",
-                    CannotConnect,
-                )
+            elif "Remote end closed connection" in msg:
+                raise_error(f"Could not find sensor with ID {sensor_id}", CannotConnect)
             else:
                 raise_error(f"generic connection error: {ce}", CannotConnect)
-        except json.decoder.JSONDecodeError:
+        except aiohttp.ContentTypeError:
             raise_error(
-                f"Center on {self._ip} did not return a valid JSON for Sensor {sensor_id}",
+                f"Center on {self._ip} did not return valid JSON for Sensor {sensor_id}",
                 CannotConnect,
             )
         except (ValueError, KeyError) as e:
@@ -225,10 +250,6 @@ class EmuApiClient:
                 f"Response from M-Bus Center did not satisfy expectations: {e}",
                 CannotConnect,
             )
-
-    async def read_sensor_async(self, sensor_id: int, hass: HomeAssistant):
-        """Enqueue the sync call in Home Assistant's executor."""
-        return await hass.async_add_executor_job(self.read_sensor_sync, sensor_id)
 
 
 class CannotConnect(HomeAssistantError):

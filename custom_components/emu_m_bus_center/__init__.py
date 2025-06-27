@@ -30,7 +30,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     )
 
     connection_info = await client.validate_connection_async(
-        hass=hass, sensors=sensors_from_config
+        sensors=sensors_from_config
     )
 
     _LOGGER.debug("async_setup_entry got connectionInfo %s", connection_info)

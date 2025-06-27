@@ -440,8 +440,6 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
 
         async def fetch_all_values() -> dict[str, float]:
             client = EmuApiClient(ip=self.ip, update_coordinator=self)
-            return await client.read_sensor_async(
-                hass=self._hass, sensor_id=self._sensor_id
-            )
+            return await client.read_sensor_async(sensor_id=self._sensor_id)
 
         return await fetch_all_values()
