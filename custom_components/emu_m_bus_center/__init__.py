@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 
 from homeassistant.config_entries import ConfigEntry
@@ -9,6 +10,7 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
 from .const import DOMAIN
+from .device_types.devices import generic_sensor_deserializer
 from .emu_client import EmuApiClient
 
 _LOGGER = logging.getLogger(__name__)
@@ -22,10 +24,13 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     hass.data.setdefault(DOMAIN, {})
 
     client = EmuApiClient(config_entry.data["ip"])
-    sensors = config_entry.data["sensors"]
+    serialized_sensors = config_entry.data["sensors"]
+    sensors_from_config = json.loads(
+        serialized_sensors, object_hook=generic_sensor_deserializer
+    )
 
     connection_info = await client.validate_connection_async(
-        hass=hass, sensors=sensors
+        hass=hass, sensors=sensors_from_config
     )
 
     _LOGGER.debug("async_setup_entry got connectionInfo %s", connection_info)

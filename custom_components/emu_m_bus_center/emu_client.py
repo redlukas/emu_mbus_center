@@ -10,7 +10,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .device_types.devices import (
-    Device_type,
+    Generic_sensor,
     get_enum_from_version_and_sensor_count,
     get_supported_measurement_types,
 )
@@ -32,7 +32,7 @@ class EmuApiClient:
             "found_center": False,
             "found_all_sensors": False,
             "good_sensors": [],
-            "bad_sensors": []
+            "bad_sensors": [],
         }
         try:
             main_page_response = requests.get(f"http://{self._ip}")
@@ -42,54 +42,52 @@ class EmuApiClient:
             if sensors is None or len(sensors) == 0:
                 _LOGGER.debug("Sensors was none or len 0")
                 return {**result, "found_all_sensors": True}
-            else:
-                for (
-                    sensor_id,
-                    _,
-                    _,
-                    _,
-                ) in sensors:
-                    api_response = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
-                    try:
-                        parsed = json.loads(api_response.text).get("Device")
+            for sensor in sensors:
+                api_response = requests.get(
+                    f"http://{self._ip}/app/api/id/{sensor.sensor_id}.json"
+                )
+                try:
+                    parsed = json.loads(api_response.text).get("Device")
 
-                        # test if we got the Info for the right device
-                        if parsed.get("Id") != int(sensor_id):
-                            _LOGGER.warning(
-                                "Got Info for the wrong Sensor! Expected %i, got %s",
-                                sensor_id,
-                                parsed.get("Id"),
-                            )
-                            result["bad_sensors"].append(sensor_id)
-                            continue
-                        # test if the sensor we read out does in fact provide measurements we know how to handle
-                        if (
-                            parsed.get("Medium")
-                            not in get_supported_measurement_types()
-                        ):
-                            _LOGGER.warning(
-                                "Sensor %i does not provide a measurement type we know how to handle",
-                                sensor_id,
-                            )
-                            result["bad_sensors"].append(sensor_id)
-                            continue
-                        # if we find no objections, we can go on and set the flag
-                        result["good_sensors"].append(sensor_id)
-                    except json.decoder.JSONDecodeError:
+                    # test if we got the Info for the right device
+                    if parsed.get("Id") != int(sensor.sensor_id):
                         _LOGGER.warning(
-                            "Center on %d did not return a valid JSON for Sensor %i",
-                            self._ip,
-                            sensor_id,
+                            "Got Info for the wrong Sensor! Expected %i, got %s",
+                            sensor.sensor_id,
+                            parsed.get("Id"),
                         )
-                        result["bad_sensors"].append(sensor_id)
+                        result["bad_sensors"].append(sensor.sensor_id)
                         continue
+                    # test if the sensor we read out does in fact provide measurements we know how to handle
+                    if parsed.get("Medium") not in get_supported_measurement_types():
+                        _LOGGER.warning(
+                            "Sensor %i does not provide a measurement type we know how to handle",
+                            sensor.sensor_id,
+                        )
+                        result["bad_sensors"].append(sensor.sensor_id)
+                        continue
+                    # if we find no objections, we can go on and set the flag
+                    result["good_sensors"].append(sensor.sensor_id)
+                except json.decoder.JSONDecodeError:
+                    _LOGGER.warning(
+                        "Center on %d did not return a valid JSON for Sensor %i",
+                        self._ip,
+                        sensor.sensor_id,
+                    )
+                    result["bad_sensors"].append(sensor.sensor_id)
+                    continue
 
         except requests.exceptions.ConnectionError as ce:
             if "Max retries exceeded" in ce.__str__():
-                _LOGGER.error("Validate Connection could not reach M-Bus Center on %s", self._ip)
+                _LOGGER.error(
+                    "Validate Connection could not reach M-Bus Center on %s", self._ip
+                )
             return result
 
-        return {**result, "found_all_sensors": len(result["good_sensors"]) == len(sensors)}
+        return {
+            **result,
+            "found_all_sensors": len(result["good_sensors"]) == len(sensors),
+        }
 
     async def validate_connection_async(
         self, hass: HomeAssistant, sensors: list | None
@@ -97,7 +95,7 @@ class EmuApiClient:
         """Enqueue the sync call in Home Assistant's executor."""
         return await hass.async_add_executor_job(self.validate_connection_sync, sensors)
 
-    def scan_for_sensors_sync(self) -> list[(int, int, str, str, int, Device_type)]:
+    def scan_for_sensors_sync(self) -> list[Generic_sensor]:
         """Scan for available sensors on the M-Bus Center."""
         list_of_ids = []
         for sensor_id in range(250):
@@ -130,10 +128,10 @@ class EmuApiClient:
                                 parsed.get("Medium"),
                             )
                         list_of_ids.append(
-                            (
-                                int(sensor_id),
-                                int(parsed.get("Serial")),
-                                (
+                            Generic_sensor(
+                                sensor_id=int(sensor_id),
+                                serial_number=int(parsed.get("Serial")),
+                                name=(
                                     f"{parsed.get('Name')} ({parsed.get('Site')})"
                                     if parsed.get("Site") and parsed.get("Name")
                                     else (
@@ -142,7 +140,7 @@ class EmuApiClient:
                                         else parsed.get("Serial")
                                     )
                                 ),
-                                device_type,
+                                device_type=device_type,
                             )
                         )
                     else:
@@ -163,7 +161,7 @@ class EmuApiClient:
                 )
         return list_of_ids
 
-    async def scan_for_sensors_async(self, hass: HomeAssistant):
+    async def scan_for_sensors_async(self, hass: HomeAssistant) -> list[Generic_sensor]:
         """Enqueue the sync call in Home Assistant's executor."""
         return await hass.async_add_executor_job(self.scan_for_sensors_sync)
 
