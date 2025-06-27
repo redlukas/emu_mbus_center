@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import abc
 from datetime import timedelta
+import json
 import logging
 from typing import Any
 
@@ -42,7 +43,7 @@ from .const import (
     TARIFF,
     TIMESTAMP,
 )
-from .device_types.devices import get_class_from_enum
+from .device_types.devices import generic_sensor_deserializer, get_class_from_enum
 from .emu_client import EmuApiClient
 
 _LOGGER = logging.getLogger(__name__)
@@ -54,23 +55,21 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ):
     """Implement the Method to setup the sensor platform."""
-    sensors_from_config = config_entry.data["sensors"]
-    center_name = config_entry.data["name"]
+    serialized_sensors_from_config = config_entry.data.get("sensors")
+    sensors_from_config = json.loads(
+        serialized_sensors_from_config, object_hook=generic_sensor_deserializer
+    )
+    center_name = config_entry.data.get("name")
     all_sensors = []
-    for (
-        sensor_id,
-        serial_no,
-        given_name,
-        device_type,
-    ) in sensors_from_config:
-        coordinator = get_class_from_enum(device_type)(
+    for sensor in sensors_from_config:
+        coordinator = get_class_from_enum(sensor.device_type)(
             hass=hass,
             config_entry_id=config_entry.entry_id,
             logger=_LOGGER,
-            sensor_id=sensor_id,
-            serial_no=serial_no,
+            sensor_id=sensor.sensor_id,
+            serial_no=sensor.serial_number,
             center_name=center_name,
-            sensor_given_name=given_name,
+            sensor_given_name=sensor.name,
         )
         sensors = coordinator.sensors()
         all_sensors.extend(sensors)

@@ -1,8 +1,12 @@
 """Help keep track of all the different device types we know about."""
 
+from dataclasses import dataclass
 from enum import Enum
+import logging
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class Device_type(Enum):
@@ -100,3 +104,44 @@ def get_enum_from_version_and_sensor_count(
 def get_supported_measurement_types() -> list[str]:
     """Get a list of all supported measurement types."""
     return ["Electricity", "Water"]
+
+
+@dataclass
+class Generic_sensor:
+    """Class to hold info about an inspecific device."""
+
+    sensor_id: int
+    serial_number: int
+    name: str
+    device_type: Device_type
+
+    @staticmethod
+    def from_dict(data):
+        """Create a generic_sensor object from a dict."""
+        return Generic_sensor(
+            sensor_id=data["sensor_id"],
+            serial_number=data["serial_number"],
+            name=data["name"],
+            device_type=Device_type[data["device_type"]],
+        )
+
+    def to_dict(self):
+        """Convert to dict."""
+        return {
+            "sensor_id": self.sensor_id,
+            "serial_number": self.serial_number,
+            "name": self.name,
+            "device_type": self.device_type.name,
+        }
+
+
+def generic_sensor_deserializer(sensor_as_dict) -> Generic_sensor:
+    """Convert the dict representation of a generic sensor into a generic sensor object."""
+    if (
+        "sensor_id" in sensor_as_dict
+        and "serial_number" in sensor_as_dict
+        and "name" in sensor_as_dict
+        and "device_type" in sensor_as_dict
+    ):
+        return Generic_sensor.from_dict(sensor_as_dict)
+    raise ValueError("Could not recognize generic sensor %s", sensor_as_dict)

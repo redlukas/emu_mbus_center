@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 
 import voluptuous as vol
@@ -35,15 +36,17 @@ class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ip = user_input.get("ip", "")
             if is_ipv4_address(ip) or is_ipv6_address(ip):
                 client = EmuApiClient(ip)
-                valid_connection = await client.validate_connection_async(
+                connection_info = await client.validate_connection_async(
                     hass=self.hass, sensors=None
                 )
-                if valid_connection:
-                    sensor_ids = await client.scan_for_sensors_async(hass=self.hass)
+                _LOGGER.debug("async_step_user got connectionInfo %s", connection_info)
+                if connection_info and connection_info.get("found_center"):
+                    sensors = await client.scan_for_sensors_async(hass=self.hass)
+                    sensor_dicts = [sensor.to_dict() for sensor in sensors]
                     return self.async_create_entry(
                         title=user_input.get("name", "Emu M-Bus Center"),
                         data={
-                            "sensors": sensor_ids,
+                            "sensors": json.dumps(sensor_dicts),
                             "ip": ip,
                             "name": user_input.get("name", "Emu M-Bus Center"),
                         },
