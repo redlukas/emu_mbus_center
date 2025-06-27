@@ -3,6 +3,7 @@
 import json
 import logging
 
+import aiohttp
 import requests
 
 from homeassistant.core import HomeAssistant
@@ -166,26 +167,36 @@ class EmuApiClient:
         """Enqueue the sync call in Home Assistant's executor."""
         return await hass.async_add_executor_job(self.scan_for_sensors_sync)
 
-    def read_sensor_sync(self, sensor_id: int) -> dict[str, float]:
-        """Fetch new state data for the sensor."""
+    async def read_sensor_async(self, sensor_id: int):
+        """Fetch new state data for the sensor asynchronously."""
         if self._update_coordinator is None:
             raise ValueError(
-                "update_coordinator must be set before calling read_sensor_sync"
+                "update_coordinator must be set before calling read_sensor_async"
             )
+
+        url = f"http://{self._ip}/app/api/id/{sensor_id}.json"
 
         def raise_error(message: str, exception_type: type[Exception]):
             _LOGGER.error(
-                "%s during read_sensor_sync: %s", exception_type.__name__, message
+                "%s during read_sensor_async: %s", exception_type.__name__, message
             )
 
         try:
-            res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
-            parsed = json.loads(res.text).get("Device")
+            async with (
+                aiohttp.ClientSession() as session,
+                session.get(url, timeout=10) as response,
+            ):
+                if response.status != 200:
+                    raise_error(
+                        f"Unexpected status code: {response.status}", CannotConnect
+                    )
+                    return None
 
-            # test if we got the Info for the right device
+                parsed = (await response.json()).get("Device")
+
             if parsed.get("Id") != int(sensor_id):
                 raise_error("wrong ID", ValueError)
-            # test if the sensor we read out does in fact provide electricity measurements
+
             if parsed.get("Medium") not in get_supported_measurement_types():
                 raise_error(
                     "The M-Bus Center sent a valid response, but the sensor does not provide Electricity measurements",
@@ -203,21 +214,19 @@ class EmuApiClient:
                 )
             return self._update_coordinator.parse(parsed.get("ValueDescs"))
 
-        except requests.exceptions.ConnectionError as ce:
-            if "Max retries exceeded" in ce.__str__():
+        except aiohttp.ClientConnectionError as ce:
+            msg = str(ce)
+            if "Max retries exceeded" in msg:
                 raise_error(
                     f"Could not reach M-Bus Center on {self._ip}", CannotConnect
                 )
-            elif "Remote end closed connection without response" in ce.__str__():
-                raise_error(
-                    f"Could not find sensor with ID {sensor_id} on M-Bus Center {self._ip}",
-                    CannotConnect,
-                )
+            elif "Remote end closed connection" in msg:
+                raise_error(f"Could not find sensor with ID {sensor_id}", CannotConnect)
             else:
                 raise_error(f"generic connection error: {ce}", CannotConnect)
-        except json.decoder.JSONDecodeError:
+        except aiohttp.ContentTypeError:
             raise_error(
-                f"Center on {self._ip} did not return a valid JSON for Sensor {sensor_id}",
+                f"Center on {self._ip} did not return valid JSON for Sensor {sensor_id}",
                 CannotConnect,
             )
         except (ValueError, KeyError) as e:
@@ -225,10 +234,6 @@ class EmuApiClient:
                 f"Response from M-Bus Center did not satisfy expectations: {e}",
                 CannotConnect,
             )
-
-    async def read_sensor_async(self, sensor_id: int, hass: HomeAssistant):
-        """Enqueue the sync call in Home Assistant's executor."""
-        return await hass.async_add_executor_job(self.read_sensor_sync, sensor_id)
 
 
 class CannotConnect(HomeAssistantError):
