@@ -1,6 +1,5 @@
 """Sensor implementation for a 2 Value Water sensor."""
 
-import inspect
 import logging
 
 from custom_components.emu_m_bus_center.const import SERIAL_NO, VOLUME
@@ -40,8 +39,6 @@ class Gwf_water_2val(EmuCoordinator):
         )
 
         _LOGGER = logging.getLogger(__name__)
-        _LOGGER.error("Initializing with given name %s", sensor_given_name)
-        _LOGGER.error("caller name: %s", inspect.stack()[1][3])
 
         super().__init__(
             hass=hass,

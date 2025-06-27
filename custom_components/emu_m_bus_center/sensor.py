@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import abc
 from datetime import timedelta
+import json
 import logging
 from typing import Any
 
@@ -42,7 +43,7 @@ from .const import (
     TARIFF,
     TIMESTAMP,
 )
-from .device_types.devices import get_class_from_enum
+from .device_types.devices import generic_sensor_deserializer, get_class_from_enum
 from .emu_client import EmuApiClient
 
 _LOGGER = logging.getLogger(__name__)
@@ -54,28 +55,28 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ):
     """Implement the Method to setup the sensor platform."""
-    sensors_from_config = config_entry.data["sensors"]
-    center_name = config_entry.data["name"]
+    serialized_sensors_from_config = config_entry.data.get("sensors")
+    sensors_from_config = json.loads(
+        serialized_sensors_from_config, object_hook=generic_sensor_deserializer
+    )
+    center_name = config_entry.data.get("name")
     all_sensors = []
-    for (
-        sensor_id,
-        serial_no,
-        given_name,
-        device_type,
-    ) in sensors_from_config:
-        coordinator = get_class_from_enum(device_type)(
+    for sensor in sensors_from_config:
+        coordinator = get_class_from_enum(sensor.device_type)(
             hass=hass,
             config_entry_id=config_entry.entry_id,
             logger=_LOGGER,
-            sensor_id=sensor_id,
-            serial_no=serial_no,
+            sensor_id=sensor.sensor_id,
+            serial_no=sensor.serial_number,
             center_name=center_name,
-            sensor_given_name=given_name,
+            sensor_given_name=sensor.name,
         )
         sensors = coordinator.sensors()
         all_sensors.extend(sensors)
-        await coordinator.async_config_entry_first_refresh()
+
     async_add_entities(all_sensors)
+    for sensor in all_sensors:
+        await sensor.coordinator.async_config_entry_first_refresh()
 
 
 class EmuBaseSensor(CoordinatorEntity, SensorEntity):
@@ -83,12 +84,10 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
 
     def __init__(self, coordinator: EmuCoordinator, suffix: str):
         """Create a new base Sensor object."""
-        SensorEntity.__init__(self)
-        CoordinatorEntity.__init__(self, coordinator)
+        super().__init__(coordinator)
         self._name = coordinator.name
         self._suffix = suffix
         self._serial_no = coordinator.serial_no
-        # _LOGGER.error(f"created Sensor of class {__class__} with uid {self.unique_id}")
 
     _attr_has_entity_name: True
     _attr_should_poll: True
@@ -102,6 +101,11 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
     def friendly_name(self) -> str | None:
         """Return the friendly name of the sensor."""
         return f"{self._name} {self._suffix.replace('_', ' ').capitalize()}"
+
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        return self._attr_available
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -125,11 +129,7 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         if self.coordinator.data is None:
-            _LOGGER.error(
-                "%s %s got None data during coordinator update",
-                self._name,
-                self._suffix,
-            )
+            self._attr_available = False
         else:
             item = next(
                 item
@@ -137,9 +137,11 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
                 if item.get("name") == self._suffix
             )
             self._attr_native_value = item.pop("value")
+            self._attr_available = True
             del item["name"]
             self._attr_extra_state_attributes = item
-            self.async_write_ha_state()
+
+        self.async_write_ha_state()
 
 
 class EmuActiveEnergySensor(EmuBaseSensor):
@@ -386,8 +388,8 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
             for sensor in self._sensors
         ]
 
+    @staticmethod
     def _extract_values(
-        self,
         data: list[dict],
         position: int,
         name: str,
@@ -437,9 +439,7 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
         self.update_interval = timedelta(seconds=60)
 
         async def fetch_all_values() -> dict[str, float]:
-            client = EmuApiClient(self.ip, self)
-            return await client.read_sensor_async(
-                hass=self._hass, sensor_id=self._sensor_id
-            )
+            client = EmuApiClient(ip=self.ip, update_coordinator=self)
+            return await client.read_sensor_async(sensor_id=self._sensor_id)
 
         return await fetch_all_values()
