@@ -41,7 +41,7 @@ class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
                 _LOGGER.debug("async_step_user got connectionInfo %s", connection_info)
                 if connection_info and connection_info.get("found_center"):
-                    sensors = await client.scan_for_sensors_async(hass=self.hass)
+                    sensors = await client.scan_for_sensors_async()
                     sensor_dicts = [sensor.to_dict() for sensor in sensors]
                     return self.async_create_entry(
                         title=user_input.get("name", "Emu M-Bus Center"),

@@ -96,76 +96,84 @@ class EmuApiClient:
         """Enqueue the sync call in Home Assistant's executor."""
         return await hass.async_add_executor_job(self.validate_connection_sync, sensors)
 
-    def scan_for_sensors_sync(self) -> list[Generic_sensor]:
-        """Scan for available sensors on the M-Bus Center."""
+    async def scan_for_sensors_async(self) -> list[Generic_sensor]:
+        """Scan for available sensors on the M-Bus Center asynchronously."""
         list_of_ids = []
-        for sensor_id in range(250):
-            try:
-                res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
-                parsed = json.loads(res.text).get("Device")
-                if parsed.get("Medium") in get_supported_measurement_types():
-                    if (
-                        parsed.get("Serial")
-                        and int(parsed.get("Serial"))
-                        and parsed.get("Version")
-                        and int(parsed.get("Version"))
-                        and parsed.get("ValueDescs")
-                        and len(parsed.get("ValueDescs")) > 0
-                    ):
-                        device_type = get_enum_from_version_and_sensor_count(
-                            version=int(parsed.get("Version")),
-                            sensor_count=len(parsed.get("ValueDescs")),
-                        )
-                        if device_type is None:
-                            _LOGGER.warning(
-                                "No device template found for sensor id %i with serial %s."
-                                "Reported Version is %i and sensor count is %i."
-                                "Manufacturer is %s, medium is %s",
-                                sensor_id,
-                                parsed.get("Serial"),
-                                int(parsed.get("Version")),
-                                len(parsed.get("ValueDescs")),
-                                parsed.get("ManufacturerId"),
-                                parsed.get("Medium"),
-                            )
-                        list_of_ids.append(
-                            Generic_sensor(
-                                sensor_id=int(sensor_id),
-                                serial_number=int(parsed.get("Serial")),
-                                name=(
-                                    f"{parsed.get('Name')} ({parsed.get('Site')})"
-                                    if parsed.get("Site") and parsed.get("Name")
-                                    else (
-                                        parsed.get("Name")
-                                        if parsed.get("Name")
-                                        else parsed.get("Serial")
-                                    )
-                                ),
-                                device_type=device_type,
-                            )
-                        )
-                    else:
-                        _LOGGER.error(
-                            "Sensor %i did not supply a proper serial number", sensor_id
-                        )
-            # ruff: noqa: PERF203
-            except requests.exceptions.ConnectionError:
-                _LOGGER.debug("No Sensor on ID %s", sensor_id)
-            except json.decoder.JSONDecodeError:
-                _LOGGER.error(
-                    "Center on %s did not return a valid JSON for Sensor %i",
-                    self._ip,
-                    sensor_id,
-                )
-            except (ValueError, KeyError) as e:
-                _LOGGER.error(
-                    "Response from M-Bus Center did not satisfy expectations: %s", e
-                )
-        return list_of_ids
 
-    async def scan_for_sensors_async(self, hass: HomeAssistant) -> list[Generic_sensor]:
-        """Enqueue the sync call in Home Assistant's executor."""
-        return await hass.async_add_executor_job(self.scan_for_sensors_sync)
+        async with aiohttp.ClientSession() as session:
+            for sensor_id in range(250):
+                try:
+                    url = f"http://{self._ip}/app/api/id/{sensor_id}.json"
+                    async with session.get(url, timeout=10) as response:
+                        if response.status != 200:
+                            _LOGGER.debug(
+                                "No Sensor on ID %s (status %d)",
+                                sensor_id,
+                                response.status,
+                            )
+                            continue
+
+                        parsed = (await response.json()).get("Device")
+
+                    if parsed.get("Medium") in get_supported_measurement_types():
+                        if (
+                            parsed.get("Serial")
+                            and int(parsed.get("Serial"))
+                            and parsed.get("Version")
+                            and int(parsed.get("Version"))
+                            and parsed.get("ValueDescs")
+                            and len(parsed.get("ValueDescs")) > 0
+                        ):
+                            device_type = get_enum_from_version_and_sensor_count(
+                                version=int(parsed.get("Version")),
+                                sensor_count=len(parsed.get("ValueDescs")),
+                            )
+                            if device_type is None:
+                                _LOGGER.warning(
+                                    "No device template found for sensor id %i with serial %s. "
+                                    "Reported Version is %i and sensor count is %i. "
+                                    "Manufacturer is %s, medium is %s",
+                                    sensor_id,
+                                    parsed.get("Serial"),
+                                    int(parsed.get("Version")),
+                                    len(parsed.get("ValueDescs")),
+                                    parsed.get("ManufacturerId"),
+                                    parsed.get("Medium"),
+                                )
+
+                            list_of_ids.append(
+                                Generic_sensor(
+                                    sensor_id=int(sensor_id),
+                                    serial_number=int(parsed.get("Serial")),
+                                    name=(
+                                        f"{parsed.get('Name')} ({parsed.get('Site')})"
+                                        if parsed.get("Site") and parsed.get("Name")
+                                        else parsed.get("Name") or parsed.get("Serial")
+                                    ),
+                                    device_type=device_type,
+                                )
+                            )
+                            _LOGGER.debug("%s on ID %i", device_type, sensor_id)
+                        else:
+                            _LOGGER.error(
+                                "Sensor %i did not supply a proper serial number",
+                                sensor_id,
+                            )
+
+                except aiohttp.ClientConnectionError:
+                    _LOGGER.debug("No Sensor on ID %s (connection error)", sensor_id)
+                except aiohttp.ContentTypeError:
+                    _LOGGER.error(
+                        "Center on %s did not return valid JSON for Sensor %i",
+                        self._ip,
+                        sensor_id,
+                    )
+                except (ValueError, KeyError) as e:
+                    _LOGGER.error(
+                        "Response from M-Bus Center did not satisfy expectations: %s", e
+                    )
+
+        return list_of_ids
 
     async def read_sensor_async(self, sensor_id: int):
         """Fetch new state data for the sensor asynchronously."""
