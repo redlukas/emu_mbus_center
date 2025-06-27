@@ -21,10 +21,10 @@ _LOGGER = logging.getLogger(__name__)
 class EmuApiClient:
     """Wrap the API of the M-Bus Center."""
 
-    def __init__(self, ip, device: DataUpdateCoordinator | None = None):
+    def __init__(self, ip, update_coordinator: DataUpdateCoordinator | None = None):
         """Create a new EmuApiClient object."""
         self._ip = ip
-        self._device = device
+        self._update_coordinator = update_coordinator
 
     def validate_connection_sync(self, sensors: list | None) -> dict[str, bool | list]:
         """See if we have a good connection to the M-Bus Center."""
@@ -168,12 +168,15 @@ class EmuApiClient:
 
     def read_sensor_sync(self, sensor_id: int) -> dict[str, float]:
         """Fetch new state data for the sensor."""
-        if self._device is None:
-            raise ValueError("device must be set before calling read_sensor_sync")
+        if self._update_coordinator is None:
+            raise ValueError(
+                "update_coordinator must be set before calling read_sensor_sync"
+            )
 
         def raise_error(message: str, exception_type: type[Exception]):
-            _LOGGER.error(message)
-            # raise exception_type(message)
+            _LOGGER.error(
+                "%s during read_sensor_sync: %s", exception_type.__name__, message
+            )
 
         try:
             res = requests.get(f"http://{self._ip}/app/api/id/{sensor_id}.json")
@@ -189,14 +192,16 @@ class EmuApiClient:
                     ValueError,
                 )
 
-            if self._device.version_number != int(
+            if self._update_coordinator.version_number != int(
                 parsed.get("Version")
-            ) and self._device.sensor_count == len(parsed.get("ValueDescs")):
+            ) and self._update_coordinator.sensor_count == len(
+                parsed.get("ValueDescs")
+            ):
                 raise_error(
                     "The M-Bus Center sent a valid response, but the sensor does not match the device template",
                     EmuApiError,
                 )
-            return self._device.parse(parsed.get("ValueDescs"))
+            return self._update_coordinator.parse(parsed.get("ValueDescs"))
 
         except requests.exceptions.ConnectionError as ce:
             if "Max retries exceeded" in ce.__str__():

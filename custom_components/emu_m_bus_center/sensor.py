@@ -103,6 +103,11 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
         return f"{self._name} {self._suffix.replace('_', ' ').capitalize()}"
 
     @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        return self._attr_available
+
+    @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
         return DeviceInfo(
@@ -124,11 +129,8 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         if self.coordinator.data is None:
-            _LOGGER.error(
-                "%s %s got None data during coordinator update",
-                self._name,
-                self._suffix,
-            )
+            self._attr_available = False
+            # self._attr_native_value = None
         else:
             item = next(
                 item
@@ -136,9 +138,11 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
                 if item.get("name") == self._suffix
             )
             self._attr_native_value = item.pop("value")
+            self._attr_available = True
             del item["name"]
             self._attr_extra_state_attributes = item
-            self.async_write_ha_state()
+
+        self.async_write_ha_state()
 
 
 class EmuActiveEnergySensor(EmuBaseSensor):
@@ -436,7 +440,7 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
         self.update_interval = timedelta(seconds=60)
 
         async def fetch_all_values() -> dict[str, float]:
-            client = EmuApiClient(self.ip, self)
+            client = EmuApiClient(ip=self.ip, update_coordinator=self)
             return await client.read_sensor_async(
                 hass=self._hass, sensor_id=self._sensor_id
             )

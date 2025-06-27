@@ -35,7 +35,7 @@ class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             ip = user_input.get("ip", "")
             if is_ipv4_address(ip) or is_ipv6_address(ip):
-                client = EmuApiClient(ip)
+                client = EmuApiClient(ip=ip)
                 connection_info = await client.validate_connection_async(
                     hass=self.hass, sensors=None
                 )

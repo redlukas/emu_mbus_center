@@ -23,7 +23,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
     hass.data.setdefault(DOMAIN, {})
 
-    client = EmuApiClient(config_entry.data["ip"])
+    client = EmuApiClient(ip=config_entry.data["ip"])
     serialized_sensors = config_entry.data["sensors"]
     sensors_from_config = json.loads(
         serialized_sensors, object_hook=generic_sensor_deserializer
