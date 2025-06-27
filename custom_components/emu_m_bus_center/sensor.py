@@ -73,8 +73,10 @@ async def async_setup_entry(
         )
         sensors = coordinator.sensors()
         all_sensors.extend(sensors)
-        await coordinator.async_config_entry_first_refresh()
+
     async_add_entities(all_sensors)
+    for sensor in all_sensors:
+        await sensor.coordinator.async_config_entry_first_refresh()
 
 
 class EmuBaseSensor(CoordinatorEntity, SensorEntity):
@@ -82,12 +84,10 @@ class EmuBaseSensor(CoordinatorEntity, SensorEntity):
 
     def __init__(self, coordinator: EmuCoordinator, suffix: str):
         """Create a new base Sensor object."""
-        SensorEntity.__init__(self)
-        CoordinatorEntity.__init__(self, coordinator)
+        super().__init__(coordinator)
         self._name = coordinator.name
         self._suffix = suffix
         self._serial_no = coordinator.serial_no
-        # _LOGGER.error(f"created Sensor of class {__class__} with uid {self.unique_id}")
 
     _attr_has_entity_name: True
     _attr_should_poll: True
