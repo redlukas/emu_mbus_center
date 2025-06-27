@@ -424,14 +424,6 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
             result["value"] = result["value"] / (
                 float(item.get("CfgFactor", 1)) if item.get("CfgFactor", 1) != 0 else 1
             )
-        # Hack for the emu pro 2 v25 24val which for its frequency sensor reports a scaling factor of 0 but a value of 499, thank you very much
-        if (
-            has_scaling_factor
-            and self.version_number == 25
-            and self.sensor_count == 24
-            and position == 22
-        ):
-            result["value"] = result.get("value") / 10
         return result
 
     async def _async_update_data(self) -> dict[str, Any]:
