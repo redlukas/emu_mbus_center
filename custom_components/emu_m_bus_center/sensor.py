@@ -385,8 +385,8 @@ class EmuCoordinator(DataUpdateCoordinator, metaclass=abc.ABCMeta):
             for sensor in self._sensors
         ]
 
+    @staticmethod
     def _extract_values(
-        self,
         data: list[dict],
         position: int,
         name: str,
