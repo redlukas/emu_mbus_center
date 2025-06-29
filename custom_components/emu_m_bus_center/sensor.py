@@ -55,7 +55,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ):
     """Implement the Method to setup the sensor platform."""
-    serialized_sensors_from_config = config_entry.data.get("sensors")
+    serialized_sensors_from_config = config_entry.data.get("serialized_sensors")
     sensors_from_config = json.loads(
         serialized_sensors_from_config, object_hook=generic_sensor_deserializer
     )

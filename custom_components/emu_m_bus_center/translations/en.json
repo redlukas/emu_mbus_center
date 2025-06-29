@@ -16,5 +16,13 @@
         }
       }
     }
+  },
+  "issue_tracker": {
+    "migration_to_serialized_sensors": {
+      "title": "Update from 1.x to 2.x",
+      "description": "This integration has undergone heavy internal refactoring.\n This necessitates that you reconfigure it. Please remove all hubs from the integration page and re-add them."
+    }
   }
 }
+
+

@@ -16,5 +16,11 @@
         }
       }
     }
+  },
+  "issue_tracker": {
+    "migration_to_serialized_sensors": {
+      "title": "Update von 1.x nach 2.x",
+      "description": "Diese Integration wurde stark umgeschrieben.\n Deswegen muss sie neu konfiguriert werden. Bitte entferne alle Hubs auf der Integrationsseite und füge sie wieder hinzu."
+    }
   }
 }

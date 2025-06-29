@@ -44,7 +44,7 @@ class CenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     return self.async_create_entry(
                         title=user_input.get("name", "Emu M-Bus Center"),
                         data={
-                            "sensors": json.dumps(sensor_dicts),
+                            "serialized_sensors": json.dumps(sensor_dicts),
                             "ip": ip,
                             "name": user_input.get("name", "Emu M-Bus Center"),
                         },

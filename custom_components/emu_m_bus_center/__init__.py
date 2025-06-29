@@ -8,6 +8,7 @@ import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import issue_registry as ir
 
 from .const import DOMAIN
 from .device_types.devices import generic_sensor_deserializer
@@ -24,7 +25,28 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     hass.data.setdefault(DOMAIN, {})
 
     client = EmuApiClient(ip=config_entry.data["ip"])
-    serialized_sensors = config_entry.data["sensors"]
+    # _LOGGER.error("setup_entry in __init__. data is: %s", config_entry.data)  # removeme
+
+    # Detecting unserialized sensors
+    unserialized_sensors = config_entry.data.get("sensors")
+    if unserialized_sensors:
+        ir.async_create_issue(
+            hass,
+            domain=DOMAIN,
+            issue_id="migration_to_serialized_sensors",
+            is_fixable=False,
+            severity=ir.IssueSeverity.ERROR,
+            translation_key="migration_to_serialized_sensors",
+            learn_more_url="https://github.com/redlukas/emu_mbus_center/releases/tag/v2.0.0",
+        )
+
+    # Loading from serialized sensors
+    serialized_sensors = config_entry.data["serialized_sensors"]
+    # _LOGGER.error(
+    #     "Fresh from the serialized_sensors: %s, loaded_unserialized_config is %s",
+    #     serialized_sensors,
+    #     loaded_unserialized_config,
+    # )  # removeme
     sensors_from_config = json.loads(
         serialized_sensors, object_hook=generic_sensor_deserializer
     )
