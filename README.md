@@ -55,6 +55,7 @@ custom_components/emu_m_bus_center/
 │   ├── emu_allrounder_v16_17val.py
 │   ├── emu_professional_v16_31val.py
 │   ├── emu_professional_v16_32val.py
+│   ├── emu_professional_v25_24val.py
 │   ├── gwf_water_2val.py
 ├── emu_client.py
 ├── __init__.py
@@ -107,6 +108,7 @@ EMU say that the EMU M-Center employs the same REST API as the M-Bus Center. I a
 | EMU          | Allrounder 3/75 M-Bus       | 1.4                                                  | 16                                       | Fully tested    |
 | EMU          | Professional 3/75 M-Bus     | 1.4                                                  | 16                                       | Somewhat tested |
 | EMU          | Professional II 3/100 M-Bus | 1.4                                                  | 16                                       | Experimental    |
+| EMU          | Professional II 3/100 M-Bus | 1.4.1                                                | 25                                       | Experimental    |
 | EMU          | 1/40                        | ???                                                  | 4                                        | Experimental    |
 | GWF          | MTK3coder MP                | ???                                                  | 60                                       | Somewhat tested |
 

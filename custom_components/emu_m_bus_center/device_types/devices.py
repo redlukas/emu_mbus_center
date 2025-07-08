@@ -1,9 +1,12 @@
 """Help keep track of all the different device types we know about."""
 
+from dataclasses import dataclass
 from enum import Enum
-from typing import Union
+import logging
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class Device_type(Enum):
@@ -13,12 +16,13 @@ class Device_type(Enum):
     ALLROUNDER_v16_17val = "EMU Allrounder | Firmware Version 16 | 17 Values"
     PROFESSIONAL_v16_31val = "EMU Professional | Firmware Version 16 | 31 Values"
     PROFESSIONAL_v16_32val = "EMU Professional | Firmware Version 16 | 32 Values"
+    PROFESSIONAL_v25_24val = "EMU Professional | Firmware Version 25 | 24 Values"
     EMU_1_40_v4_15val = "EMU 1/40 | Firmware Version 4 | 15 Values"
     GWF_WATER_2val = "GWF Water Meter | 2 Values"
 
 
 def get_class_from_enum(
-    enum_or_str: Union[Device_type, str],
+    enum_or_str: Device_type | str,
 ) -> type[DataUpdateCoordinator] | None:
     """Get class from enum.
 
@@ -27,6 +31,7 @@ def get_class_from_enum(
     you may even input a string
     and it will be converted to the corresponding enum value
     """
+    # ruff: noqa: PLC0415
     from custom_components.emu_m_bus_center.device_types.emu_1_40_v4_15val import (
         Emu_1_40_V4_15val,
     )
@@ -42,6 +47,9 @@ def get_class_from_enum(
     from custom_components.emu_m_bus_center.device_types.emu_professional_v16_32val import (
         EmuProfessionalV16_32val,
     )
+    from custom_components.emu_m_bus_center.device_types.emu_professional_v25_24val import (
+        EmuProfessionalV25_24val,
+    )
     from custom_components.emu_m_bus_center.device_types.gwf_water_2val import (
         Gwf_water_2val,
     )
@@ -52,6 +60,7 @@ def get_class_from_enum(
         Device_type.ALLROUNDER_v16_17val: EmuAllrounderV16_17val,
         Device_type.PROFESSIONAL_v16_31val: EmuProfessionalV16_31val,
         Device_type.PROFESSIONAL_v16_32val: EmuProfessionalV16_32val,
+        Device_type.PROFESSIONAL_v25_24val: EmuProfessionalV25_24val,
         Device_type.EMU_1_40_v4_15val: Emu_1_40_V4_15val,
         Device_type.GWF_WATER_2val: Gwf_water_2val,
     }
@@ -86,6 +95,7 @@ def get_enum_from_version_and_sensor_count(
         (16, 17): Device_type.ALLROUNDER_v16_17val,
         (16, 31): Device_type.PROFESSIONAL_v16_31val,
         (16, 32): Device_type.PROFESSIONAL_v16_32val,
+        (25, 24): Device_type.PROFESSIONAL_v25_24val,
         (60, 2): Device_type.GWF_WATER_2val,
     }
     return device_type_matrix.get((version, sensor_count), None)
@@ -94,3 +104,44 @@ def get_enum_from_version_and_sensor_count(
 def get_supported_measurement_types() -> list[str]:
     """Get a list of all supported measurement types."""
     return ["Electricity", "Water"]
+
+
+@dataclass
+class Generic_sensor:
+    """Class to hold info about an inspecific device."""
+
+    sensor_id: int
+    serial_number: int
+    name: str
+    device_type: Device_type
+
+    @staticmethod
+    def from_dict(data):
+        """Create a generic_sensor object from a dict."""
+        return Generic_sensor(
+            sensor_id=data["sensor_id"],
+            serial_number=data["serial_number"],
+            name=data["name"],
+            device_type=Device_type[data["device_type"]],
+        )
+
+    def to_dict(self):
+        """Convert to dict."""
+        return {
+            "sensor_id": self.sensor_id,
+            "serial_number": self.serial_number,
+            "name": self.name,
+            "device_type": self.device_type.name,
+        }
+
+
+def generic_sensor_deserializer(sensor_as_dict) -> Generic_sensor:
+    """Convert the dict representation of a generic sensor into a generic sensor object."""
+    if (
+        "sensor_id" in sensor_as_dict
+        and "serial_number" in sensor_as_dict
+        and "name" in sensor_as_dict
+        and "device_type" in sensor_as_dict
+    ):
+        return Generic_sensor.from_dict(sensor_as_dict)
+    raise ValueError("Could not recognize generic sensor %s", sensor_as_dict)
