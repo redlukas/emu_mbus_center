@@ -1,4 +1,4 @@
 pre-commit==4.3.0
 pip==25.2
-ruff==0.12.9
+ruff==0.12.10
 reorder-python-imports==3.15.0
