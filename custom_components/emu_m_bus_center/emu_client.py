@@ -44,7 +44,7 @@ class EmuApiClient:
                     text = await main_page_response.text()
                     if "emu_logo_128px" in text:
                         result["found_center"] = True
-            except aiohttp.ClientError as ce:
+            except (TimeoutError, aiohttp.ClientError) as ce:
                 _LOGGER.error(
                     "Validate Connection could not reach M-Bus Center on %s: %s",
                     self._ip,

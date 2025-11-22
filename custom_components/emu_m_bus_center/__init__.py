@@ -8,6 +8,7 @@ import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
 
 from .const import DOMAIN
 from .device_types.devices import generic_sensor_deserializer
@@ -41,6 +42,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
     if not connection_info.get("found_center"):
         _LOGGER.error("__init__ did not find a center")
+        raise ConfigEntryNotReady(
+            "Could not communicate with M-Bus Center at %s", config_entry.data["ip"]
+        )
 
     if not connection_info.get("found_all_sensors"):
         _LOGGER.error("__init__ did not find all sensors")
